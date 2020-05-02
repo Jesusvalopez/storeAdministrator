@@ -1,0 +1,9 @@
+.login-page,
+.register-page {
+    background: #e5e7ea;
+}
+
+.was-validated .form-check-input:invalid ~ .form-check-label,
+.form-check-input.is-invalid ~ .form-check-label {
+    color: #e3342f;
+}
