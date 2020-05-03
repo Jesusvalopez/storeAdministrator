@@ -14,3 +14,4 @@ require('./bootstrap');
 
 require('./components/Example');
 require('./components/pricetypes/PriceTypes');
+require('./components/products/Products');

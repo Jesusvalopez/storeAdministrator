@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\PriceProduct;
 use App\Product;
 use Illuminate\Http\Request;
 
@@ -27,7 +28,7 @@ class ProductsController extends Controller
         $this->authorize('create', Product::class);
 
 
-        return view('products.index');
+        return view('products.create');
     }
 
     /**
@@ -38,7 +39,27 @@ class ProductsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->authorize('create', Product::class);
+
+        $product = new Product();
+        $product->name = $request->get('name');
+        $product->description = $request->get('description');
+        $product->stock = $request->get('stock');
+        $product->save();
+
+
+        foreach ($request->except(['name', 'description','stock']) as $key => $value){
+
+            $priceProduct = new PriceProduct();
+            $priceProduct->product_id = $product->id;
+            $priceProduct->price_type_id = str_replace('price_', '', $key);
+            $priceProduct->price = $value;
+            $priceProduct->save();
+
+        }
+
+
+        return response()->json(true);
     }
 
     /**
