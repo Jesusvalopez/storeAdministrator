@@ -20,18 +20,19 @@ export default class PriceTypes extends Component {
             formEdit:{
                 name: '',
                 status: '',
+                editId: null,
             },
             show:false,
             text: '¿Está seguro que desea eliminar el registro?',
             deleteId: null,
-            editId: null,
+
             showPriceTypeEdit: false,
             showPriceTypeCreate: true,
             options:[
                 {value:1, label:'Activo'},
                 {value:0, label:'Inactivo'}
             ],
-            selected: 0,
+
 
         }
 
@@ -53,7 +54,7 @@ export default class PriceTypes extends Component {
         axios.get('/price-types/'+id)
             .then(res => {
                 this.setState({
-                    formEdit: {name: res.data.name, status: res.data.status},
+                    formEdit: {name: res.data.name, status: res.data.status,editId:id},
                     selected: res.data.status,
                 });
             })
@@ -66,7 +67,7 @@ export default class PriceTypes extends Component {
         this.setState({
             showPriceTypeEdit:true,
             showPriceTypeCreate: false,
-            editId:id
+
         });
     }
 
@@ -117,6 +118,24 @@ export default class PriceTypes extends Component {
         }
     }
 
+    async handleSubmitEdit(e){
+        e.preventDefault()
+        try {
+            axios.post('/price-types',  this.state.form )
+                .then(res => {
+                    this.setState({
+                        pricetypes: [res.data].concat(this.state.pricetypes),
+                        form:{
+                            name: ''
+                        }
+                    });
+
+                })
+        }catch (e) {
+
+        }
+    }
+
      deleteAction = (e) =>{
         e.preventDefault();
         try {
@@ -137,8 +156,13 @@ export default class PriceTypes extends Component {
     }
 
     handleChangeEdit = (e) =>{
+        console.log(e.target.name);
         this.setState({
-            formEdit:{[e.target.name]: e.target.value}
+
+            formEdit:{
+                ...this.state.formEdit,
+                [e.target.name]: e.target.value
+            }
         });
     }
     handleChange(e){
@@ -161,7 +185,7 @@ export default class PriceTypes extends Component {
                 { this.state.showPriceTypeEdit ? <PriceTypeEdit form = {this.state.formEdit}
                                                                 onCancel={this.handleEditHide}
                                                                 onChange={this.handleChangeEdit}
-                                                                options={this.state.options} selected={this.state.selected}/> : null }
+                                                                options={this.state.options}/> : null }
 
                 <PriceTypeList pricetypes = {this.state.pricetypes}
                                onClick={this.handleShow}

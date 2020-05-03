@@ -1,11 +1,11 @@
 import React from 'react';
 
-const PriceTypeEdit = ({form, onCancel, onChange, options, selected}) => (
+const PriceTypeEdit = ({form, onCancel, onChange, options}) => (
 
 
 
     <div className="col-md-12">
-        <form action="/price-types/" method="POST">
+        <form action={"/price-types/"+form.editId} method="PUT" onClick={onCancel}>
 
             <div className="box box-info">
                 <div className="box-header with-border">
@@ -18,7 +18,7 @@ const PriceTypeEdit = ({form, onCancel, onChange, options, selected}) => (
                                   />
                         </div>
                         <div className="col-xs-2">
-                            <select name="status"  className="form-control" defaultValue={selected}>
+                            <select name="status"  className="form-control" value={form.status} onChange={onChange}>
                                 {options.map((option) => (
                                     <option key={option.value} value={option.value} >{option.label}</option>
                                 ))}

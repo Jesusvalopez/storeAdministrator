@@ -75730,13 +75730,13 @@ var PriceTypeEdit = function PriceTypeEdit(_ref) {
   var form = _ref.form,
       onCancel = _ref.onCancel,
       onChange = _ref.onChange,
-      options = _ref.options,
-      selected = _ref.selected;
+      options = _ref.options;
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     className: "col-md-12"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("form", {
-    action: "/price-types/",
-    method: "POST"
+    action: "/price-types/" + form.editId,
+    method: "PUT",
+    onClick: onCancel
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     className: "box box-info"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
@@ -75761,7 +75761,8 @@ var PriceTypeEdit = function PriceTypeEdit(_ref) {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("select", {
     name: "status",
     className: "form-control",
-    defaultValue: selected
+    value: form.status,
+    onChange: onChange
   }, options.map(function (option) {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("option", {
       key: option.value,
@@ -75941,6 +75942,10 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -75988,7 +75993,8 @@ var PriceTypes = /*#__PURE__*/function (_Component) {
         _this.setState({
           formEdit: {
             name: res.data.name,
-            status: res.data.status
+            status: res.data.status,
+            editId: id
           },
           selected: res.data.status
         });
@@ -76000,8 +76006,7 @@ var PriceTypes = /*#__PURE__*/function (_Component) {
 
       _this.setState({
         showPriceTypeEdit: true,
-        showPriceTypeCreate: false,
-        editId: id
+        showPriceTypeCreate: false
       });
     });
 
@@ -76036,8 +76041,10 @@ var PriceTypes = /*#__PURE__*/function (_Component) {
     });
 
     _defineProperty(_assertThisInitialized(_this), "handleChangeEdit", function (e) {
+      console.log(e.target.name);
+
       _this.setState({
-        formEdit: _defineProperty({}, e.target.name, e.target.value)
+        formEdit: _objectSpread(_objectSpread({}, _this.state.formEdit), {}, _defineProperty({}, e.target.name, e.target.value))
       });
     });
 
@@ -76049,12 +76056,12 @@ var PriceTypes = /*#__PURE__*/function (_Component) {
       },
       formEdit: {
         name: '',
-        status: ''
+        status: '',
+        editId: null
       },
       show: false,
       text: '¿Está seguro que desea eliminar el registro?',
       deleteId: null,
-      editId: null,
       showPriceTypeEdit: false,
       showPriceTypeCreate: true,
       options: [{
@@ -76063,8 +76070,7 @@ var PriceTypes = /*#__PURE__*/function (_Component) {
       }, {
         value: 0,
         label: 'Inactivo'
-      }],
-      selected: 0
+      }]
     };
     _this.handleChange = _this.handleChange.bind(_assertThisInitialized(_this));
     _this.handleSubmit = _this.handleSubmit.bind(_assertThisInitialized(_this)); //this.handleShow = this.handleShow.bind(this);
@@ -76152,6 +76158,43 @@ var PriceTypes = /*#__PURE__*/function (_Component) {
       return handleSubmit;
     }()
   }, {
+    key: "handleSubmitEdit",
+    value: function () {
+      var _handleSubmitEdit = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3(e) {
+        var _this4 = this;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                e.preventDefault();
+
+                try {
+                  axios__WEBPACK_IMPORTED_MODULE_3___default.a.post('/price-types', this.state.form).then(function (res) {
+                    _this4.setState({
+                      pricetypes: [res.data].concat(_this4.state.pricetypes),
+                      form: {
+                        name: ''
+                      }
+                    });
+                  });
+                } catch (e) {}
+
+              case 2:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function handleSubmitEdit(_x2) {
+        return _handleSubmitEdit.apply(this, arguments);
+      }
+
+      return handleSubmitEdit;
+    }()
+  }, {
     key: "handleChange",
     value: function handleChange(e) {
       this.setState({
@@ -76169,8 +76212,7 @@ var PriceTypes = /*#__PURE__*/function (_Component) {
         form: this.state.formEdit,
         onCancel: this.handleEditHide,
         onChange: this.handleChangeEdit,
-        options: this.state.options,
-        selected: this.state.selected
+        options: this.state.options
       }) : null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_PriceTypeList__WEBPACK_IMPORTED_MODULE_5__["default"], {
         pricetypes: this.state.pricetypes,
         onClick: this.handleShow,
