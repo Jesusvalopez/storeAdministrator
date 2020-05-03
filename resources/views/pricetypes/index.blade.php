@@ -20,6 +20,10 @@
 
 @section('content')
 
+    <form action="">
+        @method('delete')
+    </form>
+
     <div id="PriceTypes"></div>
 
 @endsection

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
+
 class PriceTypesController extends Controller
 {
     /**
@@ -27,7 +28,7 @@ class PriceTypesController extends Controller
      */
     public function index()
     {
-        $priceTypes = PriceType::all();
+        $priceTypes = PriceType::orderBy('id', 'desc')->get();
 
         return response()->json($priceTypes);
 
@@ -42,11 +43,33 @@ class PriceTypesController extends Controller
 
     }
 
-    public function store(PriceType $priceType){
+    public function store(Request $request){
 
         $this->authorize('create', PriceType::class);
 
-        return 'hola';
+        $priceType = PriceType::create(['name'=>$request->get('name'), 'status' => 1]);
+
+
+        return $priceType;
+
+    }
+
+    public function destroy(PriceType $priceType){
+
+        $this->authorize('delete', $priceType);
+
+        $priceType->delete();
+
+        $priceTypes = PriceType::orderBy('id', 'desc')->get();
+
+        return response()->json($priceTypes);
+    }
+
+    public function show(PriceType $priceType){
+
+        $this->authorize('view', $priceType);
+
+        return response()->json($priceType);
 
     }
 }

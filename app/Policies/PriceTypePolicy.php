@@ -81,7 +81,11 @@ class PriceTypePolicy
      */
     public function delete(User $user, PriceType $priceType)
     {
-        //
+        if ($user->can('delete price type')) {
+            return Response::allow();
+        }else{
+            return Response::deny('No tiene permisos para acceder.');
+        }
     }
 
     /**
