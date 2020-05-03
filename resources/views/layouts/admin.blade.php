@@ -72,7 +72,7 @@
                                         <a href="#">
                                             <div class="pull-left">
                                                 <!-- User Image -->
-                                                <img src="dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+                                                <img src="/dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
                                             </div>
                                             <!-- Message title and timestamp -->
                                             <h4>
@@ -121,14 +121,14 @@
                         <!-- Menu Toggle Button -->
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <!-- The user image in the navbar-->
-                            <img src="dist/img/user2-160x160.jpg" class="user-image" alt="User Image">
+                            <img src="/dist/img/user2-160x160.jpg" class="user-image" alt="User Image">
                             <!-- hidden-xs hides the username on small devices so only the image appears. -->
                             <span class="hidden-xs">{{ Auth::user()->name }}</span>
                         </a>
                         <ul class="dropdown-menu">
                             <!-- The user image in the menu -->
                             <li class="user-header">
-                                <img src="dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+                                <img src="/dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
 
                                 <p>
                                     {{ Auth::user()->name }}
@@ -171,22 +171,7 @@
 
 
             <!-- Sidebar Menu -->
-            <ul class="sidebar-menu" data-widget="tree">
-                <li class="header"></li>
-                <li class="treeview">
-                    <a href="#"><i class="fa fa-link"></i> <span>Configuración</span>
-                        <span class="pull-right-container">
-                <i class="fa fa-angle-left pull-right"></i>
-              </span>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li><a href="#">Productos</a></li>
-                        @can('view price type')
-                        <li><a href="#">Tipos de Precios</a></li>
-                        @endcan
-                    </ul>
-                </li>
-            </ul>
+            @include('layouts.partials.menu')
             <!-- /.sidebar-menu -->
         </section>
         <!-- /.sidebar -->
@@ -306,7 +291,7 @@
 <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <!-- AdminLTE App -->
 <script src="/dist/js/adminlte.min.js"></script>
-
+<script src="/js/app.js"></script>
 @yield('added-js')
 
 <!-- Optionally, you can add Slimscroll and FastClick plugins.

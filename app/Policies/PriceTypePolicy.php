@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\PriceType;
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Auth\Access\Response;
 
 class PriceTypePolicy
 {
@@ -18,8 +19,14 @@ class PriceTypePolicy
      */
     public function viewAny(User $user)
     {
-        //
+        if ($user->can('view price type')) {
+            return Response::allow();
+        }else{
+            return Response::deny('No tiene permisos para acceder.');
+        }
+
     }
+
 
     /**
      * Determine whether the user can view the model.
@@ -46,7 +53,11 @@ class PriceTypePolicy
      */
     public function create(User $user)
     {
-        //
+        if ($user->can('create price type')) {
+            return Response::allow();
+        }else{
+            return Response::deny('No tiene permisos para acceder.');
+        }
     }
 
     /**
