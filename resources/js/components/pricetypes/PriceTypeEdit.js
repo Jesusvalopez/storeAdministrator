@@ -1,11 +1,11 @@
 import React from 'react';
 
-const PriceTypeEdit = ({form, onCancel, onChange, options}) => (
+const PriceTypeEdit = ({form, onCancel, onChange, options, onSubmit}) => (
 
 
 
     <div className="col-md-12">
-        <form action={"/price-types/"+form.editId} method="PUT" onClick={onCancel}>
+        <form action={"/price-types/"+form.editId} method="PUT" onSubmit={onSubmit}>
 
             <div className="box box-info">
                 <div className="box-header with-border">

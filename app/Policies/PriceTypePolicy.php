@@ -69,7 +69,11 @@ class PriceTypePolicy
      */
     public function update(User $user, PriceType $priceType)
     {
-        //
+        if ($user->can('edit price type')) {
+            return Response::allow();
+        }else{
+            return Response::deny('No tiene permisos para acceder.');
+        }
     }
 
     /**

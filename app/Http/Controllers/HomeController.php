@@ -27,12 +27,19 @@ class HomeController extends Controller
     public function index()
     {
         //Role::create(['name' => 'Administrador']);
-       // $role = Role::findById(1);
-        //Permission::create(['name' => 'create price type']);
-       // Permission::create(['name' => 'view price type']);
-       // $role->givePermissionTo('view price type');
-        //Auth::user()->givePermissionTo('create price type');
-
+        /*
+        $role = Role::findById(1);
+        Permission::create(['name' => 'create price type']);
+        Permission::create(['name' => 'edit price type']);
+        Permission::create(['name' => 'delete price type']);
+        Permission::create(['name' => 'view price type']);
+        $role->givePermissionTo('view price type');
+        $role->givePermissionTo('create price type');
+        $role->givePermissionTo('edit price type');
+        $role->givePermissionTo('delete price type');
+*/
+        $user = Auth::user();
+        $user->assignRole('Administrador');
         return view('home');
     }
 }

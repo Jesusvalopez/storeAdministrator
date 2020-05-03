@@ -72,4 +72,18 @@ class PriceTypesController extends Controller
         return response()->json($priceType);
 
     }
+
+    public function update(PriceType $priceType, Request $request){
+
+        $this->authorize('update', $priceType);
+
+        $priceType->name = $request->get('name');
+        $priceType->status = $request->get('status');
+        $priceType->save();
+
+        $priceTypes = PriceType::orderBy('id', 'desc')->get();
+
+        return response()->json($priceTypes);
+
+    }
 }

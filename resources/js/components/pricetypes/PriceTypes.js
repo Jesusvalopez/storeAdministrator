@@ -5,6 +5,8 @@ import PriceTypeForm from "./PriceTypeForm";
 import PriceTypeList from "./PriceTypeList";
 import ConfirmModal from "../ConfirmModal";
 import PriceTypeEdit from "./PriceTypeEdit";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 export default class PriceTypes extends Component {
@@ -40,7 +42,7 @@ export default class PriceTypes extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         //this.handleShow = this.handleShow.bind(this);
         this.handleClose = this.handleClose.bind(this);
-
+        toast.configure();
     }
 
 
@@ -54,7 +56,7 @@ export default class PriceTypes extends Component {
         axios.get('/price-types/'+id)
             .then(res => {
                 this.setState({
-                    formEdit: {name: res.data.name, status: res.data.status,editId:id},
+                    formEdit: {name: res.data.name, status: res.data.status,editId:res.data.id},
                     selected: res.data.status,
                 });
             })
@@ -71,7 +73,7 @@ export default class PriceTypes extends Component {
         });
     }
 
-    handleEditHide = (id) => {
+    handleEditHide = () => {
         this.setState({
             showPriceTypeEdit:false,
             showPriceTypeCreate: true,
@@ -111,28 +113,27 @@ export default class PriceTypes extends Component {
                             name: ''
                         }
                     });
+                    this.notify('Registro creado con éxito')
 
                 })
         }catch (e) {
-
+            this.notifyError('No se pudo crear el registro')
         }
     }
 
-    async handleSubmitEdit(e){
-        e.preventDefault()
+    handleSubmitEdit = (e) =>{
+        e.preventDefault();
         try {
-            axios.post('/price-types',  this.state.form )
+            axios.put('/price-types/'+this.state.formEdit.editId,  this.state.formEdit )
                 .then(res => {
                     this.setState({
-                        pricetypes: [res.data].concat(this.state.pricetypes),
-                        form:{
-                            name: ''
-                        }
+                        pricetypes: res.data
                     });
-
+                    this.handleEditHide()
+                    this.notify('Registro modificado con éxito')
                 })
         }catch (e) {
-
+            this.notifyError('No se pudo editar el registro')
         }
     }
 
@@ -148,17 +149,17 @@ export default class PriceTypes extends Component {
                         show: false,
 
                     });
+                    this.notify('Registro eliminado con éxito')
 
                 })
         }catch (e) {
-        console.log(e);
+            this.notifyError('No se pudo eliminar el registro')
         }
     }
 
     handleChangeEdit = (e) =>{
-        console.log(e.target.name);
-        this.setState({
 
+        this.setState({
             formEdit:{
                 ...this.state.formEdit,
                 [e.target.name]: e.target.value
@@ -171,6 +172,8 @@ export default class PriceTypes extends Component {
         });
     }
 
+    notify = (text) => toast.success(text);
+    notifyError = (text) => toast.error(text);
 
 
     render(){
@@ -185,7 +188,8 @@ export default class PriceTypes extends Component {
                 { this.state.showPriceTypeEdit ? <PriceTypeEdit form = {this.state.formEdit}
                                                                 onCancel={this.handleEditHide}
                                                                 onChange={this.handleChangeEdit}
-                                                                options={this.state.options}/> : null }
+                                                                options={this.state.options}
+                                                                onSubmit={this.handleSubmitEdit}/> : null }
 
                 <PriceTypeList pricetypes = {this.state.pricetypes}
                                onClick={this.handleShow}
