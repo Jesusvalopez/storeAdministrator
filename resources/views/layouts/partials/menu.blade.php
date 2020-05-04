@@ -16,11 +16,19 @@
         </a>
         <ul class="treeview-menu">
             @can('view products')
-                    <li><a href="{{route('products.create')}}">Ver Productos</a></li>
+                <li><a href="{{route('products.create')}}">Ver Productos</a></li>
             @endcan
         </ul>
     </li>
 </ul>
+<ul class="sidebar-menu" data-widget="tree">
+
+    @can('view discounts')
+        <li><a href="{{route('discounts.create')}}"><i class="fa  fa-bullhorn"></i><span>Descuentos</span></a></li>
+    @endcan
+
+</ul>
+
 <ul class="sidebar-menu" data-widget="tree">
 
     <li class="treeview">

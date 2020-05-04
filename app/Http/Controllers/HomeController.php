@@ -47,10 +47,20 @@ class HomeController extends Controller
         $role->givePermissionTo('view products');
         $role->givePermissionTo('edit products');
         $role->givePermissionTo('delete products');
+        Permission::create(['name' => 'create discounts']);
+        Permission::create(['name' => 'edit discounts']);
+        Permission::create(['name' => 'delete discounts']);
+        Permission::create(['name' => 'view discounts']);
+        $role->givePermissionTo('view discounts');
+        $role->givePermissionTo('create discounts');
+        $role->givePermissionTo('edit discounts');
+        $role->givePermissionTo('delete discounts');
 
         $user = Auth::user();
         $user->assignRole('Administrador');
 */
+
+
         return view('home');
     }
 }

@@ -14,8 +14,8 @@ require('./bootstrap');
 
 require('./components/Example');
 require('./components/pricetypes/PriceTypes');
-
 require('./components/products/ProductsList');
 require('./components/products/ProductsCreate');
 require('./components/products/Products');
 require('./components/sales/Sales');
+require('./components/discounts/Discounts');
