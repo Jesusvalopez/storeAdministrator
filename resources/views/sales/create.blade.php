@@ -20,7 +20,7 @@
 
 @section('content')
 
-    <div id="sales"></div>
+    <div id="sale"></div>
 
 @endsection
 @section('added-js')
