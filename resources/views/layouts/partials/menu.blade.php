@@ -1,14 +1,22 @@
 <ul class="sidebar-menu" data-widget="tree">
     <li class="header"></li>
+
+            @can('view products')
+                <li><a href="{{route('sales.create')}}"><i class="fa fa-edit"></i><span>POS</span></a></li>
+            @endcan
+
+</ul>
+<ul class="sidebar-menu" data-widget="tree">
+
     <li class="treeview">
-        <a href="#"><i class="fa fa-link"></i> <span>Productos</span>
+        <a href="#"><i class="fa fa-list"></i> <span>Productos</span>
             <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
               </span>
         </a>
         <ul class="treeview-menu">
             @can('view products')
-                    <li><a href="{{route('products.index')}}">Ver Productos</a></li>
+                    <li><a href="{{route('products.create')}}">Ver Productos</a></li>
             @endcan
         </ul>
     </li>
@@ -16,7 +24,7 @@
 <ul class="sidebar-menu" data-widget="tree">
 
     <li class="treeview">
-        <a href="#"><i class="fa fa-link"></i> <span>Configuración</span>
+        <a href="#"><i class="fa fa-gear"></i> <span>Configuración</span>
             <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
               </span>

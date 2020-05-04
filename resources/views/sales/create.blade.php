@@ -7,25 +7,22 @@
 @section('content-header')
     <section class="content-header">
         <h1>
-            Productos
-            <small>Crear producto</small>
+            POS
+            <small>Venta</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="/"><i class="fa fa-dashboard"></i> Inicio</a></li>
-            <li class="active">Productos</li>
-            <li class="active">Crear producto</li>
+            <li class="active">POS</li>
+            <li class="active">Venta</li>
         </ol>
     </section>
 @endsection
 
 @section('content')
 
-    <div id="products"></div>
+    <div id="sales"></div>
 
 @endsection
 @section('added-js')
-    <script >
-        SHOW_CREATE = {!! $can_create !!};
-        SHOW_LIST = {!!$can_list !!};
-    </script>
-    @endsection
+
+@endsection

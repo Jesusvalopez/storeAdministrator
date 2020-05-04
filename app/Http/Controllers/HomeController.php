@@ -38,7 +38,7 @@ class HomeController extends Controller
         $role->givePermissionTo('edit price type');
         $role->givePermissionTo('delete price type');
 */
-        /*
+       /*
         $role = Role::findById(1);
         Permission::create(['name' => 'create products']);
         Permission::create(['name' => 'view products']);
@@ -48,7 +48,7 @@ class HomeController extends Controller
         $role->givePermissionTo('view products');
         $role->givePermissionTo('edit products');
         $role->givePermissionTo('delete products');
-        */
+*/
         /*
         $user = Auth::user();
         $user->assignRole('Administrador');

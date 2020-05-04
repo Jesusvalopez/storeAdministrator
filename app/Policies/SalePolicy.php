@@ -2,12 +2,11 @@
 
 namespace App\Policies;
 
-use App\Product;
+use App\Sale;
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Auth\Access\Response;
 
-class ProductPolicy
+class SalePolicy
 {
     use HandlesAuthorization;
 
@@ -19,27 +18,19 @@ class ProductPolicy
      */
     public function viewAny(User $user)
     {
-        if ($user->can('view products')) {
-            return Response::allow();
-        }else{
-            return Response::deny('No tiene permisos para acceder.');
-        }
+        //
     }
 
     /**
      * Determine whether the user can view the model.
      *
      * @param  \App\User  $user
-     * @param  \App\Product  $product
+     * @param  \App\Sale  $sale
      * @return mixed
      */
-    public function view(User $user, Product $product)
+    public function view(User $user, Sale $sale)
     {
-        if ($user->can('view products')) {
-            return Response::allow();
-        }else{
-            return Response::deny('No tiene permisos para acceder.');
-        }
+        //
     }
 
     /**
@@ -50,21 +41,17 @@ class ProductPolicy
      */
     public function create(User $user)
     {
-        if ($user->can('create products')) {
-            return Response::allow();
-        }else{
-            return Response::deny('No tiene permisos para acceder.');
-        }
+        //
     }
 
     /**
      * Determine whether the user can update the model.
      *
      * @param  \App\User  $user
-     * @param  \App\Product  $product
+     * @param  \App\Sale  $sale
      * @return mixed
      */
-    public function update(User $user, Product $product)
+    public function update(User $user, Sale $sale)
     {
         //
     }
@@ -73,26 +60,22 @@ class ProductPolicy
      * Determine whether the user can delete the model.
      *
      * @param  \App\User  $user
-     * @param  \App\Product  $product
+     * @param  \App\Sale  $sale
      * @return mixed
      */
-    public function delete(User $user, Product $product)
+    public function delete(User $user, Sale $sale)
     {
-        if ($user->can('delete products')) {
-            return Response::allow();
-        }else{
-            return Response::deny('No tiene permisos para acceder.');
-        }
+        //
     }
 
     /**
      * Determine whether the user can restore the model.
      *
      * @param  \App\User  $user
-     * @param  \App\Product  $product
+     * @param  \App\Sale  $sale
      * @return mixed
      */
-    public function restore(User $user, Product $product)
+    public function restore(User $user, Sale $sale)
     {
         //
     }
@@ -101,10 +84,10 @@ class ProductPolicy
      * Determine whether the user can permanently delete the model.
      *
      * @param  \App\User  $user
-     * @param  \App\Product  $product
+     * @param  \App\Sale  $sale
      * @return mixed
      */
-    public function forceDelete(User $user, Product $product)
+    public function forceDelete(User $user, Sale $sale)
     {
         //
     }

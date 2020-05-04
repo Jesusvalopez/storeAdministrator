@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\PriceProduct;
 use App\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductsController extends Controller
 {
@@ -36,10 +37,13 @@ class ProductsController extends Controller
      */
     public function create()
     {
+
         $this->authorize('create', Product::class);
 
+        $can_create = Auth::user()->can('create products') ? 1 : 0;
+        $can_list = Auth::user()->can('view products') ? 1 : 0;
 
-        return view('products.create');
+        return view('products.create')->with(['can_create' => $can_create, 'can_list' => $can_list]);
     }
 
     /**
@@ -78,11 +82,13 @@ class ProductsController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function show(Product $product)
     {
-        //
+        $this->authorize('view', $product);
+
+        return response()->json($product);
     }
 
     /**
@@ -112,10 +118,16 @@ class ProductsController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($id)
+    public function destroy(Product $product)
     {
-        //
+        $this->authorize('delete', $product);
+
+        $product->delete();
+
+        $products = Product::orderBy('id', 'desc')->get();
+
+        return response()->json($products);
     }
 }

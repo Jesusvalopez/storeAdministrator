@@ -2,10 +2,9 @@ import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
 import ConfirmModal from "../ConfirmModal";
-import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProductsList from "./ProductsList";
-
+import ProductsCreate from "./ProductsCreate";
 
 export default class Products extends Component {
 
@@ -19,50 +18,15 @@ export default class Products extends Component {
             },
             error : null,
             pricetypes: [],
+            products: [],
+            editId: null,
+
         }
 
-        toast.configure();
+
     }
 
-    notify = (text) => toast.success(text);
-    notifyError = (text) => toast.error(text);
-
-    async componentDidMount() {
-        axios.get('/price-types')
-            .then(res => {
-                this.setState({
-                    pricetypes: res.data
-                });
-            })
-            .catch((error) => {
-                this.setState({
-                    error: error
-                });
-            })
-    }
-
-    resetForm = () => {
-        document.getElementById("createProductForm").reset();
-    }
-
-    handleSubmit = (e) =>{
-        e.preventDefault();
-        try {
-            axios.post('/products',  this.state.form )
-                .then(res => {
-
-                   // this.state.products = [res.data].concat(this.state.products),
-                    this.resetForm();
-                    this.notify('Registro creado con éxito')
-
-                })
-        }catch (e) {
-            this.notifyError('No se pudo crear el registro')
-        }
-    }
-
-    handleChange = (e) =>{
-
+    handleUpdateForm = (e) => {
         this.setState({
             form:{
                 ...this.state.form,
@@ -70,66 +34,48 @@ export default class Products extends Component {
             }
         });
     }
+    handleUpdateListElement = (element) => {
+        this.setState({products: [element].concat(this.state.products)});
+
+    }
+    handleUpdatePriceTypes = (priceTypes) => {
+        this.setState({pricetypes: priceTypes});
+    }
+    handleUpdateList = (productsList) => {
+        this.setState({products: productsList});
+    }
+
+
+    handleOnEdit = (id) => {
+
+        axios.get('/products/'+id)
+            .then(res => {
+                this.setState({
+                    form: {name: res.data.name, description: res.data.description, stock: res.data.stock, editId:res.data.id}
+                });
+            })
+            .catch((error) => {
+                this.setState({
+                    error: error
+                });
+            });
+
+    }
+
+
 
     render(){
 
         return (
             <div>
-                <div className="col-md-12">
-                    <form id="createProductForm" action="/" method="" onSubmit={this.handleSubmit}>
+                {this.props.showCreate ? <ProductsCreate form={this.state.form}
+                                                         onUpdatePriceTypes={this.handleUpdatePriceTypes}
+                                                         onUpdateListElement={this.handleUpdateListElement}
+                                                         onUpdateForm={this.handleUpdateForm}
+                                                         priceTypes={this.state.pricetypes}
+                                                         /> : null}
+                {this.props.showList ? <ProductsList products={this.state.products} onUpdateList={this.handleUpdateList} onEdit={this.handleOnEdit}/>: null}
 
-                        <div className="box box-success">
-                            <div className="box-header with-border">
-                                <h3 className="box-title">Nuevo Producto</h3>
-                            </div>
-                            <div className="box-body">
-                                <div className="row">
-                                    <div className="col-xs-3">
-                                        <input type="text" name="name" className="form-control" placeholder="Nombre del producto"
-                                               onChange={this.handleChange}/>
-                                    </div>
-                                    <div className="col-xs-8">
-                                        <input type="text" name="description" className="form-control" placeholder="Descripción "
-                                               onChange={this.handleChange}/>
-                                    </div>
-                                    <div className="col-xs-1">
-                                        <input type="text" name="stock" className="form-control" placeholder="Stock"
-                                               onChange={this.handleChange}/>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                            <div className="box-header with-border">
-                                <h3 className="box-title">Precios</h3>
-                            </div>
-                            <div className="box-body">
-                                <div className="row">
-                                    {this.state.pricetypes.map((pricetype) => (
-                                    <div className="col-xs-2" key={pricetype.id}>
-                                        <label >{pricetype.name}</label>
-                                        <input type="text" name={"price_"+pricetype.id} className="form-control"
-                                               onChange={this.handleChange}/>
-                                    </div>
-                                    ))}
-
-                                </div>
-                            </div>
-
-                            <div className="box-body">
-                                <div className="row">
-
-                                <div className="col-xs-2">
-                                    <button type="submit" className="btn btn-block btn-primary" >Crear</button>
-                                </div>
-
-                                </div>
-                            </div>
-
-                        </div>
-                    </form>
-                </div>
-                <ProductsList products={this.state.products}/>
             </div>
         );
     }
@@ -137,5 +83,6 @@ export default class Products extends Component {
 
 if (document.getElementById('products')) {
 
-    ReactDOM.render(<Products />, document.getElementById('products'));
+    ReactDOM.render(<Products showCreate={SHOW_CREATE} showList={SHOW_LIST}/>, document.getElementById('products'));
 }
+
