@@ -18,7 +18,7 @@
     <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
           page. However, you can choose any other skin. Make sure you
           apply the skin class to the body tag so the changes take effect. -->
-    <link rel="stylesheet" href="/dist/css/skins/skin-blue.min.css">
+    <link rel="stylesheet" href="/dist/css/skins/skin-black.min.css">
 
     @yield('added-css')
 
@@ -34,7 +34,7 @@
           href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 </head>
 
-<body class="hold-transition skin-blue sidebar-mini">
+<body class="hold-transition skin-black sidebar-mini">
 <div class="wrapper">
 
     <!-- Main Header -->

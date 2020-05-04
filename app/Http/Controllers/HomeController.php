@@ -26,8 +26,9 @@ class HomeController extends Controller
      */
     public function index()
     {
-        //Role::create(['name' => 'Administrador']);
         /*
+        Role::create(['name' => 'Administrador']);
+
         $role = Role::findById(1);
         Permission::create(['name' => 'create price type']);
         Permission::create(['name' => 'edit price type']);
@@ -37,9 +38,7 @@ class HomeController extends Controller
         $role->givePermissionTo('create price type');
         $role->givePermissionTo('edit price type');
         $role->givePermissionTo('delete price type');
-*/
-       /*
-        $role = Role::findById(1);
+
         Permission::create(['name' => 'create products']);
         Permission::create(['name' => 'view products']);
         Permission::create(['name' => 'edit products']);
@@ -48,11 +47,10 @@ class HomeController extends Controller
         $role->givePermissionTo('view products');
         $role->givePermissionTo('edit products');
         $role->givePermissionTo('delete products');
-*/
-        /*
+
         $user = Auth::user();
         $user->assignRole('Administrador');
-        */
+*/
         return view('home');
     }
 }

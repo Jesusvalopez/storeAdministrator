@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDiscountSaleTable extends Migration
+class CreateDiscountSaleDetailTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreateDiscountSaleTable extends Migration
      */
     public function up()
     {
-        Schema::create('discount_sale', function (Blueprint $table) {
+        Schema::create('discount_sale_detail', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('sale_id');
-            $table->foreign('sale_id')->references('id')->on('sales');
+            $table->bigInteger('sale_detail_id');
+            $table->foreign('sale_detail_id')->references('id')->on('sale_details');
             $table->integer('discount_id');
             $table->foreign('discount_id')->references('id')->on('discounts');
             $table->timestamps();
@@ -30,6 +30,6 @@ class CreateDiscountSaleTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('discount_sale');
+        Schema::dropIfExists('discount_sale_detail');
     }
 }

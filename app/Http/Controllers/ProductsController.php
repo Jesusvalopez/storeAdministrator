@@ -18,7 +18,7 @@ class ProductsController extends Controller
     {
         $this->authorize('viewAny', Product::class);
 
-        $products = Product::orderBy('id', 'desc')->get();
+        $products = Product::with('pricesTypes')->orderBy('id', 'desc')->get();
 
         return response()->json($products);
     }
