@@ -64,6 +64,18 @@ export default class Sales extends Component {
                     error: error
                 });
             })
+        axios.get('/discounts')
+            .then(res => {
+                this.setState({
+                    discounts: res.data
+                });
+
+            })
+            .catch((error) => {
+                this.setState({
+                    error: error
+                });
+            })
     }
 
     handleAddProduct = () =>{

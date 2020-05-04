@@ -55,12 +55,18 @@ class HomeController extends Controller
         $role->givePermissionTo('create discounts');
         $role->givePermissionTo('edit discounts');
         $role->givePermissionTo('delete discounts');
+        Permission::create(['name' => 'create payment methods']);
+        Permission::create(['name' => 'edit payment methods']);
+        Permission::create(['name' => 'delete payment methods']);
+        Permission::create(['name' => 'view payment methods']);
+        $role->givePermissionTo('view payment methods');
+        $role->givePermissionTo('create payment methods');
+        $role->givePermissionTo('edit payment methods');
+        $role->givePermissionTo('delete payment methods');
 
         $user = Auth::user();
         $user->assignRole('Administrador');
 */
-
-
         return view('home');
     }
 }

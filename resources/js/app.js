@@ -19,3 +19,4 @@ require('./components/products/ProductsCreate');
 require('./components/products/Products');
 require('./components/sales/Sales');
 require('./components/discounts/Discounts');
+require('./components/paymentmethods/PaymentMethods');

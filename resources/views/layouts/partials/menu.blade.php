@@ -41,6 +41,9 @@
             @can('view price type')
                 <li><a href="{{route('price-types.create')}}">Tipos de Precios</a></li>
             @endcan
+                @can('view payment methods')
+                    <li><a href="{{route('payment-methods.create')}}">Medios de pago</a></li>
+                @endcan
         </ul>
     </li>
 </ul>
