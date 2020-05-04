@@ -4,6 +4,7 @@ import axios from 'axios';
 import ConfirmModal from "../ConfirmModal";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ProductsList from "./ProductsList";
 
 
 export default class Products extends Component {
@@ -50,7 +51,7 @@ export default class Products extends Component {
             axios.post('/products',  this.state.form )
                 .then(res => {
 
-
+                   // this.state.products = [res.data].concat(this.state.products),
                     this.resetForm();
                     this.notify('Registro creado con éxito')
 
@@ -128,6 +129,7 @@ export default class Products extends Component {
                         </div>
                     </form>
                 </div>
+                <ProductsList products={this.state.products}/>
             </div>
         );
     }

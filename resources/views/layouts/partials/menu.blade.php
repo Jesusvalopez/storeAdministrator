@@ -7,9 +7,6 @@
               </span>
         </a>
         <ul class="treeview-menu">
-            @can('create products')
-                <li><a href="{{route('products.create')}}">Crear Producto</a></li>
-            @endcan
             @can('view products')
                     <li><a href="{{route('products.index')}}">Ver Productos</a></li>
             @endcan

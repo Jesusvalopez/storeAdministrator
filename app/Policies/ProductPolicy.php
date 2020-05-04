@@ -19,7 +19,7 @@ class ProductPolicy
      */
     public function viewAny(User $user)
     {
-        if ($user->can('create products')) {
+        if ($user->can('view products')) {
             return Response::allow();
         }else{
             return Response::deny('No tiene permisos para acceder.');

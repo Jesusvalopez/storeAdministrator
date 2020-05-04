@@ -15,9 +15,20 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        //
+        $this->authorize('viewAny', Product::class);
+
+        $products = Product::orderBy('id', 'desc')->get();
+
+        return response()->json($products);
     }
 
+    public function listing(){
+        $this->authorize('viewAny', Product::class);
+
+        $products = Product::orderBy('id', 'desc')->get();
+
+        return response()->json($products);
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -59,7 +70,8 @@ class ProductsController extends Controller
         }
 
 
-        return response()->json(true);
+
+        return response()->json($product);
     }
 
     /**
