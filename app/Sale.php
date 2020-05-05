@@ -17,5 +17,10 @@ class Sale extends Model
         return $this->hasMany(PaymentMethodSale::class);
     }
 
+    public function seller()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
 
 }

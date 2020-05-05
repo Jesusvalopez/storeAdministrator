@@ -12,14 +12,43 @@ use Illuminate\Support\Facades\Auth;
 
 class SalesController extends Controller
 {
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function index()
     {
+        $this->authorize('viewAny', Sale::class);
 
+
+
+        return view('sales.index');
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function listing()
+    {
+        $this->authorize('viewAny', Sale::class);
+
+        $sales = Sale::with(['saleDetails.priceProduct','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])->get();
+        return response()->json($sales);
     }
 
     /**
@@ -29,6 +58,8 @@ class SalesController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Sale::class);
+
         return view('sales.create');
     }
 

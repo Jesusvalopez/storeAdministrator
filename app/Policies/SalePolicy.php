@@ -19,7 +19,11 @@ class SalePolicy
      */
     public function viewAny(User $user)
     {
-        //
+        if ($user->can('view sales')) {
+            return Response::allow();
+        }else{
+            return Response::deny('No tiene permisos para acceder.');
+        }
     }
 
     /**

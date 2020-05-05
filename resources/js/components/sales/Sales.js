@@ -397,19 +397,35 @@ export default class Sales extends Component {
 
     handleSubmitSale = () =>{
 
+
+        const products = this.state.products_on_sale.products;
+        //validar que haya productos
+        if(products.length === 0){
+            this.notifyWarning('No hay productos para registrar');
+            return false;
+        }
+        if(this.state.total !== this.state.totalMethodsSale){
+            this.notifyWarning('Debe agregar los medios de pago');
+            return false;
+        }
+
+
         var saleForm = {
-                products: this.state.products_on_sale.products,
+                products: products,
                 payment_methods_sale: this.state.payment_methods_sales,
         }
 
         try {
             axios.post('/sales',  saleForm )
                 .then(res => {
-                    /*
-                    this.setState({
 
-                    });
-                    */
+                    this.setState({
+                        products_on_sale:{
+                            products: [],
+                        },
+                        payment_methods_sales:[],
+                    },() => { this.calculateTotals(); this.calculateTotalPaymentMethodsSale() })
+
                     console.log(res);
                     this.notify('Venta registrada')
 
@@ -593,10 +609,15 @@ export default class Sales extends Component {
                                     ))}
                                 </select>
                             </div>
-                            <div className="col-xs-5">
+                            {this.state.products_on_sale.products.length > 0 ?
+
+                                <div className="col-xs-5">
                                 <label htmlFor=""></label>
                                 <button type="submit" className="btn btn-block btn-primary" onClick={this.handleAddDiscount}>Agregar descuento</button>
-                            </div>
+                                </div>
+
+                                : null}
+
 
                         </div>
 
@@ -619,10 +640,12 @@ export default class Sales extends Component {
                                 <input id="paymentMethodAmount" type="number" name="amount" className="form-control" placeholder="$ 1000"
                                 />
                             </div>
+                            {this.state.products_on_sale.products.length > 0 ?
                             <div className="col-xs-4">
 
                                 <button type="" className="btn btn-block btn-primary" onClick={this.handleAddPaymentMethod}>Agregar medio de pago</button>
                             </div>
+                                :null}
 
                         </div>
                         <div className="box-body">

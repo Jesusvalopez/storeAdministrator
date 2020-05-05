@@ -12,4 +12,9 @@ class DiscountSaleDetail extends Model
     {
         return $this->belongsTo(SaleDetail::class);
     }
+
+    public function discount()
+    {
+        return $this->belongsTo(Discount::class);
+    }
 }
