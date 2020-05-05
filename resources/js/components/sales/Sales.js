@@ -526,27 +526,7 @@ export default class Sales extends Component {
 
                                             ))}
 
-                                            <tr>
-                                                <td></td>
-                                                <td></td>
-                                                <td>SUBTOTAL</td>
-                                                <td>$ {this.state.sub_total}</td>
-                                                <td></td>
-                                            </tr>
-                                            <tr>
-                                            <td></td>
-                                            <td></td>
-                                            <td>TOTAL DESCUENTOS</td>
-                                            <td>$ -{this.state.discounts_total}</td>
-                                            <td></td>
-                                            </tr>
-                                            <tr>
-                                                <td></td>
-                                                <td></td>
-                                                <td>TOTAL</td>
-                                                <td>${this.state.total}</td>
-                                                <td></td>
-                                            </tr>
+
 
 
                                         </tbody>
@@ -559,7 +539,101 @@ export default class Sales extends Component {
 
 
 
+                            <div className="box-header with-border">
+                                <h3 className="box-title">Medios de pago</h3>
+                            </div>
+                            <div className="box-body">
+                                <div className="col-md-8">
+                                <div className="row">
+                                    <div className="col-xs-4">
 
+                                        <select id="PaymentMethodsElements" name="payment_method"  className="form-control">
+                                            {this.state.payment_methods.map((payment_method) => (
+                                                <option key={payment_method.id} value={payment_method.id} >{payment_method.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="col-xs-4">
+
+                                        <input id="paymentMethodAmount" type="number" name="amount" className="form-control" placeholder="$ 1000"
+                                        />
+                                    </div>
+                                    {this.state.products_on_sale.products.length > 0 ?
+                                        <div className="col-xs-4">
+
+                                            <button type="" className="btn btn-block btn-primary" onClick={this.handleAddPaymentMethod}>Agregar medio de pago</button>
+                                        </div>
+                                        :null}
+
+                                </div>
+                                <div className="box-body">
+                                    <div className="row">
+                                        <div className="col-xs-12">
+                                            <table className="table">
+                                                <thead>
+
+                                                <tr>
+                                                    <th className="text-center">Medio Pago</th>
+                                                    <th className="text-center">Cantidad</th>
+                                                    <th className="text-center">Acciones</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                {this.state.payment_methods_sales.map((payment_methods_sale) => (
+                                                    <tr key={payment_methods_sale.payment_method.id}>
+                                                        <td className="text-center">{payment_methods_sale.payment_method.name}</td>
+                                                        <td className="text-center">{payment_methods_sale.quantity}</td>
+                                                        <td className="text-center"><a href="#" className="btn btn-danger"onClick={()=>this.handleDeletePaymentMethod(payment_methods_sale.payment_method.id)}><i className="fa fa-times"></i></a></td>
+
+                                                    </tr>
+
+                                                ))}
+
+                                                <tr>
+
+                                                    <th className="text-center">TOTAL</th>
+                                                    <th className="text-center">$ {this.state.totalMethodsSale}</th>
+                                                    <th></th>
+                                                </tr>
+
+
+                                                </tbody>
+
+                                            </table>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <table className="table">
+                                        <tbody>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td><b>SUBTOTAL</b></td>
+                                        <td><b>${this.state.sub_total}</b></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td><b>TOTAL DESCUENTOS</b></td>
+                                        <td><b>$ -{this.state.discounts_total}</b></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td><b>TOTAL</b></td>
+                                        <td><b>${this.state.total}</b></td>
+                                        <td></td>
+                                    </tr>
+                                        </tbody>
+                                        </table>
+                                </div>
+                            </div>
 
 
                             <div className="box-body">
@@ -622,72 +696,7 @@ export default class Sales extends Component {
                         </div>
 
                     </div>
-                    <div className="box-header with-border">
-                        <h3 className="box-title">Medios de pago</h3>
-                    </div>
-                    <div className="box-body">
-                        <div className="row">
-                            <div className="col-xs-4">
 
-                                <select id="PaymentMethodsElements" name="payment_method"  className="form-control">
-                                    {this.state.payment_methods.map((payment_method) => (
-                                        <option key={payment_method.id} value={payment_method.id} >{payment_method.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="col-xs-4">
-
-                                <input id="paymentMethodAmount" type="number" name="amount" className="form-control" placeholder="$ 1000"
-                                />
-                            </div>
-                            {this.state.products_on_sale.products.length > 0 ?
-                            <div className="col-xs-4">
-
-                                <button type="" className="btn btn-block btn-primary" onClick={this.handleAddPaymentMethod}>Agregar medio de pago</button>
-                            </div>
-                                :null}
-
-                        </div>
-                        <div className="box-body">
-                            <div className="row">
-                                <div className="col-xs-12">
-                        <table className="table">
-                            <thead>
-
-                            <tr>
-                                <th className="text-center">Medio Pago</th>
-                                <th className="text-center">Cantidad</th>
-                                <th className="text-center">Acciones</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-
-                            {this.state.payment_methods_sales.map((payment_methods_sale) => (
-                                <tr key={payment_methods_sale.payment_method.id}>
-                                    <td className="text-center">{payment_methods_sale.payment_method.name}</td>
-                                    <td className="text-center">{payment_methods_sale.quantity}</td>
-                                    <td className="text-center"><a href="#" className="btn btn-danger"onClick={()=>this.handleDeletePaymentMethod(payment_methods_sale.payment_method.id)}><i className="fa fa-times"></i></a></td>
-
-                                </tr>
-
-                            ))}
-
-                            <tr>
-                                <td></td>
-                                <td>TOTAL</td>
-                                <td>$ {this.state.totalMethodsSale}</td>
-                                <td></td>
-                            </tr>
-
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-                    </div>
-                    </div>
-                    </div>
                 </div>
                 </div>
             </div>

@@ -47,7 +47,7 @@ class SalesController extends Controller
     {
         $this->authorize('viewAny', Sale::class);
 
-        $sales = Sale::with(['saleDetails.priceProduct.product','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
+        $sales = Sale::with(['saleDetails.priceProduct.priceType','saleDetails.priceProduct.product','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
             ->orderBy('id', 'desc')->get();
         return response()->json($sales);
     }
