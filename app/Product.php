@@ -12,6 +12,6 @@ class Product extends Model
 
     public function pricesTypes()
     {
-        return $this->belongsToMany(PriceType::class, 'price_products')->withPivot('price')->as('prices');
+        return $this->belongsToMany(PriceType::class, 'price_products')->withPivot('price', 'id')->as('prices');
     }
 }

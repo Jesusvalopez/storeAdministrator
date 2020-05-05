@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Sale;
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Auth\Access\Response;
 
 class SalePolicy
 {
@@ -41,7 +42,11 @@ class SalePolicy
      */
     public function create(User $user)
     {
-        //
+        if ($user->can('create sales')) {
+            return Response::allow();
+        }else{
+            return Response::deny('No tiene permisos para acceder.');
+        }
     }
 
     /**

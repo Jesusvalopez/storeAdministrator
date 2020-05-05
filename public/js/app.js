@@ -81935,6 +81935,10 @@ var Sales = /*#__PURE__*/function (_Component) {
       return react_toastify__WEBPACK_IMPORTED_MODULE_5__["toast"].error(text);
     });
 
+    _defineProperty(_assertThisInitialized(_this), "notifyWarning", function (text) {
+      return react_toastify__WEBPACK_IMPORTED_MODULE_5__["toast"].warn(text);
+    });
+
     _defineProperty(_assertThisInitialized(_this), "handleAddProduct", function () {
       var product_selected = document.getElementById("products");
       var priceType = document.getElementById("priceType");
@@ -81942,7 +81946,7 @@ var Sales = /*#__PURE__*/function (_Component) {
       var add_quantity_value = parseInt(document.getElementById("productAddQuantity").value);
 
       if (isNaN(add_quantity_value) || add_quantity_value < 1) {
-        _this.notifyError('Debe agregar cantidad');
+        _this.notifyWarning('Debe agregar cantidad');
 
         document.getElementById("productAddQuantity").focus();
         return false;
@@ -81968,6 +81972,7 @@ var Sales = /*#__PURE__*/function (_Component) {
             if (product.product.id === parseInt(product_selected_value)) {
               product.quantity += add_quantity_value;
               product.price_type_id = parseInt(priceType_value);
+              product.product_price_type_id = product.find_price_type().prices.id;
               return product;
             }
 
@@ -81978,20 +81983,39 @@ var Sales = /*#__PURE__*/function (_Component) {
               products: new_products_on_sale
             }
           };
+        }, function () {
+          _this.calculateTotals();
         });
 
         return false;
       }
 
+      var product_price = product.prices_types.find(function (price) {
+        return price.id === parseInt(priceType_value);
+      });
       var product_on_sale_model = {
         product: product,
         quantity: add_quantity_value,
         price_type_id: parseInt(priceType_value),
+        discounts: [],
+        product_price_type_id: product_price.prices.id,
         get_price_type: function get_price_type() {
           return this.find_price_type().name;
         },
         calculate_price: function calculate_price() {
           return this.quantity * this.find_price_type().prices.price;
+        },
+        calculate_final_price: function calculate_final_price() {
+          var discount_amount = 0;
+
+          if (this.discounts.length > 0) {
+            this.discounts.map(function (discount) {
+              discount_amount += parseInt(discount.quantity);
+            });
+          }
+
+          var discount_percent = (100 - discount_amount) / 100;
+          return this.quantity * this.find_price_type().prices.price * discount_percent;
         },
         find_price_type: function find_price_type() {
           var _this2 = this;
@@ -82003,10 +82027,21 @@ var Sales = /*#__PURE__*/function (_Component) {
         }
       };
 
-      _this.setState({
-        products_on_sale: {
-          products: products_on_sale.concat(product_on_sale_model)
-        }
+      _this.setState(function (prevState) {
+        var products_on_sale_2 = _toConsumableArray(prevState.products_on_sale.products);
+
+        return {
+          products_on_sale: {
+            products: products_on_sale_2.concat(product_on_sale_model)
+          }
+        };
+        /*
+        products_on_sale:{
+            products: products_on_sale.concat(product_on_sale_model),
+             }
+         */
+      }, function () {
+        _this.calculateTotals();
       });
     });
 
@@ -82016,22 +82051,183 @@ var Sales = /*#__PURE__*/function (_Component) {
       });
     });
 
-    _defineProperty(_assertThisInitialized(_this), "calculateTotal", function () {
+    _defineProperty(_assertThisInitialized(_this), "calculateTotals", function () {
       var products = _this.state.products_on_sale.products;
       var total = 0;
+      var sub_total = 0;
       products.map(function (product) {
-        total += parseFloat(product.calculate_price());
+        total += parseFloat(product.calculate_final_price());
+        sub_total += parseFloat(product.calculate_price());
       });
-      return total;
+
+      _this.setState({
+        total: total,
+        sub_total: sub_total,
+        discounts_total: sub_total - total
+      });
     });
 
-    _defineProperty(_assertThisInitialized(_this), "calculateSubTotal", function () {
-      var products = _this.state.products_on_sale.products;
-      var total = 0;
-      products.map(function (product) {
-        total += parseFloat(product.calculate_price());
+    _defineProperty(_assertThisInitialized(_this), "calculateTotalPaymentMethodsSale", function () {
+      var payment_methods_sales = _this.state.payment_methods_sales;
+      var total = 0.0;
+      payment_methods_sales.map(function (payment_methods_sale) {
+        total += parseFloat(payment_methods_sale.quantity);
       });
-      return total;
+
+      _this.setState({
+        totalMethodsSale: total
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "showProductsOnSale", function () {
+      return _this.state.products_on_sale.products.map(function (product_on_sale) {
+        return function () {
+          /*#__PURE__*/
+          react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", {
+            key: product_on_sale.product.id
+          }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+            className: "text-center"
+          }, product_on_sale.product.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+            className: "text-center"
+          }, product_on_sale.quantity), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+            className: "text-center"
+          }, product_on_sale.get_price_type()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+            className: "text-center"
+          }, "$ ", product_on_sale.calculate_price()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+            className: "text-center"
+          }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+            href: "#",
+            className: "btn btn-danger"
+          }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
+            className: "fa fa-times"
+          }))));
+        };
+      });
+      /*
+        ))*/
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleDeleteProduct", function (id) {
+      _this.setState(function (prevState) {
+        var products_on_sale = _toConsumableArray(prevState.products_on_sale.products);
+
+        var new_products_on_sale = products_on_sale.filter(function (product) {
+          return product.product.id !== id;
+        });
+        return {
+          products_on_sale: {
+            products: new_products_on_sale
+          }
+        };
+      }, function () {
+        _this.calculateTotals();
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleDeletePaymentMethod", function (id) {
+      _this.setState(function (prevState) {
+        var payment_methods_sales = _toConsumableArray(prevState.payment_methods_sales);
+
+        var new_payment_methods_sales = payment_methods_sales.filter(function (payment_method) {
+          return payment_method.payment_method.id !== id;
+        });
+        return {
+          payment_methods_sales: new_payment_methods_sales
+        };
+      }, function () {
+        _this.calculateTotalPaymentMethodsSale();
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleAddPaymentMethod", function (e) {
+      var payment_method_select = document.getElementById("PaymentMethodsElements");
+      var payment_method_amount_element = document.getElementById("paymentMethodAmount");
+      var payment_method_value = payment_method_select.options[payment_method_select.selectedIndex].value;
+
+      var payment_method = _this.state.payment_methods.find(function (payment_method) {
+        return payment_method.id === parseInt(payment_method_value);
+      });
+
+      var payment_method_model = {
+        payment_method: payment_method,
+        quantity: parseInt(payment_method_amount_element.value)
+      };
+
+      _this.setState(function (prevState) {
+        var new_payment_methods_sale = _toConsumableArray(prevState.payment_methods_sales);
+
+        return {
+          payment_methods_sales: new_payment_methods_sale.concat(payment_method_model)
+        };
+      }, function () {
+        _this.calculateTotalPaymentMethodsSale();
+      });
+
+      payment_method_amount_element.value = '';
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleAddDiscount", function (e) {
+      var discount_selected = document.getElementById("discounts");
+      var products_on_sale_discount = document.getElementById("products_on_sale_discount");
+      var discount_selected_value = discount_selected.options[discount_selected.selectedIndex].value;
+      var products_on_sale_discount_value = products_on_sale_discount.options[products_on_sale_discount.selectedIndex].value;
+
+      if (products_on_sale_discount_value === '') {
+        return false;
+      }
+
+      var discount = _this.state.discounts.find(function (discount) {
+        return discount.id === parseInt(discount_selected_value);
+      });
+
+      _this.setState(function (prevState) {
+        var products_on_sale = _toConsumableArray(prevState.products_on_sale.products);
+
+        var new_products_on_sale = products_on_sale.map(function (product) {
+          if (products_on_sale_discount_value === 'all' || product.product.id === parseInt(products_on_sale_discount_value)) {
+            //validar que el descuento no esté aplicado ya.
+            if (!product.discounts.find(function (discountToFind) {
+              return discountToFind.id === discount.id;
+            })) {
+              product.discounts = product.discounts.concat(discount);
+            }
+
+            return product;
+          }
+
+          return product;
+        });
+        return {
+          products_on_sale: {
+            products: new_products_on_sale
+          }
+        };
+      }, function () {
+        _this.calculateTotals();
+      });
+
+      _this.notify('Descuento agregado');
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleSubmitSale", function () {
+      var saleForm = {
+        products: _this.state.products_on_sale.products,
+        payment_methods_sale: _this.state.payment_methods_sales
+      };
+
+      try {
+        axios__WEBPACK_IMPORTED_MODULE_2___default.a.post('/sales', saleForm).then(function (res) {
+          /*
+          this.setState({
+           });
+          */
+          console.log(res);
+
+          _this.notify('Venta registrada');
+        });
+      } catch (e) {
+        _this.notifyError('No se pudo crear el registro');
+      }
     });
 
     _this.state = {
@@ -82042,7 +82238,12 @@ var Sales = /*#__PURE__*/function (_Component) {
         products: []
       },
       discounts: [],
-      payment_methods: []
+      payment_methods: [],
+      payment_methods_sales: [],
+      total: 0,
+      sub_total: 0,
+      discounts_total: 0,
+      totalMethodsSale: 0.0
     };
     react_toastify__WEBPACK_IMPORTED_MODULE_5__["toast"].configure();
     return _this;
@@ -82075,6 +82276,15 @@ var Sales = /*#__PURE__*/function (_Component) {
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/discounts').then(function (res) {
         _this3.setState({
           discounts: res.data
+        });
+      })["catch"](function (error) {
+        _this3.setState({
+          error: error
+        });
+      });
+      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/payment-methods').then(function (res) {
+        _this3.setState({
+          payment_methods: res.data
         });
       })["catch"](function (error) {
         _this3.setState({
@@ -82171,6 +82381,8 @@ var Sales = /*#__PURE__*/function (_Component) {
         className: "text-center"
       }, "Precio"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", {
         className: "text-center"
+      }, "Descuentos"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", {
+        className: "text-center"
       }, "Acciones"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, this.state.products_on_sale.products.map(function (product_on_sale) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", {
           key: product_on_sale.product.id
@@ -82184,13 +82396,23 @@ var Sales = /*#__PURE__*/function (_Component) {
           className: "text-center"
         }, "$ ", product_on_sale.calculate_price()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
           className: "text-center"
+        }, product_on_sale.discounts.map(function (discount) {
+          return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
+            className: "label label-success",
+            key: discount.id
+          }, discount.name);
+        })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+          className: "text-center"
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
           href: "#",
-          className: "btn btn-danger"
+          className: "btn btn-danger",
+          onClick: function onClick() {
+            return _this4.handleDeleteProduct(product_on_sale.product.id);
+          }
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
           className: "fa fa-times"
         }))));
-      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "SUBTOTAL"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "$ ", this.calculateSubTotal()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "TOTAL DESCUENTOS"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "$ 0"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "TOTAL"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "$", this.calculateTotal()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "SUBTOTAL"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "$ ", this.state.sub_total), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "TOTAL DESCUENTOS"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "$ -", this.state.discounts_total), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "TOTAL"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "$", this.state.total), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "box-body"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "row"
@@ -82198,7 +82420,8 @@ var Sales = /*#__PURE__*/function (_Component) {
         className: "col-xs-2"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
         type: "submit",
-        className: "btn btn-block btn-primary btn-lg"
+        className: "btn btn-block btn-primary btn-lg",
+        onClick: this.handleSubmitSale
       }, "Generar Venta")))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col-md-4"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
@@ -82216,9 +82439,14 @@ var Sales = /*#__PURE__*/function (_Component) {
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
         htmlFor: "products_on_sale"
       }, "Producto"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("select", {
+        id: "products_on_sale_discount",
         name: "products_on_sale",
         className: "form-control"
-      }, this.state.products_on_sale.products.map(function (product_on_sale) {
+      }, this.state.products_on_sale.products.length > 0 ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("option", {
+        value: "all"
+      }, "Todos") : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("option", {
+        value: ""
+      }, "No hay productos en la venta"), this.state.products_on_sale.products.map(function (product_on_sale) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("option", {
           key: product_on_sale.product.id,
           value: product_on_sale.product.id
@@ -82230,6 +82458,7 @@ var Sales = /*#__PURE__*/function (_Component) {
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
         htmlFor: "discounts"
       }, "Descuento"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("select", {
+        id: "discounts",
         name: "discounts",
         className: "form-control"
       }, this.state.discounts.map(function (discount) {
@@ -82240,10 +82469,11 @@ var Sales = /*#__PURE__*/function (_Component) {
       }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col-xs-5"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
-        htmlFor: "discounts"
+        htmlFor: ""
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
         type: "submit",
-        className: "btn btn-block btn-primary"
+        className: "btn btn-block btn-primary",
+        onClick: this.handleAddDiscount
       }, "Agregar descuento")))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "box-header with-border"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", {
@@ -82253,9 +82483,10 @@ var Sales = /*#__PURE__*/function (_Component) {
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "row"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-        className: "col-xs-6"
+        className: "col-xs-4"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("select", {
-        name: "payment_methods",
+        id: "PaymentMethodsElements",
+        name: "payment_method",
         className: "form-control"
       }, this.state.payment_methods.map(function (payment_method) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("option", {
@@ -82263,10 +82494,19 @@ var Sales = /*#__PURE__*/function (_Component) {
           value: payment_method.id
         }, payment_method.name);
       }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-        className: "col-xs-5"
+        className: "col-xs-4"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("input", {
+        id: "paymentMethodAmount",
+        type: "number",
+        name: "amount",
+        className: "form-control",
+        placeholder: "$ 1000"
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "col-xs-4"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
-        type: "submit",
-        className: "btn btn-block btn-primary"
+        type: "",
+        className: "btn btn-block btn-primary",
+        onClick: this.handleAddPaymentMethod
       }, "Agregar medio de pago"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "box-body"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
@@ -82281,29 +82521,25 @@ var Sales = /*#__PURE__*/function (_Component) {
         className: "text-center"
       }, "Cantidad"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", {
         className: "text-center"
-      }, "Acciones"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
-        className: "text-center"
-      }, "Debito"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
-        className: "text-center"
-      }, "$ 1.000"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
-        className: "text-center"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
-        href: "#",
-        className: "btn btn-danger"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
-        className: "fa fa-times"
-      })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
-        className: "text-center"
-      }, "Efectivo"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
-        className: "text-center"
-      }, "$ 350"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
-        className: "text-center"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
-        href: "#",
-        className: "btn btn-danger"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
-        className: "fa fa-times"
-      })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "TOTAL"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "$ 1.350"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)))))))))));
+      }, "Acciones"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, this.state.payment_methods_sales.map(function (payment_methods_sale) {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", {
+          key: payment_methods_sale.payment_method.id
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+          className: "text-center"
+        }, payment_methods_sale.payment_method.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+          className: "text-center"
+        }, payment_methods_sale.quantity), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+          className: "text-center"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+          href: "#",
+          className: "btn btn-danger",
+          onClick: function onClick() {
+            return _this4.handleDeletePaymentMethod(payment_methods_sale.payment_method.id);
+          }
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
+          className: "fa fa-times"
+        }))));
+      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "TOTAL"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, "$ ", this.state.totalMethodsSale), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)))))))))));
     }
   }]);
 

@@ -25,6 +25,12 @@ export default class Sales extends Component {
 
             discounts:[],
             payment_methods : [],
+            payment_methods_sales : [],
+
+            total : 0,
+            sub_total : 0,
+            discounts_total : 0,
+            totalMethodsSale:0.0,
 
         }
 
@@ -37,6 +43,7 @@ export default class Sales extends Component {
 
     notify = (text) => toast.success(text);
     notifyError = (text) => toast.error(text);
+    notifyWarning = (text) => toast.warn(text);
 
     componentDidMount() {
         axios.get('/price-types')
@@ -76,6 +83,18 @@ export default class Sales extends Component {
                     error: error
                 });
             })
+        axios.get('/payment-methods')
+            .then(res => {
+                this.setState({
+                    payment_methods: res.data
+                });
+
+            })
+            .catch((error) => {
+                this.setState({
+                    error: error
+                });
+            })
     }
 
     handleAddProduct = () =>{
@@ -86,7 +105,7 @@ export default class Sales extends Component {
         var add_quantity_value = parseInt(document.getElementById("productAddQuantity").value);
 
         if(isNaN(add_quantity_value) || add_quantity_value < 1){
-            this.notifyError('Debe agregar cantidad');
+            this.notifyWarning('Debe agregar cantidad');
             document.getElementById("productAddQuantity").focus();
             return false;
         }
@@ -119,6 +138,7 @@ export default class Sales extends Component {
 
                         product.quantity += add_quantity_value;
                         product.price_type_id = parseInt(priceType_value);
+                        product.product_price_type_id = product.find_price_type().prices.id;
 
                         return product;
                     }
@@ -128,34 +148,63 @@ export default class Sales extends Component {
                     products:new_products_on_sale
                     } };
 
-            });
+            },() => { this.calculateTotals() });
 
             return false;
         }
+
+
+
+        var product_price = product.prices_types.find(price => (price.id === parseInt(priceType_value)));
 
         var product_on_sale_model = {
                 product:product,
                 quantity: add_quantity_value,
                 price_type_id: parseInt(priceType_value),
-
+                discounts:[],
+                product_price_type_id: product_price.prices.id,
                 get_price_type:function () {
                     return this.find_price_type().name;
                 },
                 calculate_price:function () {
                 return this.quantity * this.find_price_type().prices.price;
                 },
+                calculate_final_price:function () {
+
+                    var discount_amount = 0;
+
+                    if(this.discounts.length > 0){
+                        this.discounts.map((discount)=>{
+                            discount_amount+= parseInt(discount.quantity);
+                        });
+
+                    }
+
+                    var discount_percent = (100 - discount_amount) / 100;
+
+                return this.quantity * this.find_price_type().prices.price * discount_percent;
+                },
                 find_price_type:function () {
                     var price_type = this.product.prices_types.find(price => (price.id === this.price_type_id));
                     return price_type;
-                }
+                },
+
         };
 
-        this.setState({
+        this.setState(prevState => {
 
+
+            const products_on_sale_2 = [...prevState.products_on_sale.products];
+            return {products_on_sale:{
+                    products:products_on_sale_2.concat(product_on_sale_model),
+                } };
+            /*
             products_on_sale:{
                 products: products_on_sale.concat(product_on_sale_model),
-            }
-        })
+                 }
+             */
+
+        },() => { this.calculateTotals() })
 
 
 
@@ -170,35 +219,208 @@ export default class Sales extends Component {
     }
 
 
-    calculateTotal = () =>{
+    calculateTotals= () =>{
 
         const products = this.state.products_on_sale.products;
         var total = 0;
+        var sub_total = 0;
 
         products.map(product => {
 
-            total+= parseFloat(product.calculate_price());
+            total+= parseFloat(product.calculate_final_price());
+            sub_total +=parseFloat(product.calculate_price());
+
 
         });
 
-        return total;
+
+        this.setState({
+            total: total,
+            sub_total: sub_total,
+            discounts_total: sub_total-total,
+        });
+
 
     }
 
-    calculateSubTotal = () =>{
+    calculateTotalPaymentMethodsSale= () =>{
 
-        const products = this.state.products_on_sale.products;
-        var total = 0;
+        const payment_methods_sales = this.state.payment_methods_sales;
+        var total = 0.0;
 
-        products.map(product => {
+        payment_methods_sales.map(payment_methods_sale => {
 
-            total+= parseFloat(product.calculate_price());
+            total+= parseFloat(payment_methods_sale.quantity);
 
         });
 
-        return total;
+
+        this.setState({
+            totalMethodsSale: total,
+
+        });
+
 
     }
+
+
+    showProductsOnSale = () =>{
+
+        return this.state.products_on_sale.products.map((product_on_sale) => (  function () {
+
+            <tr key={product_on_sale.product.id}>
+                <td className="text-center">{product_on_sale.product.name}</td>
+                <td className="text-center">{product_on_sale.quantity}</td>
+                <td className="text-center">{product_on_sale.get_price_type()}</td>
+                <td className="text-center">$ {product_on_sale.calculate_price()}</td>
+                <td className="text-center"><a href="#" className="btn btn-danger"><i className="fa fa-times"></i></a></td>
+
+            </tr>;
+
+
+        }      ));
+        /*
+
+
+        ))*/
+    }
+    handleDeleteProduct = (id) =>{
+
+        this.setState(prevState => {
+
+            const products_on_sale = [...prevState.products_on_sale.products];
+
+            const new_products_on_sale = products_on_sale.filter(product => {
+                return product.product.id !== id;
+            });
+
+            return {products_on_sale:{
+                    products:new_products_on_sale
+                } };
+
+        },() => { this.calculateTotals() })
+
+    }
+
+    handleDeletePaymentMethod = (id) =>{
+
+        this.setState(prevState => {
+
+            const payment_methods_sales = [...prevState.payment_methods_sales];
+
+            const new_payment_methods_sales = payment_methods_sales.filter(payment_method => {
+                return payment_method.payment_method.id !== id;
+            });
+
+            return {payment_methods_sales:new_payment_methods_sales
+                 };
+
+        }, ()=>{
+            this.calculateTotalPaymentMethodsSale();
+        })
+
+    }
+
+
+    handleAddPaymentMethod = (e) =>{
+
+        var payment_method_select = document.getElementById("PaymentMethodsElements");
+        var payment_method_amount_element = document.getElementById("paymentMethodAmount");
+
+        var payment_method_value = payment_method_select.options[payment_method_select.selectedIndex].value;
+
+        const payment_method = this.state.payment_methods.find(payment_method => (payment_method.id === parseInt(payment_method_value)));
+
+
+        var payment_method_model = {
+            payment_method:payment_method,
+            quantity: parseInt(payment_method_amount_element.value),
+
+        };
+
+
+        this.setState(prevState => {
+                const new_payment_methods_sale = [...prevState.payment_methods_sales];
+                return {
+                    payment_methods_sales:new_payment_methods_sale.concat(payment_method_model)
+                }
+            }, ()=>{
+            this.calculateTotalPaymentMethodsSale();
+            }
+
+        );
+
+        payment_method_amount_element.value = '';
+
+
+    }
+
+    handleAddDiscount = (e) =>{
+        var discount_selected = document.getElementById("discounts");
+        var products_on_sale_discount = document.getElementById("products_on_sale_discount");
+
+        var discount_selected_value = discount_selected.options[discount_selected.selectedIndex].value;
+        var products_on_sale_discount_value = products_on_sale_discount.options[products_on_sale_discount.selectedIndex].value;
+
+        if(products_on_sale_discount_value === ''){
+            return false;
+        }
+
+        const discount = this.state.discounts.find(discount => (discount.id === parseInt(discount_selected_value)));
+
+        this.setState(prevState => {
+
+            const products_on_sale = [...prevState.products_on_sale.products];
+
+            const new_products_on_sale = products_on_sale.map(product => {
+
+                if (products_on_sale_discount_value === 'all' || product.product.id === parseInt(products_on_sale_discount_value)) {
+
+                    //validar que el descuento no esté aplicado ya.
+                    if(!product.discounts.find(discountToFind => (discountToFind.id === discount.id))) {
+                        product.discounts = product.discounts.concat(discount);
+                    }
+
+                    return product;
+                }
+                return product;
+            });
+            return {products_on_sale:{
+                    products:new_products_on_sale
+                } };
+
+        },() => { this.calculateTotals() })
+        this.notify('Descuento agregado');
+
+
+    }
+
+    handleSubmitSale = () =>{
+
+        var saleForm = {
+                products: this.state.products_on_sale.products,
+                payment_methods_sale: this.state.payment_methods_sales,
+        }
+
+        try {
+            axios.post('/sales',  saleForm )
+                .then(res => {
+                    /*
+                    this.setState({
+
+                    });
+                    */
+                    console.log(res);
+                    this.notify('Venta registrada')
+
+                })
+        }catch (e) {
+            this.notifyError('No se pudo crear el registro')
+        }
+
+    }
+
+
 
 
     render(){
@@ -263,38 +485,50 @@ export default class Sales extends Component {
                                             <th className="text-center">Cantidad</th>
                                             <th className="text-center">Tipo Precio</th>
                                             <th className="text-center">Precio</th>
+                                            <th className="text-center">Descuentos</th>
                                             <th className="text-center">Acciones</th>
                                         </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody >
                                         {this.state.products_on_sale.products.map((product_on_sale) => (
-                                            <tr key={product_on_sale.product.id}>
-                                                <td className="text-center">{product_on_sale.product.name}</td>
-                                                <td className="text-center">{product_on_sale.quantity}</td>
-                                                <td className="text-center">{product_on_sale.get_price_type()}</td>
-                                                <td className="text-center">$ {product_on_sale.calculate_price()}</td>
-                                                <td className="text-center"><a href="#" className="btn btn-danger"><i className="fa fa-times"></i></a></td>
 
-                                            </tr>
+                                            <tr key={product_on_sale.product.id} >
 
-                                        ))}
+                                            <td className="text-center">{product_on_sale.product.name}</td>
+                                            <td className="text-center">{product_on_sale.quantity}</td>
+                                            <td className="text-center">{product_on_sale.get_price_type()}</td>
+                                            <td className="text-center">$ {product_on_sale.calculate_price()}</td>
+                                            <td className="text-center">
+                                                {product_on_sale.discounts.map((discount)=>(
+                                                    <label className={"label label-success"} key={discount.id}>{discount.name}</label>
+                                                ))}
+                                            </td>
+                                            <td className="text-center"><a href="#" className="btn btn-danger" onClick={()=>this.handleDeleteProduct(product_on_sale.product.id)}><i className="fa fa-times"></i></a></td>
+
+                                        </tr>
+
+
+                                            ))}
 
                                             <tr>
+                                                <td></td>
                                                 <td></td>
                                                 <td>SUBTOTAL</td>
-                                                <td>$ {this.calculateSubTotal()}</td>
+                                                <td>$ {this.state.sub_total}</td>
                                                 <td></td>
                                             </tr>
                                             <tr>
+                                            <td></td>
                                             <td></td>
                                             <td>TOTAL DESCUENTOS</td>
-                                            <td>$ 0</td>
+                                            <td>$ -{this.state.discounts_total}</td>
                                             <td></td>
                                             </tr>
                                             <tr>
                                                 <td></td>
+                                                <td></td>
                                                 <td>TOTAL</td>
-                                                <td>${this.calculateTotal()}</td>
+                                                <td>${this.state.total}</td>
                                                 <td></td>
                                             </tr>
 
@@ -316,7 +550,7 @@ export default class Sales extends Component {
                                 <div className="row">
 
                                     <div className="col-xs-2">
-                                        <button type="submit" className="btn btn-block btn-primary btn-lg" >Generar Venta</button>
+                                        <button type="submit" className="btn btn-block btn-primary btn-lg" onClick={this.handleSubmitSale}>Generar Venta</button>
                                     </div>
 
                                 </div>
@@ -341,7 +575,8 @@ export default class Sales extends Component {
                         <div className="row">
                             <div className="col-xs-12">
                                 <label htmlFor="products_on_sale">Producto</label>
-                                <select name="products_on_sale"  className="form-control">
+                                <select id="products_on_sale_discount" name="products_on_sale"  className="form-control">
+                                    {this.state.products_on_sale.products.length > 0 ? <option value="all">Todos</option> : <option value="">No hay productos en la venta</option>}
                                     {this.state.products_on_sale.products.map((product_on_sale) => (
                                         <option key={product_on_sale.product.id} value={product_on_sale.product.id} >{product_on_sale.product.name}</option>
 
@@ -352,15 +587,15 @@ export default class Sales extends Component {
                         <div className="row">
                             <div className="col-xs-6">
                                 <label htmlFor="discounts">Descuento</label>
-                                <select name="discounts"  className="form-control">
+                                <select id="discounts" name="discounts"  className="form-control">
                                     {this.state.discounts.map((discount) => (
                                         <option key={discount.id} value={discount.id} >{discount.name}</option>
                                     ))}
                                 </select>
                             </div>
                             <div className="col-xs-5">
-                                <label htmlFor="discounts"></label>
-                                <button type="submit" className="btn btn-block btn-primary" >Agregar descuento</button>
+                                <label htmlFor=""></label>
+                                <button type="submit" className="btn btn-block btn-primary" onClick={this.handleAddDiscount}>Agregar descuento</button>
                             </div>
 
                         </div>
@@ -371,17 +606,22 @@ export default class Sales extends Component {
                     </div>
                     <div className="box-body">
                         <div className="row">
-                            <div className="col-xs-6">
+                            <div className="col-xs-4">
 
-                                <select name="payment_methods"  className="form-control">
+                                <select id="PaymentMethodsElements" name="payment_method"  className="form-control">
                                     {this.state.payment_methods.map((payment_method) => (
                                         <option key={payment_method.id} value={payment_method.id} >{payment_method.name}</option>
                                     ))}
                                 </select>
                             </div>
-                            <div className="col-xs-5">
+                            <div className="col-xs-4">
 
-                                <button type="submit" className="btn btn-block btn-primary" >Agregar medio de pago</button>
+                                <input id="paymentMethodAmount" type="number" name="amount" className="form-control" placeholder="$ 1000"
+                                />
+                            </div>
+                            <div className="col-xs-4">
+
+                                <button type="" className="btn btn-block btn-primary" onClick={this.handleAddPaymentMethod}>Agregar medio de pago</button>
                             </div>
 
                         </div>
@@ -399,21 +639,20 @@ export default class Sales extends Component {
                             </thead>
                             <tbody>
 
-                            <tr >
-                                <td className="text-center">Debito</td>
-                                <td className="text-center">$ 1.000</td>
-                                <td className="text-center"><a href="#" className="btn btn-danger"><i className="fa fa-times"></i></a></td>
+                            {this.state.payment_methods_sales.map((payment_methods_sale) => (
+                                <tr key={payment_methods_sale.payment_method.id}>
+                                    <td className="text-center">{payment_methods_sale.payment_method.name}</td>
+                                    <td className="text-center">{payment_methods_sale.quantity}</td>
+                                    <td className="text-center"><a href="#" className="btn btn-danger"onClick={()=>this.handleDeletePaymentMethod(payment_methods_sale.payment_method.id)}><i className="fa fa-times"></i></a></td>
 
-                            </tr>
-                            <tr>
-                                <td className="text-center">Efectivo</td>
-                                <td className="text-center">$ 350</td>
-                                <td className="text-center"><a href="#" className="btn btn-danger"><i className="fa fa-times"></i></a></td>
-                            </tr>
+                                </tr>
+
+                            ))}
+
                             <tr>
                                 <td></td>
                                 <td>TOTAL</td>
-                                <td>$ 1.350</td>
+                                <td>$ {this.state.totalMethodsSale}</td>
                                 <td></td>
                             </tr>
 
