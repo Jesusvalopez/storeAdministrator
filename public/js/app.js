@@ -82680,39 +82680,34 @@ var SalesList = /*#__PURE__*/function (_Component) {
       });
     });
 
-    _defineProperty(_assertThisInitialized(_this), "calculateSubTotal", function (sale) {
+    _defineProperty(_assertThisInitialized(_this), "calculateTotals", function (sale) {
       var subTotal = 0.0;
-      sale.sale_details.map(function (sale_detail) {
-        subTotal += parseFloat(sale_detail.price_product.price) * sale_detail.quantity;
-      }); // console.log(sale);
-
-      return subTotal;
-    });
-
-    _defineProperty(_assertThisInitialized(_this), "calculateDiscounts", function (sale) {
-      var subTotal = 0.0;
-      var discount_quantity = 0;
       var discount = 0;
+      var discount_quantity = 0;
       sale.sale_details.map(function (sale_detail) {
-        subTotal = parseFloat(sale_detail.price_product.price) * sale_detail.quantity;
+        var sub = parseFloat(sale_detail.price_product.price) * sale_detail.quantity;
+        subTotal += sub;
         sale_detail.discount_sale_details.map(function (discount_sale_detail) {
           discount_quantity = parseInt(discount_sale_detail.discount.quantity);
         });
-        if (sale_detail.discount_sale_details.length > 0) discount += subTotal * (discount_quantity / 100);
+        if (sale_detail.discount_sale_details.length > 0) discount += sub * (discount_quantity / 100);
       });
-      return discount;
-    });
-
-    _defineProperty(_assertThisInitialized(_this), "calculateComissions", function (sale) {
-      var subTotal = 0.0;
+      var subTotalComission = 0.0;
       var comission_quantity = 0;
       var comission = 0;
       sale.payment_method_sale.map(function (payment_method_sales) {
-        subTotal += parseFloat(payment_method_sales.amount);
+        subTotalComission += parseFloat(payment_method_sales.amount);
         comission_quantity = parseFloat(payment_method_sales.payment_method.comission);
       });
-      comission = subTotal * (comission_quantity / 100);
-      return comission;
+      comission = subTotalComission * (comission_quantity / 100);
+      var total = subTotal - discount - comission; // console.log(sale);
+
+      return {
+        sub_total: subTotal,
+        discount: discount,
+        comission: comission,
+        total: total
+      };
     });
 
     _this.state = {
@@ -82732,8 +82727,19 @@ var SalesList = /*#__PURE__*/function (_Component) {
       var _this2 = this;
 
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/sales/listing').then(function (res) {
-        _this2.setState({
-          sales: res.data
+        _this2.setState(function (prevState) {
+          var new_sales = res.data.map(function (sale) {
+            var totals = _this2.calculateTotals(sale);
+
+            sale.sub_total = totals.sub_total;
+            sale.discounts = totals.discount;
+            sale.comissions = totals.comission;
+            sale.total = totals.total;
+            return sale;
+          });
+          return {
+            sales: new_sales
+          };
         });
       })["catch"](function (error) {
         _this2.setState({
@@ -82744,15 +82750,57 @@ var SalesList = /*#__PURE__*/function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
-
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col-md-12"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("form", {
-        id: "",
-        action: "/",
-        method: ""
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "box box-success"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "box-header with-border"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", {
+        className: "box-title"
+      }, "Detalle Ventas")), this.state.sales ? this.state.sales.map(function (sale) {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "box-body",
+          key: sale.id
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "row"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "col-xs-offset-1 col-xs-2"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", null, "Venta # ", sale.id)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "col-xs-2"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", null, "Vendedor: ", sale.seller.name))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "row"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "col-xs-offset-1 col-xs-10"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("table", {
+          className: "table table-bordered"
+        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("thead", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", {
+          className: "text-center"
+        }, "Producto"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", {
+          className: "text-center"
+        }, "Cantidad"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", {
+          className: "text-center"
+        }, "Descuentos Aplicados"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", {
+          className: "text-center"
+        }, "Tipo de precio"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, sale.sale_details.map(function (sale_detail) {
+          return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", {
+            key: sale_detail.id
+          }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+            className: "text-center"
+          }, sale_detail.price_product.product.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+            className: "text-center"
+          }, sale_detail.quantity), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+            className: "text-center"
+          }, sale_detail.discount_sale_details.map(function (discount) {
+            return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
+              className: "label label-success",
+              key: discount.id
+            }, discount.discount.name);
+          })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+            className: "text-center"
+          }));
+        }))))));
+      }) : null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "box box-success"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "box-header with-border"
@@ -82787,13 +82835,13 @@ var SalesList = /*#__PURE__*/function (_Component) {
           className: "text-center"
         }, sale.seller.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
           className: "text-center"
-        }, _this3.calculateSubTotal(sale)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+        }, "$ ", sale.sub_total), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
           className: "text-center"
-        }, _this3.calculateDiscounts(sale)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+        }, "$ ", sale.discounts), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
           className: "text-center"
-        }, _this3.calculateComissions(sale)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+        }, "$ ", sale.comissions), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
           className: "text-center"
-        }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+        }, "$ ", sale.total), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
           className: "text-center"
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
           href: "#",
@@ -82801,7 +82849,7 @@ var SalesList = /*#__PURE__*/function (_Component) {
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
           className: "fa fa-times"
         }))));
-      }) : null))))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_ConfirmModal__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }) : null)))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_ConfirmModal__WEBPACK_IMPORTED_MODULE_3__["default"], {
         handleClose: this.handleClose,
         show: this.state.show,
         text: this.state.text,

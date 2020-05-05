@@ -64,8 +64,23 @@ export default class SalesList extends Component {
     componentDidMount() {
         axios.get('/sales/listing')
             .then(res => {
-                this.setState({
-                    sales: res.data,
+
+                this.setState(prevState => {
+
+                    const new_sales = res.data.map(sale => {
+                        const  totals= this.calculateTotals(sale)
+
+                        sale.sub_total = totals.sub_total;
+                        sale.discounts = totals.discount;
+                        sale.comissions = totals.comission;
+                        sale.total = totals.total;
+
+                        return sale;
+                    });
+
+                    return {sales:new_sales
+                    };
+
                 })
 
             })
@@ -76,67 +91,111 @@ export default class SalesList extends Component {
             })
     }
 
-    calculateSubTotal = (sale) =>{
+
+    calculateTotals = (sale) =>{
 
         var subTotal = 0.0;
-
-        sale.sale_details.map((sale_detail)=>{
-            subTotal+=parseFloat(sale_detail.price_product.price) * sale_detail.quantity;
-
-        })
-
-       // console.log(sale);
-        return subTotal;
-    }
-
-    calculateDiscounts = (sale) =>{
-
-        var subTotal = 0.0;
-        var discount_quantity = 0;
         var discount = 0;
+        var discount_quantity = 0;
+
 
         sale.sale_details.map((sale_detail)=>{
-            subTotal=parseFloat(sale_detail.price_product.price) * sale_detail.quantity;
+            var sub = parseFloat(sale_detail.price_product.price) * sale_detail.quantity
+            subTotal+=sub;
+
             sale_detail.discount_sale_details.map((discount_sale_detail)=>{
                 discount_quantity=parseInt(discount_sale_detail.discount.quantity);
 
-            })
+            });
 
             if(sale_detail.discount_sale_details.length > 0)
-            discount += subTotal * ((discount_quantity) / 100);
+                discount += sub * ((discount_quantity) / 100);
 
         })
 
-
-
-
-        return discount;
-    }
-
-    calculateComissions = (sale) =>{
-
-        var subTotal = 0.0;
+        var subTotalComission = 0.0;
         var comission_quantity = 0;
         var comission = 0;
 
         sale.payment_method_sale.map((payment_method_sales)=>{
-            subTotal+=parseFloat(payment_method_sales.amount);
+            subTotalComission+=parseFloat(payment_method_sales.amount);
             comission_quantity = parseFloat(payment_method_sales.payment_method.comission);
 
         })
 
-        comission = subTotal * ((comission_quantity) / 100);
+        comission = subTotalComission * ((comission_quantity) / 100);
 
-
-        return comission;
+        var total = subTotal - discount - comission;
+        // console.log(sale);
+        return {sub_total :subTotal, discount: discount, comission: comission, total: total};
     }
+
+
+
 
     render(){
 
         return (
             <div>
                 <div className="col-md-12">
-                    <form id="" action="/" method="" >
+
+                    <div className="box box-success">
+                        <div className="box-header with-border">
+                            <h3 className="box-title">Detalle Ventas</h3>
+                        </div>
+
+
+                                {this.state.sales ? this.state.sales.map((sale) => (
+                                    <div className="box-body" key={sale.id}>
+                                        <div className="row">
+                                            <div className="col-xs-offset-1 col-xs-2">
+                                                <h3 >Venta # {sale.id}</h3>
+
+                                            </div>
+                                            <div className="col-xs-2">
+                                                <h3 >Vendedor: {sale.seller.name}</h3>
+
+                                            </div>
+                                        </div>
+                                        <div className="row">
+                                            <div className="col-xs-offset-1 col-xs-10">
+                                            <table className="table table-bordered">
+                                                <thead>
+
+                                                <tr>
+                                                    <th className="text-center">Producto</th>
+                                                    <th className="text-center">Cantidad</th>
+                                                    <th className="text-center">Descuentos Aplicados</th>
+                                                    <th className="text-center">Tipo de precio</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                            {sale.sale_details.map((sale_detail)=>(
+                                                <tr key={sale_detail.id}>
+                                                    <td className="text-center">{sale_detail.price_product.product.name}</td>
+                                                    <td className="text-center">{sale_detail.quantity}</td>
+                                                    <td className="text-center">
+                                                        {sale_detail.discount_sale_details.map((discount)=>(
+                                                            <label className={"label label-success"} key={discount.id}>{discount.discount.name}</label>
+                                                        ))}
+                                                    </td>
+                                                    <td className="text-center"></td>
+
+
+                                                </tr>
+                                                ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        </div>
+                                    </div>
+                                )) : null}
+
+
+
+
+                    </div>
+
 
                         <div className="box box-success">
                             <div className="box-header with-border">
@@ -163,10 +222,10 @@ export default class SalesList extends Component {
                                             <tr key={sale.id}>
                                                 <td className="text-center">{sale.id}</td>
                                                 <td className="text-center">{sale.seller.name}</td>
-                                                <td className="text-center">{this.calculateSubTotal(sale)}</td>
-                                                <td className="text-center">{this.calculateDiscounts(sale)}</td>
-                                                <td className="text-center">{this.calculateComissions(sale)}</td>
-                                                <td className="text-center"></td>
+                                                <td className="text-center">$ {sale.sub_total}</td>
+                                                <td className="text-center">$ {sale.discounts}</td>
+                                                <td className="text-center">$ {sale.comissions}</td>
+                                                <td className="text-center">$ {sale.total}</td>
                                                 <td className="text-center"><a
                                                     href="#" className="btn btn-danger"><i
                                                     className="fa fa-times"></i></a></td>
@@ -184,7 +243,7 @@ export default class SalesList extends Component {
 
 
                         </div>
-                    </form>
+
                 </div>
                 <ConfirmModal handleClose={this.handleClose} show={this.state.show} text={this.state.text} action={this.deleteAction}/>
             </div>
