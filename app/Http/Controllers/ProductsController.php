@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\PriceProduct;
+use App\Price;
 use App\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +29,7 @@ class ProductsController extends Controller
     {
         $this->authorize('viewAny', Product::class);
 
-        $products = Product::with('pricesTypes')->orderBy('id', 'desc')->get();
+        $products = Product::with('price')->orderBy('id', 'desc')->get();
 
         return response()->json($products);
     }
@@ -61,7 +61,7 @@ class ProductsController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -76,11 +76,11 @@ class ProductsController extends Controller
 
         foreach ($request->except(['name', 'description','stock']) as $key => $value){
 
-            $priceProduct = new PriceProduct();
-            $priceProduct->product_id = $product->id;
-            $priceProduct->price_type_id = str_replace('price_', '', $key);
-            $priceProduct->price = $value;
-            $priceProduct->save();
+            $price = new Price();
+            $price->price_type_id = str_replace('price_', '', $key);
+            $price->price = $value;
+
+            $product->price()->save($price);
 
         }
 

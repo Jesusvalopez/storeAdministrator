@@ -25,6 +25,7 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('price-types', 'PriceTypesController');
 Route::resource('payment-methods', 'PaymentMethodsController');
 Route::resource('products', 'ProductsController');
+Route::resource('bundles', 'BundlesController');
 Route::resource('discounts', 'DiscountsController');
 Route::get('/sales/listing', 'SalesController@listing');
 Route::resource('sales', 'SalesController');

@@ -24,7 +24,7 @@ class PriceTypesController extends Controller
     /**
      * Show the application dashboard.
      *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {

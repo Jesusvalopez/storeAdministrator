@@ -75,7 +75,7 @@ export default class ProductsCreate extends Component {
     render(){
 
         return (
-            <div>
+            <div className="row">
                 <div className="col-md-12">
                     <form id="createProductForm" action="/" method="" onSubmit={this.handleSubmit}>
 
@@ -89,11 +89,11 @@ export default class ProductsCreate extends Component {
                                         <input type="text" name="name" className="form-control" placeholder="Nombre del producto"
                                                onChange={this.handleChange}/>
                                     </div>
-                                    <div className="col-xs-8">
+                                    <div className="col-xs-7">
                                         <input type="text" name="description" className="form-control" placeholder="Descripción "
                                                onChange={this.handleChange}/>
                                     </div>
-                                    <div className="col-xs-1">
+                                    <div className="col-xs-2">
                                         <input type="text" name="stock" className="form-control" placeholder="Stock"
                                                onChange={this.handleChange}/>
                                     </div>
@@ -109,7 +109,7 @@ export default class ProductsCreate extends Component {
                                     {this.props.priceTypes ? this.props.priceTypes.map((pricetype) => (
                                         <div className="col-xs-2" key={pricetype.id}>
                                             <label >{pricetype.name}</label>
-                                            <input type="text" name={"price_"+pricetype.id} className="form-control"
+                                            <input type="number" name={"price_"+pricetype.id} className="form-control"
                                                    onChange={this.handleChange}/>
                                         </div>
                                     )) : null}

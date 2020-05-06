@@ -4,8 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PriceProduct extends Model
+class Price extends Model
 {
+
     public function product()
     {
         return $this->belongsTo(Product::class);
@@ -13,5 +14,10 @@ class PriceProduct extends Model
     public function priceType()
     {
         return $this->belongsTo(PriceType::class);
+    }
+
+    public function priceable()
+    {
+        return $this->morphTo();
     }
 }

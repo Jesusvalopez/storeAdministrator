@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
-export default class ProductsList extends Component {
+export default class ProductsBundleList extends Component {
 
     constructor(props){
         super(props);
@@ -26,11 +26,11 @@ export default class ProductsList extends Component {
     notify = (text) => toast.success(text);
     notifyError = (text) => toast.error(text);
 
-     componentDidMount() {
-        axios.get('/products')
+    componentDidMount() {
+        axios.get('/bundles')
             .then(res => {
 
-                this.props.onUpdateList(res.data);
+                this.props.onUpdateListBundle(res.data);
 
             })
             .catch((error) => {
@@ -51,9 +51,10 @@ export default class ProductsList extends Component {
         try {
 
             // <input type="hidden" name="_method" value="delete">//{params: {id: id}})
-            axios.delete('/products/'+this.state.deleteId,  )
+            axios.delete('/bundles/'+this.state.deleteId,  )
                 .then(res => {
-                    this.props.onUpdateList(res.data);
+
+                    this.props.onUpdateListBundle(res.data);
                     this.setState({
                         show: false,
                     });
@@ -82,7 +83,7 @@ export default class ProductsList extends Component {
 
                         <div className="box box-success">
                             <div className="box-header with-border">
-                                <h3 className="box-title">Listado de Productos</h3>
+                                <h3 className="box-title">Listado de combos</h3>
                             </div>
                             <div className="box-body">
                                 <div className="row">
@@ -93,19 +94,22 @@ export default class ProductsList extends Component {
                                         <tr>
                                             <th className="text-center">Nombre</th>
                                             <th className="text-center">Descripción</th>
-                                            <th className="text-center">Stock</th>
+                                            <th className="text-center">Productos</th>
                                             <th className="text-center">Acciones</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {this.props.products ? this.props.products.map((product) => (
-                                            <tr key={product.id}>
-                                                <td className="text-center">{product.name}</td>
-                                                <td className="text-center">{product.description}</td>
-                                                <td className="text-center">{product.stock}</td>
+                                        {this.props.bundles ? this.props.bundles.map((bundle) => (
+                                            <tr key={bundle.id}>
+                                                <td className="text-center">{bundle.name}</td>
+                                                <td className="text-center">{bundle.description}</td>
+                                                <td className="text-center">{bundle.products.map((product)=>(
+                                                    <label className={"label label-success"} key={product.id}>{product.name}</label>
+                                                ))}</td>
+
                                                 <td className="text-center">{ false ? <a href="#" className="btn btn-primary"><i
-                                                    className="fa fa-edit" onClick={() => this.props.onEdit(product.id)}></i></a> : null} <a
-                                                    href="#" className="btn btn-danger" onClick={() => this.handleShow(product.id)}><i
+                                                    className="fa fa-edit" onClick={() => this.props.onEdit(bundle.id)}></i></a> : null} <a
+                                                    href="#" className="btn btn-danger" onClick={() => this.handleShow(bundle.id)}><i
                                                     className="fa fa-times"></i></a></td>
 
                                             </tr>

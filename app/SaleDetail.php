@@ -15,7 +15,7 @@ class SaleDetail extends Model
 
     public function priceProduct()
     {
-        return $this->belongsTo(PriceProduct::class);
+        return $this->belongsTo(Price::class);
     }
 
     public function discountSaleDetails()
