@@ -18,6 +18,10 @@ class SaleDetail extends Model
         return $this->belongsTo(Price::class);
     }
 
+    public function price()
+    {
+        return $this->belongsTo(Price::class);
+    }
     public function discountSaleDetails()
     {
         return $this->hasMany(DiscountSaleDetail::class);

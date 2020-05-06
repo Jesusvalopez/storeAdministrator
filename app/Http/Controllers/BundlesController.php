@@ -29,8 +29,7 @@ class BundlesController extends Controller
     {
         $this->authorize('viewAny', Bundle::class);
 
-        $bundles = Bundle::with(['price', 'products'])->orderBy('id', 'desc')->get();
-
+        $bundles = Bundle::with(['price.priceType', 'products'])->orderBy('id', 'desc')->get();
 
         return response()->json($bundles);
     }

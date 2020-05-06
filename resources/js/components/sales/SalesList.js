@@ -46,6 +46,7 @@ export default class SalesList extends Component {
             // <input type="hidden" name="_method" value="delete">//{params: {id: id}})
             axios.delete('/products/'+this.state.deleteId,  )
                 .then(res => {
+
                     this.props.onUpdateList(res.data);
                     this.setState({
                         show: false,
@@ -69,7 +70,7 @@ export default class SalesList extends Component {
     componentDidMount() {
         axios.get('/sales/listing')
             .then(res => {
-
+                console.log(res.data);
                 this.setState(prevState => {
 
                     var numero_ventas = this.state.numero_ventas;
@@ -131,7 +132,7 @@ export default class SalesList extends Component {
 
     calculateDetailTotals = (sale_detail) =>{
 
-        var subTotal = sale_detail.quantity * sale_detail.price_product.price;
+        var subTotal = sale_detail.quantity * sale_detail.price.price;
         var discount = 0;
         var total = 0;
         var discount_quantity = 0;
@@ -158,7 +159,9 @@ export default class SalesList extends Component {
 
 
         sale.sale_details.map((sale_detail)=>{
-            var sub = parseFloat(sale_detail.price_product.price) * sale_detail.quantity
+
+            var sub = parseFloat(sale_detail.price.price) * sale_detail.quantity;
+
             subTotal+=sub;
 
             sale_detail.discount_sale_details.map((discount_sale_detail)=>{
@@ -185,6 +188,7 @@ export default class SalesList extends Component {
 
         var total = subTotal - discount - comission;
         // console.log(sale);
+
         return {sub_total :subTotal, discount: discount, comission: comission , total: total};
     }
 
@@ -303,7 +307,7 @@ export default class SalesList extends Component {
                                                 <tbody>
                                             {sale.sale_details.map((sale_detail)=>(
                                                 <tr key={sale_detail.id}>
-                                                    <td className="text-center">{sale_detail.price_product.product.name}</td>
+                                                    <td className="text-center">{sale_detail.price.priceable.name}</td>
                                                     <td className="text-center">{sale_detail.quantity}</td>
                                                     <td className="text-center">{(sale_detail.sub_total)}</td>
                                                     <td className="text-center">{(sale_detail.discounts)}</td>
@@ -313,7 +317,7 @@ export default class SalesList extends Component {
                                                         ))}
                                                     </td>
                                                     <td className="text-center">{(sale_detail.total)}</td>
-                                                    <td className="text-center">{sale_detail.price_product.price_type.name}</td>
+                                                    <td className="text-center">{sale_detail.price.price_type.name}</td>
 
 
                                                 </tr>

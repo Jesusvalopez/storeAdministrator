@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Bundle;
 use App\Price;
 use App\Product;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class ProductsController extends Controller
     {
         $this->authorize('viewAny', Product::class);
 
-        $products = Product::with('price')->orderBy('id', 'desc')->get();
+        $products = Product::with('price.priceType')->orderBy('id', 'desc')->get();
 
         return response()->json($products);
     }
@@ -37,9 +38,10 @@ class ProductsController extends Controller
     public function listing(){
         $this->authorize('viewAny', Product::class);
 
-        $products = Product::orderBy('id', 'desc')->get();
+        $products = Product::with('price.priceType')->orderBy('id', 'desc')->get();
+        $bundles = Bundle::with('price.priceType')->orderBy('id', 'desc')->get();
 
-        return response()->json($products);
+        return response()->json(array_merge($products,$bundles));
     }
     /**
      * Show the form for creating a new resource.

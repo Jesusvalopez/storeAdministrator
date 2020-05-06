@@ -50,7 +50,7 @@ export default class Sales extends Component {
             .then(res => {
                 this.setState({
                     pricetypes: res.data,
-                    selected_price_type_id:res.data[0].id
+                    selected_price_type_id: res.data[0].id
 
                 });
             })
@@ -61,8 +61,9 @@ export default class Sales extends Component {
             })
         axios.get('/products')
             .then(res => {
+                console.log(res.data);
                 this.setState({
-                    products: res.data
+                    products: this.state.products.concat(res.data)
                 });
 
             })
@@ -95,7 +96,21 @@ export default class Sales extends Component {
                     error: error
                 });
             })
+
+        axios.get('/bundles')
+            .then(res => {
+                console.log(res.data);
+                this.setState({
+                    products: this.state.products.concat(res.data)
+                });
+            })
+            .catch((error) => {
+                this.setState({
+                    error: error
+                });
+            })
     }
+
 
     handleAddProduct = () =>{
 
@@ -138,7 +153,7 @@ export default class Sales extends Component {
 
                         product.quantity += add_quantity_value;
                         product.price_type_id = parseInt(priceType_value);
-                        product.product_price_type_id = product.find_price_type().prices.id;
+                        product.product_price_type_id = product.price.price_type_id;
 
                         return product;
                     }
@@ -155,19 +170,23 @@ export default class Sales extends Component {
 
 
 
-        var product_price = product.prices_types.find(price => (price.id === parseInt(priceType_value)));
+        var product_price = product.price.find(price => (price.price_type.id === parseInt(priceType_value)))
 
         var product_on_sale_model = {
                 product:product,
                 quantity: add_quantity_value,
                 price_type_id: parseInt(priceType_value),
                 discounts:[],
-                product_price_type_id: product_price.prices.id,
+                product_price_type_id: product_price.id,
+                get_price:function(){
+                    return  this.product.price.find(price => (price.price_type.id === parseInt(priceType_value)));
+                },
                 get_price_type:function () {
-                    return this.find_price_type().name;
+
+                    return this.get_price().price_type.name;
                 },
                 calculate_price:function () {
-                return this.quantity * this.find_price_type().prices.price;
+                return this.quantity * this.get_price().price;
                 },
                 calculate_final_price:function () {
 
@@ -182,12 +201,9 @@ export default class Sales extends Component {
 
                     var discount_percent = (100 - discount_amount) / 100;
 
-                return this.quantity * this.find_price_type().prices.price * discount_percent;
+                return this.quantity * this.get_price().price * discount_percent;
                 },
-                find_price_type:function () {
-                    var price_type = this.product.prices_types.find(price => (price.id === this.price_type_id));
-                    return price_type;
-                },
+
 
         };
 
@@ -467,7 +483,7 @@ export default class Sales extends Component {
                                         <label htmlFor="">Producto</label>
                                         <select id="products" name="products"  className="form-control">
                                             {this.state.products.map((product) => (
-                                                <option key={product.id} value={product.id} >{product.name + ' $ ' + product.prices_types.find(price => (price.id === parseInt(this.state.selected_price_type_id))).prices.price}</option>
+                                                <option key={product.id} value={product.id} >{product.name + ' $ ' + product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).price}</option>
                                             ))}
                                         </select>
                                     </div>

@@ -47,7 +47,7 @@ class SalesController extends Controller
     {
         $this->authorize('viewAny', Sale::class);
 
-        $sales = Sale::with(['saleDetails.priceProduct.priceType','saleDetails.priceProduct.product','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
+        $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
             ->orderBy('id', 'desc')->get();
         return response()->json($sales);
     }
@@ -86,7 +86,7 @@ class SalesController extends Controller
             $obj = json_decode(json_encode($array), FALSE);
             $saleDetail = new SaleDetail();
             $saleDetail->quantity = $obj->quantity;
-            $saleDetail->price_product_id = $obj->product_price_type_id;
+            $saleDetail->price_id = $obj->product_price_type_id;
 
             $sale->saleDetails()->save($saleDetail);
 
@@ -94,7 +94,6 @@ class SalesController extends Controller
                     $discountSale = new DiscountSaleDetail();
                     $discountSale->discount_id = $discount->id;
                     $saleDetail->discountSaleDetails()->save($discountSale);
-
 
             }
 

@@ -89535,7 +89535,7 @@ var Sales = /*#__PURE__*/function (_Component) {
             if (product.product.id === parseInt(product_selected_value)) {
               product.quantity += add_quantity_value;
               product.price_type_id = parseInt(priceType_value);
-              product.product_price_type_id = product.find_price_type().prices.id;
+              product.product_price_type_id = product.price.price_type_id;
               return product;
             }
 
@@ -89553,20 +89553,25 @@ var Sales = /*#__PURE__*/function (_Component) {
         return false;
       }
 
-      var product_price = product.prices_types.find(function (price) {
-        return price.id === parseInt(priceType_value);
+      var product_price = product.price.find(function (price) {
+        return price.price_type.id === parseInt(priceType_value);
       });
       var product_on_sale_model = {
         product: product,
         quantity: add_quantity_value,
         price_type_id: parseInt(priceType_value),
         discounts: [],
-        product_price_type_id: product_price.prices.id,
+        product_price_type_id: product_price.id,
+        get_price: function get_price() {
+          return this.product.price.find(function (price) {
+            return price.price_type.id === parseInt(priceType_value);
+          });
+        },
         get_price_type: function get_price_type() {
-          return this.find_price_type().name;
+          return this.get_price().price_type.name;
         },
         calculate_price: function calculate_price() {
-          return this.quantity * this.find_price_type().prices.price;
+          return this.quantity * this.get_price().price;
         },
         calculate_final_price: function calculate_final_price() {
           var discount_amount = 0;
@@ -89578,15 +89583,7 @@ var Sales = /*#__PURE__*/function (_Component) {
           }
 
           var discount_percent = (100 - discount_amount) / 100;
-          return this.quantity * this.find_price_type().prices.price * discount_percent;
-        },
-        find_price_type: function find_price_type() {
-          var _this2 = this;
-
-          var price_type = this.product.prices_types.find(function (price) {
-            return price.id === _this2.price_type_id;
-          });
-          return price_type;
+          return this.quantity * this.get_price().price * discount_percent;
         }
       };
 
@@ -89836,42 +89833,55 @@ var Sales = /*#__PURE__*/function (_Component) {
   _createClass(Sales, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      var _this3 = this;
+      var _this2 = this;
 
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/price-types').then(function (res) {
-        _this3.setState({
+        _this2.setState({
           pricetypes: res.data,
           selected_price_type_id: res.data[0].id
         });
       })["catch"](function (error) {
-        _this3.setState({
+        _this2.setState({
           error: error
         });
       });
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/products').then(function (res) {
-        _this3.setState({
-          products: res.data
+        console.log(res.data);
+
+        _this2.setState({
+          products: _this2.state.products.concat(res.data)
         });
       })["catch"](function (error) {
-        _this3.setState({
+        _this2.setState({
           error: error
         });
       });
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/discounts').then(function (res) {
-        _this3.setState({
+        _this2.setState({
           discounts: res.data
         });
       })["catch"](function (error) {
-        _this3.setState({
+        _this2.setState({
           error: error
         });
       });
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/payment-methods').then(function (res) {
-        _this3.setState({
+        _this2.setState({
           payment_methods: res.data
         });
       })["catch"](function (error) {
-        _this3.setState({
+        _this2.setState({
+          error: error
+        });
+      });
+      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/bundles').then(function (res) {
+        console.log(res.data);
+
+        _this2.setState({
+          products: _this2.state.products.concat(res.data)
+        });
+      })["catch"](function (error) {
+        _this2.setState({
           error: error
         });
       });
@@ -89879,7 +89889,7 @@ var Sales = /*#__PURE__*/function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this4 = this;
+      var _this3 = this;
 
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col-md-8"
@@ -89922,9 +89932,9 @@ var Sales = /*#__PURE__*/function (_Component) {
         return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("option", {
           key: product.id,
           value: product.id
-        }, product.name + ' $ ' + product.prices_types.find(function (price) {
-          return price.id === parseInt(_this4.state.selected_price_type_id);
-        }).prices.price);
+        }, product.name + ' $ ' + product.price.find(function (price) {
+          return price.price_type_id === parseInt(_this3.state.selected_price_type_id);
+        }).price);
       }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col-xs-1"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
@@ -89991,7 +90001,7 @@ var Sales = /*#__PURE__*/function (_Component) {
           href: "#",
           className: "btn btn-danger",
           onClick: function onClick() {
-            return _this4.handleDeleteProduct(product_on_sale.product.id);
+            return _this3.handleDeleteProduct(product_on_sale.product.id);
           }
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
           className: "fa fa-times"
@@ -90058,7 +90068,7 @@ var Sales = /*#__PURE__*/function (_Component) {
           href: "#",
           className: "btn btn-danger",
           onClick: function onClick() {
-            return _this4.handleDeletePaymentMethod(payment_methods_sale.payment_method.id);
+            return _this3.handleDeletePaymentMethod(payment_methods_sale.payment_method.id);
           }
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
           className: "fa fa-times"
@@ -90252,7 +90262,7 @@ var SalesList = /*#__PURE__*/function (_Component) {
     });
 
     _defineProperty(_assertThisInitialized(_this), "calculateDetailTotals", function (sale_detail) {
-      var subTotal = sale_detail.quantity * sale_detail.price_product.price;
+      var subTotal = sale_detail.quantity * sale_detail.price.price;
       var discount = 0;
       var total = 0;
       var discount_quantity = 0;
@@ -90273,7 +90283,7 @@ var SalesList = /*#__PURE__*/function (_Component) {
       var discount = 0;
       var discount_quantity = 0;
       sale.sale_details.map(function (sale_detail) {
-        var sub = parseFloat(sale_detail.price_product.price) * sale_detail.quantity;
+        var sub = parseFloat(sale_detail.price.price) * sale_detail.quantity;
         subTotal += sub;
         sale_detail.discount_sale_details.map(function (discount_sale_detail) {
           discount_quantity = parseInt(discount_sale_detail.discount.quantity);
@@ -90325,6 +90335,8 @@ var SalesList = /*#__PURE__*/function (_Component) {
       var _this2 = this;
 
       axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/sales/listing').then(function (res) {
+        console.log(res.data);
+
         _this2.setState(function (prevState) {
           var numero_ventas = _this2.state.numero_ventas;
           var ventas_brutas_totales = _this2.state.ventas_brutas_totales;
@@ -90465,7 +90477,7 @@ var SalesList = /*#__PURE__*/function (_Component) {
             key: sale_detail.id
           }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
             className: "text-center"
-          }, sale_detail.price_product.product.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+          }, sale_detail.price.priceable.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
             className: "text-center"
           }, sale_detail.quantity), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
             className: "text-center"
@@ -90482,7 +90494,7 @@ var SalesList = /*#__PURE__*/function (_Component) {
             className: "text-center"
           }, sale_detail.total), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
             className: "text-center"
-          }, sale_detail.price_product.price_type.name));
+          }, sale_detail.price.price_type.name));
         }))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           className: "row"
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
