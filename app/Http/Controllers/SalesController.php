@@ -49,6 +49,7 @@ class SalesController extends Controller
 
         $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
             ->orderBy('id', 'desc')->get();
+
         return response()->json($sales);
     }
 
