@@ -9,9 +9,8 @@ class Sale extends Model
 {
 
     use SoftDeletes;
-    public  $timestamps = false;
 
-    protected $appends = ['date', 'date_time', 'prueba'];
+    protected $appends = ['date', 'date_time'];
 
     public function saleDetails()
     {
@@ -38,9 +37,7 @@ class Sale extends Model
         $date = date('d/m/y H:i:s', strtotime($this->created_at));
         return $date;
     }
-    public function getPruebaAttribute(){
-        return 'hola';
-    }
+
 
 
 }

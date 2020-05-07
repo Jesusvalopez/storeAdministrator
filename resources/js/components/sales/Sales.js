@@ -147,7 +147,8 @@ export default class Sales extends Component {
         var products_on_sale = this.state.products_on_sale.products;
 
         //validar primero si el producto ya se encuentra
-        var result = products_on_sale.find(product => (product.product.id === parseInt(product_selected_value)));
+        var result = products_on_sale.find(product => (product.product.price.find(price => (price.price_type_id ===parseInt(priceType_value) ))
+            .id === parseInt(product_selected_value)));
 
 
         document.getElementById("productAddQuantity").value = '';
@@ -163,7 +164,8 @@ export default class Sales extends Component {
 
                 const new_products_on_sale = products_on_sale.map(product => {
 
-                    if (product.product.id === parseInt(product_selected_value)) {
+                    if (product.product.price.find(price => (price.price_type_id ===parseInt(priceType_value) ))
+                        .id === parseInt(product_selected_value)) {
 
                         product.quantity += add_quantity_value;
                         product.price_type_id = parseInt(priceType_value);
@@ -193,14 +195,14 @@ export default class Sales extends Component {
                 discounts:[],
                 product_price_type_id: product_price.id,
                 get_price:function(){
-                    return  this.product.price.find(price => (price.price_type.id === parseInt(priceType_value)));
+                    return  this.product.price.find(price => (price.price_type.id === parseInt(this.price_type_id)));
                 },
                 get_price_type:function () {
 
                     return this.get_price().price_type.name;
                 },
                 get_price_type_id:function (priceTypeValue) {
-                  return  this.product.price.find(price => (price.price_type.id === parseInt(priceTypeValue))).price_type.id;
+                  return  this.product.price.find(price => (price.price_type_id === parseInt(priceTypeValue))).id;
             },
                 calculate_price:function () {
                 return this.quantity * this.get_price().price;
@@ -548,7 +550,7 @@ export default class Sales extends Component {
                                         <tbody >
                                         {this.state.products_on_sale.products.map((product_on_sale) => (
 
-                                            <tr key={product_on_sale.product.id} >
+                                            <tr key={product_on_sale.product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).id} >
 
                                             <td className="text-center">{product_on_sale.product.name}</td>
                                             <td className="text-center">{product_on_sale.quantity}</td>
