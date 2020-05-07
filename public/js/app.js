@@ -90486,7 +90486,7 @@ var SalesList = /*#__PURE__*/function (_Component) {
           className: "col-md-6"
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", {
           className: "box-title"
-        }, "Ventas # ", sale.id, " | Vendedor: ", sale.seller.name)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        }, "Venta # ", sale.id, " | Vendedor: ", sale.seller.name)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           className: "col-md-6"
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", {
           className: "box-title  pull-right"

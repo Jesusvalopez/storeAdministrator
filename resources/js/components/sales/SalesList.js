@@ -284,7 +284,7 @@ export default class SalesList extends Component {
                                 {this.state.sales ? this.state.sales.map((sale) => (
                                     <div className="box box-success" key={sale.id}>
                                         <div className="box-header with-border">
-                                            <div className="col-md-6"><h3 className="box-title">Ventas # {sale.id} | Vendedor: {sale.seller.name}</h3></div>
+                                            <div className="col-md-6"><h3 className="box-title">Venta # {sale.id} | Vendedor: {sale.seller.name}</h3></div>
                                             <div className="col-md-6"><h3 className="box-title  pull-right"> {sale.date_time}</h3></div>
 
                                             {false ? <a href="#" className="btn btn-danger pull-right"><i className="fa fa-times"></i>Eliminar venta</a> : null}
