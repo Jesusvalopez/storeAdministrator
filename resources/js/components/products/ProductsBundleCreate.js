@@ -4,8 +4,11 @@ import axios from 'axios';
 import ConfirmModal from "../ConfirmModal";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Select from 'react-select';
+import Select, { components } from 'react-select';
 
+const Placeholder = props => {
+    return <components.Placeholder {...props} />;
+};
 
 export default class ProductsBundleCreate extends Component {
 
@@ -19,6 +22,7 @@ export default class ProductsBundleCreate extends Component {
 
         toast.configure();
     }
+
 
     notify = (text) => toast.success(text);
     notifyError = (text) => toast.error(text);
@@ -180,7 +184,8 @@ export default class ProductsBundleCreate extends Component {
                                 <div className="row">
                                     <div className="col-xs-5">
                                         <label htmlFor="">Productos</label>
-                                            <Select  onChange={this.handleSelectChange} options={this.props.products.map((product)=>{
+                                            <Select  components={{ Placeholder }}
+                                                     placeholder={'Seleccione'} onChange={this.handleSelectChange} options={this.props.products.map((product)=>{
                                                 return {"value":product.id, "label":product.name};
                                             })} />
                                     </div>

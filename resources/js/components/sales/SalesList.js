@@ -285,7 +285,7 @@ export default class SalesList extends Component {
                                     <div className="box box-success" key={sale.id}>
                                         <div className="box-header with-border">
                                             <h3 className="box-title">Venta # {sale.id} | Vendedor: {sale.seller.name}</h3>
-                                            <a href="#" className="btn btn-danger pull-right"><i className="fa fa-times"></i>Eliminar venta</a>
+                                            {false ? <a href="#" className="btn btn-danger pull-right"><i className="fa fa-times"></i>Eliminar venta</a> : null}
                                         </div>
                                     <div className="box-body" >
 
@@ -422,9 +422,9 @@ export default class SalesList extends Component {
                                                 <td className="text-center">{sale.discounts}</td>
                                                 <td className="text-center">{sale.comissions}</td>
                                                 <td className="text-center">{sale.total}</td>
-                                                <td className="text-center"><a
+                                                <td className="text-center">{false ? <a
                                                     href="#" className="btn btn-danger"><i
-                                                    className="fa fa-times"></i></a></td>
+                                                    className="fa fa-times"></i></a>:null}</td>
 
                                             </tr>
                                         )) : null}

@@ -4,6 +4,11 @@ import axios from 'axios';
 import ConfirmModal from "../ConfirmModal";
 import 'react-toastify/dist/ReactToastify.css';
 import {toast} from "react-toastify";
+import Select, { components } from 'react-select';
+
+const Placeholder = props => {
+    return <components.Placeholder {...props} />;
+};
 
 
 export default class Sales extends Component {
@@ -31,7 +36,7 @@ export default class Sales extends Component {
             sub_total : 0,
             discounts_total : 0,
             totalMethodsSale:0.0,
-
+            selected_value:null,
         }
 
 
@@ -112,9 +117,17 @@ export default class Sales extends Component {
     }
 
 
+    convertNumber = (value) =>{
+
+        var response =  '$' + value.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
+
+
+        return response;
+    };
+
     handleAddProduct = () =>{
 
-        var product_selected = document.getElementById("products");
+
         var priceType = document.getElementById("priceType");
         var priceType_value = priceType.value;
         var add_quantity_value = parseInt(document.getElementById("productAddQuantity").value);
@@ -125,7 +138,7 @@ export default class Sales extends Component {
             return false;
         }
 
-        var product_selected_value = product_selected.options[product_selected.selectedIndex].value;
+        var product_selected_value = this.state.selected_value;
         var products = this.state.products;
         var product = products.find(product => (product.id === parseInt(product_selected_value)));
 
@@ -153,7 +166,7 @@ export default class Sales extends Component {
 
                         product.quantity += add_quantity_value;
                         product.price_type_id = parseInt(priceType_value);
-                        product.product_price_type_id = product.price.price_type_id;
+                        product.product_price_type_id = product.get_price_type_id(priceType_value);
 
                         return product;
                     }
@@ -185,6 +198,9 @@ export default class Sales extends Component {
 
                     return this.get_price().price_type.name;
                 },
+                get_price_type_id:function (priceTypeValue) {
+                  return  this.product.price.find(price => (price.price_type.id === parseInt(priceTypeValue))).price_type.id;
+            },
                 calculate_price:function () {
                 return this.quantity * this.get_price().price;
                 },
@@ -251,9 +267,9 @@ export default class Sales extends Component {
 
 
         this.setState({
-            total: total,
-            sub_total: sub_total,
-            discounts_total: sub_total-total,
+            total: this.convertNumber(Math.round(total)),
+            sub_total: this.convertNumber(Math.round(sub_total)),
+            discounts_total: this.convertNumber(Math.round(sub_total-total)),
         });
 
 
@@ -272,7 +288,7 @@ export default class Sales extends Component {
 
 
         this.setState({
-            totalMethodsSale: total,
+            totalMethodsSale: this.convertNumber(Math.round(total)),
 
         });
 
@@ -288,7 +304,7 @@ export default class Sales extends Component {
                 <td className="text-center">{product_on_sale.product.name}</td>
                 <td className="text-center">{product_on_sale.quantity}</td>
                 <td className="text-center">{product_on_sale.get_price_type()}</td>
-                <td className="text-center">$ {product_on_sale.calculate_price()}</td>
+                <td className="text-center">{this.convertNumber(Math.round(product_on_sale.calculate_price()))}</td>
                 <td className="text-center"><a href="#" className="btn btn-danger"><i className="fa fa-times"></i></a></td>
 
             </tr>;
@@ -453,6 +469,13 @@ export default class Sales extends Component {
     }
 
 
+    handleSelectChange = (e) => {
+        this.setState({
+            selected_value:e.value,
+        })
+    }
+
+
 
 
     render(){
@@ -481,11 +504,11 @@ export default class Sales extends Component {
                                 <div className="row">
                                     <div className="col-xs-5">
                                         <label htmlFor="">Producto</label>
-                                        <select id="products" name="products"  className="form-control">
-                                            {this.state.products.map((product) => (
-                                                <option key={product.id} value={product.id} >{product.name + ' $ ' + product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).price}</option>
-                                            ))}
-                                        </select>
+                                        <Select id="products" name="products" components={{ Placeholder }}
+                                                 placeholder={'Seleccione'} onChange={this.handleSelectChange} options={this.state.products.map((product)=>{
+                                            return {"value":product.id, "label":product.name + ' ' + this.convertNumber(Math.round(product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).price))};
+                                        })} />
+
                                     </div>
                                     <div className="col-xs-1">
                                         <label htmlFor="">Cantidad</label>
@@ -529,7 +552,7 @@ export default class Sales extends Component {
                                             <td className="text-center">{product_on_sale.product.name}</td>
                                             <td className="text-center">{product_on_sale.quantity}</td>
                                             <td className="text-center">{product_on_sale.get_price_type()}</td>
-                                            <td className="text-center">$ {product_on_sale.calculate_price()}</td>
+                                            <td className="text-center">{this.convertNumber(Math.round(product_on_sale.calculate_price()))}</td>
                                             <td className="text-center">
                                                 {product_on_sale.discounts.map((discount)=>(
                                                     <label className={"label label-success"} key={discount.id}>{discount.name}</label>
@@ -599,7 +622,7 @@ export default class Sales extends Component {
                                                 {this.state.payment_methods_sales.map((payment_methods_sale) => (
                                                     <tr key={payment_methods_sale.payment_method.id}>
                                                         <td className="text-center">{payment_methods_sale.payment_method.name}</td>
-                                                        <td className="text-center">{payment_methods_sale.quantity}</td>
+                                                        <td className="text-center">{this.convertNumber(Math.round(payment_methods_sale.quantity))}</td>
                                                         <td className="text-center"><a href="#" className="btn btn-danger"onClick={()=>this.handleDeletePaymentMethod(payment_methods_sale.payment_method.id)}><i className="fa fa-times"></i></a></td>
 
                                                     </tr>
@@ -609,7 +632,7 @@ export default class Sales extends Component {
                                                 <tr>
 
                                                     <th className="text-center">TOTAL</th>
-                                                    <th className="text-center">$ {this.state.totalMethodsSale}</th>
+                                                    <th className="text-center">{this.state.totalMethodsSale}</th>
                                                     <th></th>
                                                 </tr>
 
@@ -629,21 +652,21 @@ export default class Sales extends Component {
                                         <td></td>
                                         <td></td>
                                         <td><b>SUBTOTAL</b></td>
-                                        <td><b>${this.state.sub_total}</b></td>
+                                        <td><b>{this.state.sub_total}</b></td>
                                         <td></td>
                                     </tr>
                                     <tr>
                                         <td></td>
                                         <td></td>
                                         <td><b>TOTAL DESCUENTOS</b></td>
-                                        <td><b>$ -{this.state.discounts_total}</b></td>
+                                        <td><b>{this.state.discounts_total}</b></td>
                                         <td></td>
                                     </tr>
                                     <tr>
                                         <td></td>
                                         <td></td>
                                         <td><b>TOTAL</b></td>
-                                        <td><b>${this.state.total}</b></td>
+                                        <td><b>{this.state.total}</b></td>
                                         <td></td>
                                     </tr>
                                         </tbody>

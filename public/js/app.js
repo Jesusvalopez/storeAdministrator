@@ -88449,6 +88449,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+var Placeholder = function Placeholder(props) {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react_select__WEBPACK_IMPORTED_MODULE_7__["components"].Placeholder, props);
+};
+
 var ProductsBundleCreate = /*#__PURE__*/function (_Component) {
   _inherits(ProductsBundleCreate, _Component);
 
@@ -88661,6 +88665,10 @@ var ProductsBundleCreate = /*#__PURE__*/function (_Component) {
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("label", {
         htmlFor: ""
       }, "Productos"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react_select__WEBPACK_IMPORTED_MODULE_7__["default"], {
+        components: {
+          Placeholder: Placeholder
+        },
+        placeholder: 'Seleccione',
         onChange: this.handleSelectChange,
         options: this.props.products.map(function (product) {
           return {
@@ -89435,6 +89443,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react_toastify_dist_ReactToastify_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-toastify/dist/ReactToastify.css */ "./node_modules/react-toastify/dist/ReactToastify.css");
 /* harmony import */ var react_toastify_dist_ReactToastify_css__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(react_toastify_dist_ReactToastify_css__WEBPACK_IMPORTED_MODULE_4__);
 /* harmony import */ var react_toastify__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-toastify */ "./node_modules/react-toastify/esm/react-toastify.js");
+/* harmony import */ var react_select__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-select */ "./node_modules/react-select/dist/react-select.browser.esm.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
@@ -89478,6 +89487,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+
+var Placeholder = function Placeholder(props) {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_select__WEBPACK_IMPORTED_MODULE_6__["components"].Placeholder, props);
+};
+
 var Sales = /*#__PURE__*/function (_Component) {
   _inherits(Sales, _Component);
 
@@ -89502,8 +89516,12 @@ var Sales = /*#__PURE__*/function (_Component) {
       return react_toastify__WEBPACK_IMPORTED_MODULE_5__["toast"].warn(text);
     });
 
+    _defineProperty(_assertThisInitialized(_this), "convertNumber", function (value) {
+      var response = '$' + value.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+      return response;
+    });
+
     _defineProperty(_assertThisInitialized(_this), "handleAddProduct", function () {
-      var product_selected = document.getElementById("products");
       var priceType = document.getElementById("priceType");
       var priceType_value = priceType.value;
       var add_quantity_value = parseInt(document.getElementById("productAddQuantity").value);
@@ -89515,7 +89533,7 @@ var Sales = /*#__PURE__*/function (_Component) {
         return false;
       }
 
-      var product_selected_value = product_selected.options[product_selected.selectedIndex].value;
+      var product_selected_value = _this.state.selected_value;
       var products = _this.state.products;
       var product = products.find(function (product) {
         return product.id === parseInt(product_selected_value);
@@ -89535,7 +89553,7 @@ var Sales = /*#__PURE__*/function (_Component) {
             if (product.product.id === parseInt(product_selected_value)) {
               product.quantity += add_quantity_value;
               product.price_type_id = parseInt(priceType_value);
-              product.product_price_type_id = product.price.price_type_id;
+              product.product_price_type_id = product.get_price_type_id(priceType_value);
               return product;
             }
 
@@ -89569,6 +89587,11 @@ var Sales = /*#__PURE__*/function (_Component) {
         },
         get_price_type: function get_price_type() {
           return this.get_price().price_type.name;
+        },
+        get_price_type_id: function get_price_type_id(priceTypeValue) {
+          return this.product.price.find(function (price) {
+            return price.price_type.id === parseInt(priceTypeValue);
+          }).price_type.id;
         },
         calculate_price: function calculate_price() {
           return this.quantity * this.get_price().price;
@@ -89621,9 +89644,9 @@ var Sales = /*#__PURE__*/function (_Component) {
       });
 
       _this.setState({
-        total: total,
-        sub_total: sub_total,
-        discounts_total: sub_total - total
+        total: _this.convertNumber(Math.round(total)),
+        sub_total: _this.convertNumber(Math.round(sub_total)),
+        discounts_total: _this.convertNumber(Math.round(sub_total - total))
       });
     });
 
@@ -89635,7 +89658,7 @@ var Sales = /*#__PURE__*/function (_Component) {
       });
 
       _this.setState({
-        totalMethodsSale: total
+        totalMethodsSale: _this.convertNumber(Math.round(total))
       });
     });
 
@@ -89653,7 +89676,7 @@ var Sales = /*#__PURE__*/function (_Component) {
             className: "text-center"
           }, product_on_sale.get_price_type()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
             className: "text-center"
-          }, "$ ", product_on_sale.calculate_price()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+          }, this.convertNumber(Math.round(product_on_sale.calculate_price()))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
             className: "text-center"
           }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
             href: "#",
@@ -89811,6 +89834,12 @@ var Sales = /*#__PURE__*/function (_Component) {
       }
     });
 
+    _defineProperty(_assertThisInitialized(_this), "handleSelectChange", function (e) {
+      _this.setState({
+        selected_value: e.value
+      });
+    });
+
     _this.state = {
       pricetypes: [],
       selected_price_type_id: null,
@@ -89824,7 +89853,8 @@ var Sales = /*#__PURE__*/function (_Component) {
       total: 0,
       sub_total: 0,
       discounts_total: 0,
-      totalMethodsSale: 0.0
+      totalMethodsSale: 0.0,
+      selected_value: null
     };
     react_toastify__WEBPACK_IMPORTED_MODULE_5__["toast"].configure();
     return _this;
@@ -89924,18 +89954,23 @@ var Sales = /*#__PURE__*/function (_Component) {
         className: "col-xs-5"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
         htmlFor: ""
-      }, "Producto"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("select", {
+      }, "Producto"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_select__WEBPACK_IMPORTED_MODULE_6__["default"], {
         id: "products",
         name: "products",
-        className: "form-control"
-      }, this.state.products.map(function (product) {
-        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("option", {
-          key: product.id,
-          value: product.id
-        }, product.name + ' $ ' + product.price.find(function (price) {
-          return price.price_type_id === parseInt(_this3.state.selected_price_type_id);
-        }).price);
-      }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        components: {
+          Placeholder: Placeholder
+        },
+        placeholder: 'Seleccione',
+        onChange: this.handleSelectChange,
+        options: this.state.products.map(function (product) {
+          return {
+            "value": product.id,
+            "label": product.name + ' ' + _this3.convertNumber(Math.round(product.price.find(function (price) {
+              return price.price_type_id === parseInt(_this3.state.selected_price_type_id);
+            }).price))
+          };
+        })
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col-xs-1"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
         htmlFor: ""
@@ -89988,7 +90023,7 @@ var Sales = /*#__PURE__*/function (_Component) {
           className: "text-center"
         }, product_on_sale.get_price_type()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
           className: "text-center"
-        }, "$ ", product_on_sale.calculate_price()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+        }, _this3.convertNumber(Math.round(product_on_sale.calculate_price()))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
           className: "text-center"
         }, product_on_sale.discounts.map(function (discount) {
           return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
@@ -90062,7 +90097,7 @@ var Sales = /*#__PURE__*/function (_Component) {
           className: "text-center"
         }, payment_methods_sale.payment_method.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
           className: "text-center"
-        }, payment_methods_sale.quantity), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+        }, _this3.convertNumber(Math.round(payment_methods_sale.quantity))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
           className: "text-center"
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
           href: "#",
@@ -90077,11 +90112,11 @@ var Sales = /*#__PURE__*/function (_Component) {
         className: "text-center"
       }, "TOTAL"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", {
         className: "text-center"
-      }, "$ ", this.state.totalMethodsSale), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null)))))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      }, this.state.totalMethodsSale), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null)))))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "col-md-4"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("table", {
         className: "table"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, "SUBTOTAL")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, "$", this.state.sub_total)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, "TOTAL DESCUENTOS")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, "$ -", this.state.discounts_total)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, "TOTAL")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, "$", this.state.total)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, "SUBTOTAL")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, this.state.sub_total)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, "TOTAL DESCUENTOS")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, this.state.discounts_total)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, "TOTAL")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, this.state.total)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null)))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "box-body"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "row"
@@ -90445,12 +90480,7 @@ var SalesList = /*#__PURE__*/function (_Component) {
           className: "box-header with-border"
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", {
           className: "box-title"
-        }, "Venta # ", sale.id, " | Vendedor: ", sale.seller.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
-          href: "#",
-          className: "btn btn-danger pull-right"
-        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
-          className: "fa fa-times"
-        }), "Eliminar venta")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        }, "Venta # ", sale.id, " | Vendedor: ", sale.seller.name), false ? /*#__PURE__*/undefined : null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           className: "box-body"
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           className: "row"
@@ -90553,12 +90583,7 @@ var SalesList = /*#__PURE__*/function (_Component) {
           className: "text-center"
         }, sale.total), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
           className: "text-center"
-        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
-          href: "#",
-          className: "btn btn-danger"
-        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("i", {
-          className: "fa fa-times"
-        }))));
+        }, false ? /*#__PURE__*/undefined : null));
       }) : null)))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_ConfirmModal__WEBPACK_IMPORTED_MODULE_3__["default"], {
         handleClose: this.handleClose,
         show: this.state.show,
