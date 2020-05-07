@@ -502,7 +502,7 @@ export default class Sales extends Component {
                                     <br/>
                                 </div>
                                 <div className="row">
-                                    <div className="col-xs-5">
+                                    <div className="col-xs-6">
                                         <label htmlFor="">Producto</label>
                                         <Select id="products" name="products" components={{ Placeholder }}
                                                  placeholder={'Seleccione'} onChange={this.handleSelectChange} options={this.state.products.map((product)=>{
@@ -510,7 +510,7 @@ export default class Sales extends Component {
                                         })} />
 
                                     </div>
-                                    <div className="col-xs-1">
+                                    <div className="col-xs-2">
                                         <label htmlFor="">Cantidad</label>
                                         <input id="productAddQuantity" type="number" name="quantity" className="form-control" placeholder=""
                                         />
