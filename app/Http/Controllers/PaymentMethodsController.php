@@ -25,7 +25,7 @@ class PaymentMethodsController extends Controller
      */
     public function index()
     {
-        $payment_method = PaymentMethod::orderBy('id', 'desc')->get();
+        $payment_method = PaymentMethod::orderBy('id', 'asc')->get();
 
         return response()->json($payment_method);
     }

@@ -15,7 +15,7 @@ class CreateBundlesTable extends Migration
     {
         Schema::create('bundles', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 50);
+            $table->string('name', 100);
             $table->string('description', 100);
             $table->timestamps();
             $table->softDeletes('deleted_at');
