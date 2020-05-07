@@ -326,7 +326,7 @@ export default class Sales extends Component {
             const products_on_sale = [...prevState.products_on_sale.products];
 
             const new_products_on_sale = products_on_sale.filter(product => {
-                return product.product.id !== id;
+                return product.product_price_type_id !== id;
             });
 
             return {products_on_sale:{
@@ -409,7 +409,7 @@ export default class Sales extends Component {
 
             const new_products_on_sale = products_on_sale.map(product => {
 
-                if (products_on_sale_discount_value === 'all' || product.product.id === parseInt(products_on_sale_discount_value)) {
+                if (products_on_sale_discount_value === 'all' || product.product_price_type_id === parseInt(products_on_sale_discount_value)) {
 
                     //validar que el descuento no esté aplicado ya.
                     if(!product.discounts.find(discountToFind => (discountToFind.id === discount.id))) {
@@ -550,7 +550,7 @@ export default class Sales extends Component {
                                         <tbody >
                                         {this.state.products_on_sale.products.map((product_on_sale) => (
 
-                                            <tr key={product_on_sale.product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).id} >
+                                            <tr key={product_on_sale.product_price_type_id} >
 
                                             <td className="text-center">{product_on_sale.product.name}</td>
                                             <td className="text-center">{product_on_sale.quantity}</td>
@@ -561,7 +561,7 @@ export default class Sales extends Component {
                                                     <label className={"label label-success"} key={discount.id}>{discount.name}</label>
                                                 ))}
                                             </td>
-                                            <td className="text-center"><a href="#" className="btn btn-danger" onClick={()=>this.handleDeleteProduct(product_on_sale.product.id)}><i className="fa fa-times"></i></a></td>
+                                            <td className="text-center"><a href="#" className="btn btn-danger" onClick={()=>this.handleDeleteProduct(product_on_sale.product_price_type_id)}><i className="fa fa-times"></i></a></td>
 
                                         </tr>
 
@@ -710,7 +710,7 @@ export default class Sales extends Component {
                                 <select id="products_on_sale_discount" name="products_on_sale"  className="form-control">
                                     {this.state.products_on_sale.products.length > 0 ? <option value="all">Todos</option> : <option value="">No hay productos en la venta</option>}
                                     {this.state.products_on_sale.products.map((product_on_sale) => (
-                                        <option key={product_on_sale.product.id} value={product_on_sale.product.id} >{product_on_sale.product.name}</option>
+                                        <option key={product_on_sale.product_price_type_id} value={product_on_sale.product_price_type_id} >{product_on_sale.product.name}</option>
 
                                     ))}
                                 </select>
