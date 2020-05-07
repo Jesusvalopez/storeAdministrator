@@ -140,7 +140,8 @@ export default class Sales extends Component {
 
         var product_selected_value = this.state.selected_value;
         var products = this.state.products;
-        var product = products.find(product => (product.id === parseInt(product_selected_value)));
+        var product = products.find(product => (product.price.find(price => (price.price_type_id ===parseInt(priceType_value) ))
+            .id === parseInt(product_selected_value)));
 
 
         var products_on_sale = this.state.products_on_sale.products;
@@ -506,7 +507,7 @@ export default class Sales extends Component {
                                         <label htmlFor="">Producto</label>
                                         <Select id="products" name="products" components={{ Placeholder }}
                                                  placeholder={'Seleccione'} onChange={this.handleSelectChange} options={this.state.products.map((product)=>{
-                                            return {"value":product.id, "label":product.name + ' ' + this.convertNumber(Math.round(product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).price))};
+                                            return {"value":product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).id, "label":product.name + ' ' + this.convertNumber(Math.round(product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).price))};
                                         })} />
 
                                     </div>
