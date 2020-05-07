@@ -20,7 +20,7 @@ export default class Sales extends Component {
         this.state = {
 
             pricetypes : [],
-            selected_price_type_id : null,
+            selected_price_type_id : 1,
             products : [],
 
             products_on_sale :{
@@ -37,6 +37,8 @@ export default class Sales extends Component {
             discounts_total : 0,
             totalMethodsSale:0.0,
             selected_value:null,
+            product_selected_value:null,
+
         }
 
 
@@ -53,7 +55,9 @@ export default class Sales extends Component {
     componentDidMount() {
         axios.get('/price-types')
             .then(res => {
+
                 this.setState({
+
                     pricetypes: res.data,
                     selected_price_type_id: res.data[0].id
 
@@ -64,19 +68,37 @@ export default class Sales extends Component {
                     error: error
                 });
             })
-        axios.get('/products')
+
+        axios.get('/bundles')
             .then(res => {
-                console.log(res.data);
+
                 this.setState({
                     products: this.state.products.concat(res.data)
-                });
+                }, () => {
 
+                    axios.get('/products')
+                        .then(res => {
+
+                            this.setState({
+                                products: this.state.products.concat(res.data)
+                            });
+
+                        })
+                        .catch((error) => {
+                            this.setState({
+                                error: error
+                            });
+                        })
+
+                });
             })
             .catch((error) => {
                 this.setState({
                     error: error
                 });
             })
+
+
         axios.get('/discounts')
             .then(res => {
                 this.setState({
@@ -102,18 +124,7 @@ export default class Sales extends Component {
                 });
             })
 
-        axios.get('/bundles')
-            .then(res => {
-                console.log(res.data);
-                this.setState({
-                    products: this.state.products.concat(res.data)
-                });
-            })
-            .catch((error) => {
-                this.setState({
-                    error: error
-                });
-            })
+
     }
 
 
@@ -249,8 +260,11 @@ export default class Sales extends Component {
 
     handleChangePriceType = (e) =>{
         this.setState({
-            selected_price_type_id: parseInt(e.target.value)
+            selected_price_type_id: parseInt(e.target.value),
+            product_selected_value: null,
         });
+
+
     }
 
 
@@ -366,6 +380,10 @@ export default class Sales extends Component {
 
         const payment_method = this.state.payment_methods.find(payment_method => (payment_method.id === parseInt(payment_method_value)));
 
+        if(payment_method_amount_element.value === '' || payment_method_amount_element.value < 1){
+           this.notifyWarning('Debe agregar el monto');
+            return false;
+        }
 
         var payment_method_model = {
             payment_method:payment_method,
@@ -461,7 +479,7 @@ export default class Sales extends Component {
                         payment_methods_sales:[],
                     },() => { this.calculateTotals(); this.calculateTotalPaymentMethodsSale() })
 
-                    console.log(res);
+
                     this.notify('Venta registrada')
 
                 })
@@ -473,8 +491,10 @@ export default class Sales extends Component {
 
 
     handleSelectChange = (e) => {
+
         this.setState({
             selected_value:e.value,
+            product_selected_value: e,
         })
     }
 
@@ -507,7 +527,7 @@ export default class Sales extends Component {
                                 <div className="row">
                                     <div className="col-xs-6">
                                         <label htmlFor="">Producto</label>
-                                        <Select id="products" name="products" components={{ Placeholder }}
+                                        <Select id="products" name="products" components={{ Placeholder }} value={this.state.product_selected_value}
                                                  placeholder={'Seleccione'} onChange={this.handleSelectChange} options={this.state.products.map((product)=>{
                                             return {"value":product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).id, "label":product.name + ' ' + this.convertNumber(Math.round(product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).price))};
                                         })} />

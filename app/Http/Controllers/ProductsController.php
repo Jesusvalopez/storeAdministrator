@@ -28,7 +28,7 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', Product::class);
+      //  $this->authorize('viewAny', Product::class);
 
         $products = Product::with('price.priceType')->orderBy('id', 'desc')->get();
 

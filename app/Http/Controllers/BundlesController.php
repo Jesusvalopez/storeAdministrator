@@ -27,7 +27,7 @@ class BundlesController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', Bundle::class);
+       // $this->authorize('viewAny', Bundle::class);
 
         $bundles = Bundle::with(['price.priceType', 'products'])->orderBy('id', 'desc')->get();
 

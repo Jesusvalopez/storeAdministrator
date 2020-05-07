@@ -85,8 +85,13 @@ class HomeController extends Controller
         $user->assignRole('Administrador');
         */
 
-
-
+/*
+        $role = Role::create(['name' => 'Vendedor']);
+        $role->givePermissionTo('create sales');
+        $role->givePermissionTo('view sales');
+        $user = Auth::user();
+        $user->assignRole('Vendedor');
+*/
 
         return view('home');
     }
