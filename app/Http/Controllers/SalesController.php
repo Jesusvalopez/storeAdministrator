@@ -43,12 +43,28 @@ class SalesController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
+    public function listingDate(Request $request)
+    {
+        $start_date =  $request->get('start_date');
+        $end_date =  $request->get('end_date');
+
+        $this->authorize('viewAny', Sale::class);
+        $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
+            ->whereRaw("created_at::date BETWEEN '".$start_date."' and '".$end_date."'")->orderBy('id', 'desc')->get();
+
+        return response()->json($sales);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function listing()
     {
         $this->authorize('viewAny', Sale::class);
-
         $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
-            ->orderBy('id', 'desc')->get();
+            ->whereRaw("created_at::date = '". date('Y-m-d')."'")->orderBy('id', 'desc')->get();
 
         return response()->json($sales);
     }

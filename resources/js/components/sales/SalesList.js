@@ -4,24 +4,34 @@ import axios from 'axios';
 import ConfirmModal from "../ConfirmModal";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import DatePicker from "react-datepicker";
 
+import "react-datepicker/dist/react-datepicker.css";
+import Moment from 'moment';
+import { usePromiseTracker } from "react-promise-tracker";
+import { trackPromise } from 'react-promise-tracker';
+import Loader from 'react-loader-spinner';
 
 export default class SalesList extends Component {
 
     constructor(props){
         super(props);
 
+
+
         this.state = {
-            sales : [],
+            sales : null,
             error : null,
             show:false,
             text: '¿Está seguro que desea eliminar el registro?',
             deleteId: null,
-            numero_ventas: 0,
-            ventas_brutas_totales: 0,
-            comisiones_totales: 0,
-            descuentos_totales: 0,
-            ventas_netas_totales: 0,
+            numero_ventas: null,
+            ventas_brutas_totales: null,
+            comisiones_totales: null,
+            descuentos_totales: null,
+            ventas_netas_totales: null,
+            range_start_date: Date.now(),
+            range_end_date: Date.now(),
 
         }
 
@@ -42,6 +52,7 @@ export default class SalesList extends Component {
     deleteAction = (e) =>{
         e.preventDefault();
         try {
+
 
             // <input type="hidden" name="_method" value="delete">//{params: {id: id}})
             axios.delete('/products/'+this.state.deleteId,  )
@@ -68,67 +79,68 @@ export default class SalesList extends Component {
 
 
     componentDidMount() {
+        trackPromise(
         axios.get('/sales/listing')
             .then(res => {
-                console.log(res.data);
+
                 this.setState(prevState => {
 
-                    var numero_ventas = this.state.numero_ventas;
-                    var ventas_brutas_totales = this.state.ventas_brutas_totales;
-                    var comisiones_totales = this.state.comisiones_totales;
-                    var descuentos_totales = this.state.descuentos_totales;
-
-
-                    const new_sales = res.data.map(sale => {
-
-                        numero_ventas++;
-
-                        const  totals= this.calculateTotals(sale)
-
-                        sale.sub_total = this.convertNumber(Math.round(totals.sub_total));
-                        sale.discounts = this.convertNumber(Math.round(totals.discount));
-                        sale.comissions = this.convertNumber(Math.round(totals.comission));
-                        sale.total = this.convertNumber(Math.round(totals.total));
-
-                        ventas_brutas_totales+= totals.sub_total;
-                        comisiones_totales+= totals.comission;
-                        descuentos_totales+= totals.discount;
-
-
-                        const new_sale_details = sale.sale_details.map(sale_detail =>{
-
-                            const  totals= this.calculateDetailTotals(sale_detail);
-
-                            sale_detail.sub_total =  this.convertNumber(Math.round(totals.sub_total));
-                            sale_detail.discounts = this.convertNumber(Math.round(totals.discount));
-                            sale_detail.total =this.convertNumber(Math.round(totals.total));
-
-                            return sale_detail;
-                        })
-
-                        sale.sale_details = new_sale_details;
-
-                        return sale;
-                    });
-
-                    return {sales:new_sales,
-                        numero_ventas: numero_ventas,
-                        ventas_brutas_totales:this.convertNumber(Math.round(ventas_brutas_totales)),
-                        comisiones_totales:this.convertNumber(Math.round(comisiones_totales)),
-                        descuentos_totales:this.convertNumber(Math.round(descuentos_totales)),
-                        ventas_netas_totales:this.convertNumber(Math.round(ventas_brutas_totales-descuentos_totales-comisiones_totales)),
-                    };
+                    return this.reCalculateAllTotals(res);
 
                 })
 
-            })
-            .catch((error) => {
-                this.setState({
-                    error: error
-                });
-            })
+
+            }));
     }
 
+
+    reCalculateAllTotals (res){
+        var numero_ventas = 0;
+        var ventas_brutas_totales = 0;
+        var comisiones_totales = 0;
+        var descuentos_totales = 0;
+
+
+        const new_sales = res.data.map(sale => {
+
+            numero_ventas++;
+
+            const  totals= this.calculateTotals(sale)
+
+            sale.sub_total = this.convertNumber(Math.round(totals.sub_total));
+            sale.discounts = this.convertNumber(Math.round(totals.discount));
+            sale.comissions = this.convertNumber(Math.round(totals.comission));
+            sale.total = this.convertNumber(Math.round(totals.total));
+
+            ventas_brutas_totales+= totals.sub_total;
+            comisiones_totales+= totals.comission;
+            descuentos_totales+= totals.discount;
+
+
+            const new_sale_details = sale.sale_details.map(sale_detail =>{
+
+                const  totals= this.calculateDetailTotals(sale_detail);
+
+                sale_detail.sub_total =  this.convertNumber(Math.round(totals.sub_total));
+                sale_detail.discounts = this.convertNumber(Math.round(totals.discount));
+                sale_detail.total =this.convertNumber(Math.round(totals.total));
+
+                return sale_detail;
+            })
+
+            sale.sale_details = new_sale_details;
+
+            return sale;
+        });
+
+        return {sales:new_sales,
+            numero_ventas: numero_ventas,
+            ventas_brutas_totales:this.convertNumber(Math.round(ventas_brutas_totales)),
+            comisiones_totales:this.convertNumber(Math.round(comisiones_totales)),
+            descuentos_totales:this.convertNumber(Math.round(descuentos_totales)),
+            ventas_netas_totales:this.convertNumber(Math.round(ventas_brutas_totales-descuentos_totales-comisiones_totales)),
+        };
+    }
 
     calculateDetailTotals = (sale_detail) =>{
 
@@ -201,18 +213,98 @@ export default class SalesList extends Component {
         return response;
     };
 
-    render(){
+    handleFilterDateClick = () =>{
 
+        const start_date = Moment(this.state.range_start_date).format('YYYY/MM/DD');
+        const end_date = Moment(this.state.range_end_date).format('YYYY/MM/DD');
+
+        this.setState({
+            numero_ventas: null,
+            ventas_brutas_totales: null,
+            comisiones_totales: null,
+            descuentos_totales: null,
+            ventas_netas_totales: null,
+            sales: null,
+        });
+
+        trackPromise(
+        axios.post('/sales/listing-date', {start_date: start_date, end_date:end_date})
+            .then(res => {
+
+                this.setState(() =>{
+
+                   return this.reCalculateAllTotals(res)
+
+                });
+
+            }))
+    }
+
+    setRangeEndDate = (date) =>{
+        this.setState({
+            range_end_date: date,
+        })
+    }
+    setRangeStartDate = (date) =>{
+        this.setState({
+            range_start_date: date,
+        })
+    }
+
+
+    render() {
+
+        const LoadingIndicator = props => {
+            const {promiseInProgress} = usePromiseTracker();
+            return (
+                promiseInProgress &&
+                <div
+                    style={{
+                        width: "100%",
+                        height: "100",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}
+                >
+                    <Loader type="ThreeDots" color="#fff" height={45} width={45} />
+
+                </div>
+            );
+        }
+
+        const LoadingIndicator2 = props => {
+            const {promiseInProgress} = usePromiseTracker();
+            return (
+                promiseInProgress &&
+                <div
+                    style={{
+                        width: "100%",
+                        height: "100",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}
+                >
+                    <Loader type="ThreeDots" color="#00a65a" height={45} width={45} />
+
+                </div>
+            );
+        }
         return (
             <div>
 
+
                 <div className="col-xs-2">
                     <div className="small-box bg-green">
-                        <div className="inner">
-                            <h3>{this.state.numero_ventas}</h3>
 
+                        <div className="inner">
+                            {this.state.numero_ventas != null ?
+                            <h3>{this.state.numero_ventas}</h3>
+                                :  <LoadingIndicator/> }
                             <p>Número de ventas</p>
                         </div>
+
                         <div className="icon">
                             <i className="fa fa-shopping-cart"></i>
                         </div>
@@ -223,8 +315,9 @@ export default class SalesList extends Component {
                 <div className="col-xs-2">
                     <div className="small-box bg-green">
                         <div className="inner">
-                            <h3>{this.state.ventas_brutas_totales}</h3>
-
+                            {this.state.ventas_brutas_totales != null ?
+                                <h3>{this.state.ventas_brutas_totales}</h3>
+                                :  <LoadingIndicator/> }
                             <p>Ventas Brutas Totales</p>
                         </div>
                         <div className="icon">
@@ -237,7 +330,9 @@ export default class SalesList extends Component {
                 <div className="col-xs-2">
                     <div className="small-box bg-yellow">
                         <div className="inner">
-                            <h3>{this.state.comisiones_totales}</h3>
+                            {this.state.comisiones_totales != null ?
+                                <h3>{this.state.comisiones_totales}</h3>
+                                :  <LoadingIndicator/> }
 
                             <p>Comisiones totales</p>
                         </div>
@@ -250,7 +345,9 @@ export default class SalesList extends Component {
                 <div className="col-xs-2">
                     <div className="small-box bg-yellow">
                         <div className="inner">
-                            <h3>{this.state.descuentos_totales}</h3>
+                            {this.state.descuentos_totales != null ?
+                                <h3>{this.state.descuentos_totales}</h3>
+                                :  <LoadingIndicator/> }
 
                             <p>Descuentos totales</p>
                         </div>
@@ -264,7 +361,10 @@ export default class SalesList extends Component {
                 <div className="col-xs-2">
                     <div className="small-box bg-green">
                         <div className="inner">
-                            <h3>{this.state.ventas_netas_totales}</h3>
+                            {this.state.ventas_netas_totales != null ?
+                                <h3>{this.state.ventas_netas_totales}</h3>
+                                :  <LoadingIndicator/> }
+
 
                             <p>Ventas Netas Totales</p>
                         </div>
@@ -277,7 +377,57 @@ export default class SalesList extends Component {
 
                 <div className="col-md-12">
 
+                    <div className="box box-success">
+                        <div className="box-header with-border">
+                            <div className="col-md-6"><h3 className="box-title">Detalle ingresos</h3></div>
+                        </div>
 
+                        <div className="box-body" >
+
+                            <div className="row">
+
+
+                                <div className="col-md-2">
+                                    <label style={{width: "100%"}} htmlFor="">Fecha Inicio</label>
+                                    <DatePicker
+                                        style={{width: "100%"}}
+                                        className="form-control"
+                                        dateFormat="dd/MM/yyyy"
+                                        selected={this.state.range_start_date}
+                                        onChange={this.setRangeStartDate}
+                                        selectsStart
+                                        startDate={this.state.range_start_date}
+                                        endDate={this.state.range_end_date}
+                                    />
+                                </div>
+                                <div className="col-md-2">
+                                    <label style={{width: "100%"}} htmlFor="">Fecha Término</label>
+                                    <DatePicker
+                                        style={{width: "100%"}}
+                                        className="form-control"
+                                        dateFormat="dd/MM/yyyy"
+                                        selected={this.state.range_end_date}
+                                        onChange={this.setRangeEndDate}
+                                        selectsEnd
+                                        startDate={this.state.range_start_date}
+                                        endDate={this.state.range_end_date}
+                                        minDate={this.state.range_start_date}
+                                    />
+                                </div>
+
+
+
+
+
+                                <div className="col-md-2">
+                                    <label htmlFor=""></label>
+                                    <button className="btn btn-primary btn-block" onClick={this.handleFilterDateClick}>Filtrar</button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
 
 
 
@@ -387,60 +537,9 @@ export default class SalesList extends Component {
                                         </div>
                                     </div>
                                     </div>
-                                )) : null}
+                                )) : <LoadingIndicator2/>}
 
 
-
-
-
-
-
-                        <div className="box box-success">
-                            <div className="box-header with-border">
-                                <h3 className="box-title">Ventas</h3>
-                            </div>
-                            <div className="box-body">
-                                <div className="row">
-
-                                    <table className="table table-bordered">
-                                        <thead>
-
-                                        <tr>
-                                            <th className="text-center">Venta</th>
-                                            <th className="text-center">Vendedor</th>
-                                            <th className="text-center">SubTotal</th>
-                                            <th className="text-center">Descuentos</th>
-                                            <th className="text-center">Comision</th>
-                                            <th className="text-center">Total</th>
-                                            <th className="text-center">Acciones</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {this.state.sales ? this.state.sales.map((sale) => (
-                                            <tr key={sale.id}>
-                                                <td className="text-center">{sale.id}</td>
-                                                <td className="text-center">{sale.seller.name}</td>
-                                                <td className="text-center">{sale.sub_total}</td>
-                                                <td className="text-center">{sale.discounts}</td>
-                                                <td className="text-center">{sale.comissions}</td>
-                                                <td className="text-center">{sale.total}</td>
-                                                <td className="text-center">{false ? <a
-                                                    href="#" className="btn btn-danger"><i
-                                                    className="fa fa-times"></i></a>:null}</td>
-
-                                            </tr>
-                                        )) : null}
-
-                                        </tbody>
-
-                                    </table>
-
-                                </div>
-
-                            </div>
-
-
-                        </div>
 
                 </div>
                 <ConfirmModal handleClose={this.handleClose} show={this.state.show} text={this.state.text} action={this.deleteAction}/>

@@ -5,7 +5,6 @@ import ConfirmModal from "../ConfirmModal";
 import 'react-toastify/dist/ReactToastify.css';
 import {toast} from "react-toastify";
 import Select, { components } from 'react-select';
-
 const Placeholder = props => {
     return <components.Placeholder {...props} />;
 };

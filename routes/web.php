@@ -28,6 +28,7 @@ Route::resource('payment-methods', 'PaymentMethodsController');
 Route::resource('products', 'ProductsController');
 Route::resource('bundles', 'BundlesController');
 Route::resource('discounts', 'DiscountsController');
+Route::post('/sales/listing-date', 'SalesController@listingDate');
 Route::get('/sales/listing', 'SalesController@listing');
 Route::resource('sales', 'SalesController');
 
