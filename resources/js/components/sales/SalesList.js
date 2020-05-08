@@ -376,7 +376,7 @@ export default class SalesList extends Component {
                 </div>
 
                 <div className="col-md-12">
-
+                    {this.props.showFilters ?
                     <div className="box box-success">
                         <div className="box-header with-border">
                             <div className="col-md-6"><h3 className="box-title">Detalle ingresos</h3></div>
@@ -429,7 +429,7 @@ export default class SalesList extends Component {
 
                     </div>
 
-
+                    : null }
 
                                 {this.state.sales ? this.state.sales.map((sale) => (
                                     <div className="box box-success" key={sale.id}>
@@ -550,6 +550,6 @@ export default class SalesList extends Component {
 
 if (document.getElementById('salesList')) {
 
-    ReactDOM.render(<SalesList />, document.getElementById('salesList'));
+    ReactDOM.render(<SalesList showFilters={SHOW_FILTERS}/>, document.getElementById('salesList'));
 }
 

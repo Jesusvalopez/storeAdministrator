@@ -33,9 +33,10 @@ class SalesController extends Controller
     {
         $this->authorize('viewAny', Sale::class);
 
+        //TODO Cambiar este rol
+        $can_filter = Auth::user()->can('create products') ? 1 : 0;
 
-
-        return view('sales.index');
+        return view('sales.index')->with('can_filter', $can_filter);
     }
 
     /**

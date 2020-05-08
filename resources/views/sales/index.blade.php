@@ -23,3 +23,10 @@
     <div id="salesList"></div>
 
 @endsection
+
+@section('added-js')
+    <script >
+        SHOW_FILTERS = {!! $can_filter !!};
+
+    </script>
+@endsection
