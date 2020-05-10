@@ -2,14 +2,13 @@ import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
 import ConfirmModal from "../ConfirmModal";
-import { ToastContainer, toast } from 'react-toastify';
+import {toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
 import Moment from 'moment';
-import { usePromiseTracker } from "react-promise-tracker";
-import { trackPromise } from 'react-promise-tracker';
+import {trackPromise, usePromiseTracker} from "react-promise-tracker";
 import Loader from 'react-loader-spinner';
 
 export default class SalesList extends Component {
@@ -32,6 +31,7 @@ export default class SalesList extends Component {
             ventas_netas_totales: null,
             range_start_date: Date.now(),
             range_end_date: Date.now(),
+            sales_payments_details: null,
 
         }
 
@@ -100,6 +100,7 @@ export default class SalesList extends Component {
         var comisiones_totales = 0;
         var descuentos_totales = 0;
 
+        var paymentsModelsTotals = [];
 
         const new_sales = res.data.map(sale => {
 
@@ -130,15 +131,71 @@ export default class SalesList extends Component {
 
             sale.sale_details = new_sale_details;
 
+
+
+            //Calcular por metodo de pago
+            sale.payment_method_sale.map((payment_methods_sale) => {
+                const amount = payment_methods_sale.amount;
+                const payment_method_name = payment_methods_sale.payment_method.name;
+                const payment_method_comission = payment_methods_sale.payment_method.comission;
+
+                const paymentsModel = {
+                    id: payment_methods_sale.id,
+                    payment_method_name: payment_method_name,
+                    amount: parseInt(amount),
+                    payment_method_comission: payment_method_comission,
+                    calculated_comission:function () {
+                        const comission_in_percent = this.payment_method_comission / 100;
+                        return this.amount * comission_in_percent;
+                    },
+                    total:function () {
+                        return this.amount - this.calculated_comission();
+                    }
+                }
+
+
+
+                if(paymentsModelsTotals.length > 0){
+
+                    var found_one = false;
+
+                        paymentsModelsTotals.map(p => {
+                        if (p.payment_method_name === payment_method_name) {
+                            p.amount += parseInt(amount);
+                            found_one = true;
+                        return p;
+                        }
+                        return p;
+
+                        });
+
+                        if(!found_one){
+                        paymentsModelsTotals = paymentsModelsTotals.concat(paymentsModel)
+                        }
+
+
+
+                }else{
+                    paymentsModelsTotals = paymentsModelsTotals.concat(paymentsModel);
+                }
+
+
+            });
+
+
+
             return sale;
         });
 
-        return {sales:new_sales,
+
+        return {
+            sales:new_sales,
             numero_ventas: numero_ventas,
             ventas_brutas_totales:this.convertNumber(Math.round(ventas_brutas_totales)),
             comisiones_totales:this.convertNumber(Math.round(comisiones_totales)),
             descuentos_totales:this.convertNumber(Math.round(descuentos_totales)),
             ventas_netas_totales:this.convertNumber(Math.round(ventas_brutas_totales-descuentos_totales-comisiones_totales)),
+            sales_payments_details:paymentsModelsTotals,
         };
     }
 
@@ -225,6 +282,7 @@ export default class SalesList extends Component {
             descuentos_totales: null,
             ventas_netas_totales: null,
             sales: null,
+            sales_payments_details: null,
         });
 
         trackPromise(
@@ -442,9 +500,36 @@ export default class SalesList extends Component {
 
                         <div className="box-body">
 
+                            {this.state.sales_payments_details != null ?
                             <div className="row">
+                                <div className="col-xs-offset-1 col-xs-10">
+                                <table className="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                    <th>Medio de pago</th>
+                                    <th>Subtotal</th>
+                                    <th>Comision</th>
+                                    <th>Total</th>
+                                    </tr>
+                                    </thead>
 
+                                <tbody>
+
+                                {this.state.sales_payments_details.map((sale_payment_detail) => (
+
+                                    <tr key={sale_payment_detail.id}>
+                                        <td>{sale_payment_detail.payment_method_name}</td>
+                                        <td>{this.convertNumber(Math.round(sale_payment_detail.amount))}</td>
+                                        <td>{this.convertNumber(Math.round(sale_payment_detail.calculated_comission()))}</td>
+                                        <td>{this.convertNumber(Math.round(sale_payment_detail.total()))}</td>
+                                    </tr>
+
+                                ))}
+                                </tbody>
+                                </table>
                             </div>
+                            </div>
+                                : <LoadingIndicator2/>}
                         </div>
                     </div>
 
