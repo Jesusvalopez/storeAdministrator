@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
-import ConfirmModal from "../ConfirmModal";
+import CashbackModal from "./CashbackModal";
 import 'react-toastify/dist/ReactToastify.css';
 import {toast} from "react-toastify";
 import Select, { components } from 'react-select';
@@ -37,6 +37,10 @@ export default class Sales extends Component {
             totalMethodsSale:0.0,
             selected_value:null,
             product_selected_value:null,
+            show:false,
+            to_charge:0,
+            to_charge_pretty:'0',
+            to_cashback:0,
 
         }
 
@@ -379,6 +383,8 @@ export default class Sales extends Component {
 
         const payment_method = this.state.payment_methods.find(payment_method => (payment_method.id === parseInt(payment_method_value)));
 
+
+
         if(payment_method_amount_element.value === '' || payment_method_amount_element.value < 1){
            this.notifyWarning('Debe agregar el monto');
             return false;
@@ -402,7 +408,20 @@ export default class Sales extends Component {
 
         );
 
+
+
+        if(payment_method.name.includes("Efectivo")){
+            this.setState({
+                show:true,
+                to_charge: parseInt(payment_method_amount_element.value),
+                to_charge_pretty: this.convertNumber(parseInt(payment_method_amount_element.value)),
+            },() =>{
+                document.getElementById("received_money").focus();
+            })
+        }
+
         payment_method_amount_element.value = '';
+
 
 
     }
@@ -495,9 +514,51 @@ export default class Sales extends Component {
             selected_value:e.value,
             product_selected_value: e,
         })
+        document.getElementById("productAddQuantity").focus();
     }
 
+    handleCashbackChange = (e) =>{
 
+        const result = e.target.value - this.state.to_charge;
+
+        this.setState({
+            to_cashback:this.convertNumber(result)
+        });
+
+    }
+    handlePaymentMethodAmountKeyUp = (e) =>{
+        if(e.key === 'Enter'){
+            this.handleAddPaymentMethod();
+        }
+
+    }
+    productQuantityKeyUp = (e) =>{
+
+        if(e.key === 'Enter'){
+            this.handleAddProduct();
+        }
+    }
+    handleKeyUp = (e) =>{
+
+        if(e.key === 'Enter'){
+
+            this.handleClose();
+        }
+    }
+    handleClose = () =>{
+        this.setState({
+            show:false,
+            to_charge: 0,
+        });
+    }
+
+    convertNumber = (value) =>{
+
+        var response =  '$' + value.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
+
+
+        return response;
+    };
 
 
     render(){
@@ -528,13 +589,13 @@ export default class Sales extends Component {
                                         <label htmlFor="">Producto</label>
                                         <Select id="products" name="products" components={{ Placeholder }} value={this.state.product_selected_value}
                                                  placeholder={'Seleccione'} onChange={this.handleSelectChange} options={this.state.products.map((product)=>{
-                                            return {"value":product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).id, "label":product.name + ' ' + this.convertNumber(Math.round(product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).price))};
+                                            return {"value":product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).id, "label":product.name + ' ' + this.convertNumber(Math.round(product.price.find(price => (price.price_type_id === parseInt(this.state.selected_price_type_id))).price)) };
                                         })} />
 
                                     </div>
                                     <div className="col-xs-2">
                                         <label htmlFor="">Cantidad</label>
-                                        <input id="productAddQuantity" type="number" name="quantity" className="form-control" placeholder=""
+                                        <input id="productAddQuantity" type="number" name="quantity" className="form-control" placeholder="" onKeyUp={this.productQuantityKeyUp}
                                         />
                                     </div>
                                 </div>
@@ -554,7 +615,7 @@ export default class Sales extends Component {
                             <div className="box-body">
                                 <div className="row">
 
-                                    <table className="table">
+                                    <table className="table table-striped">
                                         <thead>
 
                                         <tr>
@@ -569,13 +630,13 @@ export default class Sales extends Component {
                                         <tbody >
                                         {this.state.products_on_sale.products.map((product_on_sale) => (
 
-                                            <tr key={product_on_sale.product_price_type_id} >
+                                            <tr style={{fontSize:"20px"}} key={product_on_sale.product_price_type_id} >
 
-                                            <td className="text-center">{product_on_sale.product.name}</td>
-                                            <td className="text-center">{product_on_sale.quantity}</td>
-                                            <td className="text-center">{product_on_sale.get_price_type()}</td>
-                                            <td className="text-center">{this.convertNumber(Math.round(product_on_sale.calculate_price()))}</td>
-                                            <td className="text-center">
+                                            <td className="text-center" >{product_on_sale.product.name}</td>
+                                            <td className="text-center" >{product_on_sale.quantity}</td>
+                                            <td className="text-center" >{product_on_sale.get_price_type()}</td>
+                                            <td className="text-center" ><b>{this.convertNumber(Math.round(product_on_sale.calculate_price()))}</b></td>
+                                            <td className="text-center" >
                                                 {product_on_sale.discounts.map((discount)=>(
                                                     <label className={"label label-success"} key={discount.id}>{discount.name}</label>
                                                 ))}
@@ -616,7 +677,7 @@ export default class Sales extends Component {
                                     </div>
                                     <div className="col-xs-4">
 
-                                        <input id="paymentMethodAmount" type="number" name="amount" className="form-control" placeholder="$ 1000"
+                                        <input id="paymentMethodAmount" type="number" name="amount" className="form-control" placeholder="$ 1000" onKeyUp={this.handlePaymentMethodAmountKeyUp}
                                         />
                                     </div>
                                     {this.state.products_on_sale.products.length > 0 ?
@@ -653,8 +714,8 @@ export default class Sales extends Component {
 
                                                 <tr>
 
-                                                    <th className="text-center">TOTAL</th>
-                                                    <th className="text-center">{this.state.totalMethodsSale}</th>
+                                                    <th style={{fontSize:"35px"}} className="text-center">TOTAL</th>
+                                                    <th style={{fontSize:"35px"}} className="text-center">{this.state.totalMethodsSale}</th>
                                                     <th></th>
                                                 </tr>
 
@@ -687,8 +748,8 @@ export default class Sales extends Component {
                                     <tr>
                                         <td></td>
                                         <td></td>
-                                        <td><b>TOTAL</b></td>
-                                        <td><b>{this.state.total}</b></td>
+                                        <td style={{fontSize:"35px"}}><b>TOTAL</b></td>
+                                        <td style={{fontSize:"35px"}}><b>{this.state.total}</b></td>
                                         <td></td>
                                     </tr>
                                         </tbody>
@@ -700,7 +761,7 @@ export default class Sales extends Component {
                             <div className="box-body">
                                 <div className="row">
 
-                                    <div className="col-xs-2">
+                                    <div className="col-xs-4">
                                         <button type="submit" className="btn btn-block btn-primary btn-lg" onClick={this.handleSubmitSale}>Generar Venta</button>
                                     </div>
 
@@ -760,7 +821,13 @@ export default class Sales extends Component {
 
                 </div>
                 </div>
+
+                <CashbackModal show={this.state.show}  action={this.handleClose} to_charge={this.state.to_charge_pretty} to_cashback={this.state.to_cashback}
+                               handleChange={this.handleCashbackChange} keyUp={this.handleKeyUp}/>
             </div>
+
+
+
         );
     }
 }

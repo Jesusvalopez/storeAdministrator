@@ -18,7 +18,18 @@ Route::get('/', function () {
 });
 
 Auth::routes();
+/*
+Route::get('/date', function () {
+     $date = new DateTime();
+    echo $date->format('Y-m-d H:i:s');
+    $tz  = date_timezone_get($date);
+    echo timezone_name_get($tz);
+    echo time();
+    echo phpinfo();
 
+
+});
+*/
 Route::get('/home', 'HomeController@index')->name('home');
 
 

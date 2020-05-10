@@ -427,9 +427,29 @@ export default class SalesList extends Component {
                             </div>
                         </div>
 
+
+
+
                     </div>
 
                     : null }
+
+
+                    <div className="box box-success">
+                        <div className="box-header with-border">
+                            <div className="col-md-6"><h3 className="box-title">Detalle por medios de pago</h3></div>
+                        </div>
+
+                        <div className="box-body">
+
+                            <div className="row">
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
 
                                 {this.state.sales ? this.state.sales.map((sale) => (
                                     <div className="box box-success" key={sale.id}>
