@@ -39,6 +39,21 @@ export default class ProductsCreate extends Component {
         document.getElementById("createProductForm").reset();
     }
 
+    onClickUpdateBtn = (e) =>{
+        e.preventDefault();
+        try {
+            axios.put('/products/'+this.props.editId,  this.props.form )
+                .then(res => {
+console.log(res.data);
+                    //this.props.onUpdateListElement(res.data);
+                    this.resetForm();
+                    this.notify('Registro actualizado con éxito')
+
+                })
+        }catch (e) {
+            this.notifyError('No se pudo actualizar el registro')
+        }
+    }
     handleSubmit = (e) =>{
         e.preventDefault();
         try {
@@ -87,15 +102,15 @@ export default class ProductsCreate extends Component {
                                 <div className="row">
                                     <div className="col-xs-3">
                                         <input type="text" name="name" className="form-control" placeholder="Nombre del producto"
-                                               onChange={this.handleChange}/>
+                                               onChange={this.handleChange} value={this.props.form.name}/>
                                     </div>
                                     <div className="col-xs-7">
                                         <input type="text" name="description" className="form-control" placeholder="Descripción "
-                                               onChange={this.handleChange}/>
+                                               onChange={this.handleChange} value={this.props.form.description}/>
                                     </div>
                                     <div className="col-xs-2">
                                         <input type="text" name="stock" className="form-control" placeholder="Stock"
-                                               onChange={this.handleChange}/>
+                                               onChange={this.handleChange} value={this.props.form.stock}/>
                                     </div>
 
                                 </div>
@@ -106,13 +121,15 @@ export default class ProductsCreate extends Component {
                             </div>
                             <div className="box-body">
                                 <div className="row">
-                                    {this.props.priceTypes ? this.props.priceTypes.map((pricetype) => (
+                                    {this.props.priceTypes ? this.props.priceTypes.map((pricetype) => {
+                                        var nameProperty = "price_"+pricetype.id;
+                                        return(
                                         <div className="col-xs-2" key={pricetype.id}>
                                             <label >{pricetype.name}</label>
                                             <input type="number" name={"price_"+pricetype.id} className="form-control"
-                                                   onChange={this.handleChange}/>
-                                        </div>
-                                    )) : null}
+                                                   onChange={this.handleChange} value={this.props.form[nameProperty] || ""}/>
+                                        </div>)
+                                    }) : null}
 
                                 </div>
                             </div>
@@ -120,10 +137,23 @@ export default class ProductsCreate extends Component {
                             <div className="box-body">
                                 <div className="row">
 
+                                    {this.props.show_create_btn ?
                                     <div className="col-xs-2">
                                         <button type="submit" className="btn btn-block btn-primary" >Crear</button>
                                     </div>
-
+                                    : null }
+                                    {this.props.show_update_btn ?
+                                        <div>
+                                            <div className="col-xs-3">
+                                                <button onClick={this.onClickUpdateBtn} type="" className="btn btn-block btn-primary">Actualizar
+                                                </button>
+                                            </div>
+                                            <div className="col-xs-2">
+                                                <button type="" className="btn btn-block default" onClick={this.props.onCancelUpdate}>Cancelar
+                                                </button>
+                                            </div>
+                                        </div>
+                                        : null}
                                 </div>
                             </div>
 

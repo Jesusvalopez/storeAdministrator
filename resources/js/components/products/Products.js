@@ -28,6 +28,9 @@ export default class Products extends Component {
             products: [],
             bundles: [],
             editId: null,
+            pricesEditList: null,
+            show_create_btn: true,
+            show_update_btn: false,
 
         }
 
@@ -46,6 +49,17 @@ export default class Products extends Component {
             bundle_form:{
                 ...this.state.bundle_form,
                 [e.target.name]: e.target.value
+            }
+        });
+    }
+    handleCancelUpdate = () => {
+        this.setState({
+            show_create_btn: true,
+            show_update_btn: false,
+            form : {
+                name: '',
+                description:'',
+                stock: '',
             }
         });
     }
@@ -86,9 +100,27 @@ export default class Products extends Component {
 
         axios.get('/products/'+id)
             .then(res => {
+
+                var prices = {};
+                res.data.price.map(price=>{
+                    prices["price_"+price.price_type_id] = price.price;
+
+                })
+
                 this.setState({
-                    form: {name: res.data.name, description: res.data.description, stock: res.data.stock, editId:res.data.id}
+                    form: {name: res.data.name, description: res.data.description, stock: res.data.stock, editId:res.data.id,
+                        ...prices,
+
+                    },
+                    show_create_btn: false,
+                    show_update_btn: true,
+                    editId: id,
+                }, () =>{
+
+
+
                 });
+
             })
             .catch((error) => {
                 this.setState({
@@ -110,6 +142,11 @@ export default class Products extends Component {
                                                          onUpdateListElement={this.handleUpdateListElement}
                                                          onUpdateForm={this.handleUpdateForm}
                                                          priceTypes={this.state.pricetypes}
+                                                         pricesEditList={this.state.pricesEditList}
+                                                         show_create_btn={this.state.show_create_btn}
+                                                         show_update_btn={this.state.show_update_btn}
+                                                         onCancelUpdate={this.handleCancelUpdate}
+                                                         editId={this.state.editId}
                                                          /> : null}
                 {this.props.showList ? <ProductsList products={this.state.products} onUpdateList={this.handleUpdateList} onEdit={this.handleOnEdit}/>: null}
                 </div>

@@ -103,8 +103,8 @@ export default class ProductsList extends Component {
                                                 <td className="text-center">{product.name}</td>
                                                 <td className="text-center">{product.description}</td>
                                                 <td className="text-center">{product.stock}</td>
-                                                <td className="text-center">{ false ? <a href="#" className="btn btn-primary"><i
-                                                    className="fa fa-edit" onClick={() => this.props.onEdit(product.id)}></i></a> : null} <a
+                                                <td className="text-center"><a href="#" className="btn btn-primary" onClick={() => this.props.onEdit(product.id)}><i
+                                                    className="fa fa-edit" ></i></a> <a
                                                     href="#" className="btn btn-danger" onClick={() => this.handleShow(product.id)}><i
                                                     className="fa fa-times"></i></a></td>
 

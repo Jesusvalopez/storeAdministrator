@@ -66,7 +66,11 @@ class ProductPolicy
      */
     public function update(User $user, Product $product)
     {
-        //
+        if ($user->can('edit products')) {
+            return Response::allow();
+        }else{
+            return Response::deny('No tiene permisos para acceder.');
+        }
     }
 
     /**

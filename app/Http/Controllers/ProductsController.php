@@ -101,6 +101,9 @@ class ProductsController extends Controller
     {
         $this->authorize('view', $product);
 
+        $product->load('price.priceType');
+
+
         return response()->json($product);
     }
 
@@ -122,9 +125,29 @@ class ProductsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Product $product)
     {
-        //
+
+        $this->authorize('update', $product);
+        /*
+        $product->name = $request->get('name');
+        $product->description = $request->get('description');
+        $product->stock = $request->get('stock');
+        $product->save();
+
+
+        foreach ($request->except(['name', 'description','stock']) as $key => $value){
+
+            $price = new Price();
+            $price->price_type_id = str_replace('price_', '', $key);
+            $price->price = $value;
+
+            $product->price()->save($price);
+
+        }
+        */
+
+        return response()->json([$request->all(), $product]);
     }
 
     /**
