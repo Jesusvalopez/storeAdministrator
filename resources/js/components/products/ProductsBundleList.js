@@ -107,8 +107,8 @@ export default class ProductsBundleList extends Component {
                                                     <label className={"label label-success"} key={product.id}>{product.name}</label>
                                                 ))}</td>
 
-                                                <td className="text-center">{ false ? <a href="#" className="btn btn-primary"><i
-                                                    className="fa fa-edit" onClick={() => this.props.onEdit(bundle.id)}></i></a> : null} <a
+                                                <td className="text-center"><a href="#" className="btn btn-primary" onClick={() => this.props.onEdit(bundle.id)}><i
+                                                    className="fa fa-edit" ></i></a>  <a
                                                     href="#" className="btn btn-danger" onClick={() => this.handleShow(bundle.id)}><i
                                                     className="fa fa-times"></i></a></td>
 

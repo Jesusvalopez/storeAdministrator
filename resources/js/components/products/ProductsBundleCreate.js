@@ -154,6 +154,21 @@ export default class ProductsBundleCreate extends Component {
         }
 
 
+    onClickUpdateBtn = (e) =>{
+        e.preventDefault();
+        try {
+            axios.put('/bundles/'+this.props.bundleEditId,  this.props.bundle_form )
+                .then(res => {
+
+                    this.props.handleUpdateListBundleCreate(res.data);
+                    this.resetForm();
+                    this.notify('Registro actualizado con éxito')
+
+                })
+        }catch (e) {
+            this.notifyError('No se pudo actualizar el registro')
+        }
+    }
 
 
 
@@ -172,11 +187,11 @@ export default class ProductsBundleCreate extends Component {
                                 <div className="row">
                                     <div className="col-xs-3">
                                         <input type="text" name="name" className="form-control" placeholder="Nombre del producto"
-                                               onChange={this.handleChange}/>
+                                               onChange={this.handleChange} value={this.props.bundle_form.name}/>
                                     </div>
                                     <div className="col-xs-7">
                                         <input type="text" name="description" className="form-control" placeholder="Descripción "
-                                               onChange={this.handleChange}/>
+                                               onChange={this.handleChange} value={this.props.bundle_form.description}/>
                                     </div>
 
                                 </div>
@@ -239,13 +254,15 @@ export default class ProductsBundleCreate extends Component {
                             </div>
                             <div className="box-body">
                                 <div className="row">
-                                    {this.props.priceTypes ? this.props.priceTypes.map((pricetype) => (
+                                    {this.props.priceTypes ? this.props.priceTypes.map((pricetype) => {
+                                        var nameProperty = "price_"+pricetype.id;
+                                        return(
                                         <div className="col-xs-2" key={pricetype.id}>
                                             <label >{pricetype.name}</label>
                                             <input type="number" name={"price_"+pricetype.id} className="form-control"
-                                                   onChange={this.handleChange}/>
-                                        </div>
-                                    )) : null}
+                                                   onChange={this.handleChange} value={this.props.bundle_form[nameProperty] || ""}/>
+                                        </div>)
+                                    }) : null}
 
                                 </div>
                             </div>
@@ -253,12 +270,26 @@ export default class ProductsBundleCreate extends Component {
                             <div className="box-body">
                                 <div className="row">
 
-                                    <div className="col-xs-2">
-                                        <button type="submit" className="btn btn-block btn-primary" >Crear</button>
-                                    </div>
-
+                                    {this.props.show_bundle_create_btn ?
+                                        <div className="col-xs-2">
+                                            <button type="submit" className="btn btn-block btn-primary" >Crear</button>
+                                        </div>
+                                        : null }
+                                    {this.props.show_bundle_update_btn ?
+                                        <div>
+                                            <div className="col-xs-3">
+                                                <button onClick={this.onClickUpdateBtn} type="" className="btn btn-block btn-primary">Actualizar
+                                                </button>
+                                            </div>
+                                            <div className="col-xs-2">
+                                                <button type="" className="btn btn-block default" onClick={this.props.onCancelBundleUpdate}>Cancelar
+                                                </button>
+                                            </div>
+                                        </div>
+                                        : null}
                                 </div>
                             </div>
+
 
                         </div>
                     </form>

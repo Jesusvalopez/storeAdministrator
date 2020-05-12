@@ -91,7 +91,12 @@ class BundlesController extends Controller
      */
     public function show(Bundle $bundle)
     {
-        //
+        $this->authorize('view', $bundle);
+
+        $bundle->load('price.priceType');
+
+
+        return response()->json($bundle);
     }
 
     /**
@@ -114,7 +119,64 @@ class BundlesController extends Controller
      */
     public function update(Request $request, Bundle $bundle)
     {
-        //
+        $this->authorize('update', $bundle);
+
+        $bundle->name = $request->get('name');
+        $bundle->description = $request->get('description');
+
+        $bundle->save();
+
+
+        foreach ($request->except(['name', 'description']) as $key => $value){
+
+            $price_type_id = str_replace('price_', '', $key);
+
+            $price_type_exists = true;
+
+            foreach ($bundle->price as $price){
+
+                //Son el mismo tipo de precio
+                if($price->price_type_id == $price_type_id){
+
+                    //Marcamos que tipo de precio existe para que no cree otro
+                    $price_type_exists = false;
+
+                    //Si tienen distinto valor de precio, marco como falso el anterior y creo uno nuevo.
+                    //De lo contrario no hay que hacer nada, el precio no debe ser actualizado
+                    if(!($value == $price->price)){
+                        $price->is_current_price = false;
+                        $price->save();
+
+                        $price = new Price();
+                        $price->price_type_id = $price_type_id;
+                        $price->price = $value;
+                        $price->is_current_price = true;
+
+                        $bundle->price()->save($price);
+
+                    }
+                }
+
+            }
+
+            //Si el tipo de precio no se encontró en la lista, es uno nuevo y hay que crearlo
+            if($price_type_exists){
+
+                $price = new Price();
+                $price->price_type_id = $price_type_id;
+                $price->price = $value;
+                $price->is_current_price = true;
+
+                $bundle->price()->save($price);
+
+            }
+
+
+        }
+
+        $bundle->load(['products', 'price']);
+
+        return response()->json($bundle);
     }
 
     /**

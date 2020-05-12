@@ -24,7 +24,7 @@ class ProductsController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -123,31 +123,68 @@ class ProductsController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, Product $product)
     {
 
         $this->authorize('update', $product);
-        /*
+
         $product->name = $request->get('name');
         $product->description = $request->get('description');
         $product->stock = $request->get('stock');
         $product->save();
 
 
-        foreach ($request->except(['name', 'description','stock']) as $key => $value){
+          foreach ($request->except(['name', 'description','stock']) as $key => $value){
 
-            $price = new Price();
-            $price->price_type_id = str_replace('price_', '', $key);
-            $price->price = $value;
+              $price_type_id = str_replace('price_', '', $key);
 
-            $product->price()->save($price);
+              $price_type_exists = true;
 
-        }
-        */
+              foreach ($product->price as $price){
 
-        return response()->json([$request->all(), $product]);
+                  //Son el mismo tipo de precio
+                  if($price->price_type_id == $price_type_id){
+
+                      //Marcamos que tipo de precio existe para que no cree otro
+                      $price_type_exists = false;
+
+                      //Si tienen distinto valor de precio, marco como falso el anterior y creo uno nuevo.
+                      //De lo contrario no hay que hacer nada, el precio no debe ser actualizado
+                      if(!($value == $price->price)){
+                          $price->is_current_price = false;
+                          $price->save();
+
+                          $price = new Price();
+                          $price->price_type_id = $price_type_id;
+                          $price->price = $value;
+                          $price->is_current_price = true;
+
+                          $product->price()->save($price);
+
+                      }
+                  }
+
+              }
+
+              //Si el tipo de precio no se encontró en la lista, es uno nuevo y hay que crearlo
+              if($price_type_exists){
+
+                  $price = new Price();
+                  $price->price_type_id = $price_type_id;
+                  $price->price = $value;
+                  $price->is_current_price = true;
+
+                  $product->price()->save($price);
+
+              }
+
+
+          }
+
+        $product->load('price');
+        return response()->json($product);
     }
 
     /**

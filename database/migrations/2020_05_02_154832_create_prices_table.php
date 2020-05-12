@@ -20,6 +20,7 @@ class CreatePricesTable extends Migration
             $table->integer('price_type_id');
             $table->foreign('price_type_id')->references('id')->on('price_types');
             $table->double('price');
+            $table->boolean('is_current_price');
             $table->softDeletes('deleted_at');
             $table->timestamps();
         });

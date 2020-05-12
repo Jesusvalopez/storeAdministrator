@@ -35,7 +35,11 @@ class BundlePolicy
      */
     public function view(User $user, Bundle $bundle)
     {
-        //
+        if ($user->can('view bundles')) {
+            return Response::allow();
+        }else{
+            return Response::deny('No tiene permisos para acceder.');
+        }
     }
 
     /**
@@ -62,7 +66,11 @@ class BundlePolicy
      */
     public function update(User $user, Bundle $bundle)
     {
-        //
+        if ($user->can('edit bundles')) {
+            return Response::allow();
+        }else{
+            return Response::deny('No tiene permisos para acceder.');
+        }
     }
 
     /**

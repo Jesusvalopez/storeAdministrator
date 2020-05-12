@@ -28,9 +28,13 @@ export default class Products extends Component {
             products: [],
             bundles: [],
             editId: null,
+            bundleEditId: null,
             pricesEditList: null,
+            bundlePricesEditList: null,
             show_create_btn: true,
+            show_bundle_create_btn: true,
             show_update_btn: false,
+            show_bundle_update_btn: false,
 
         }
 
@@ -49,6 +53,17 @@ export default class Products extends Component {
             bundle_form:{
                 ...this.state.bundle_form,
                 [e.target.name]: e.target.value
+            }
+        });
+    }
+    handleCancelBundleUpdate = () => {
+        this.setState({
+            show_bundle_create_btn: true,
+            show_bundle_update_btn: false,
+            bundle_form : {
+                name: '',
+                description:'',
+                stock: '',
             }
         });
     }
@@ -74,14 +89,67 @@ export default class Products extends Component {
 
     handleUpdateListBundleCreate = (element) => {
 
-        this.setState({bundles: [element].concat(this.state.bundles)});
-    }
-    handleUpdateListBundle = (bundlesList) => {
+    //    this.setState({bundles: [element].concat(this.state.bundles)});
 
-        this.setState({bundles: bundlesList});
+        this.setState(prevState => {
+
+
+            //traigo productos anteriores
+            const bundles = [...prevState.bundles];
+
+            //los recorro
+            const new_bundles = bundles.map(bundle => {
+
+                //si es el mismo producto, lo actualizao
+                if(bundle.id === element.id){
+                    console.log(element);
+                    return element;
+                }
+                return bundle;
+
+            });
+            return {bundles:new_bundles
+            };
+
+        });
+
+        this.handleCancelBundleUpdate();
+
+    }
+
+    handleUpdateListBundle = (element) => {
+
+        this.setState({bundles: element});
+
+
+
     }
     handleUpdateListElement = (element) => {
-        this.setState({products: [element].concat(this.state.products)});
+       // this.setState({products: [element].concat(this.state.products)});
+
+        this.setState(prevState => {
+
+
+            //traigo productos anteriores
+            const products = [...prevState.products];
+
+            //los recorro
+            const new_products = products.map(product => {
+
+                //si es el mismo producto, lo actualizao
+                if(product.id === element.id){
+
+                    return element;
+                }
+                return product;
+
+            });
+            return {products:new_products
+                 };
+
+        });
+
+        this.handleCancelUpdate();
 
     }
     handleUpdateBundles = (bundles) => {
@@ -96,6 +164,37 @@ export default class Products extends Component {
 
 
 
+    handleOnEditBundle = (id) => {
+        axios.get('/bundles/'+id)
+            .then(res => {
+
+                var prices = {};
+                res.data.price.map(price=>{
+                    prices["price_"+price.price_type_id] = price.price;
+
+                })
+
+                this.setState({
+                    bundle_form: {name: res.data.name, description: res.data.description,
+                        ...prices,
+
+                    },
+                    show_bundle_create_btn: false,
+                    show_bundle_update_btn: true,
+                    bundleEditId: id,
+                }, () =>{
+
+
+
+                });
+
+            })
+            .catch((error) => {
+                this.setState({
+                    error: error
+                });
+            });
+    }
     handleOnEdit = (id) => {
 
         axios.get('/products/'+id)
@@ -108,7 +207,7 @@ export default class Products extends Component {
                 })
 
                 this.setState({
-                    form: {name: res.data.name, description: res.data.description, stock: res.data.stock, editId:res.data.id,
+                    form: {name: res.data.name, description: res.data.description, stock: res.data.stock,
                         ...prices,
 
                     },
@@ -158,8 +257,13 @@ export default class Products extends Component {
                                                          onUpdateBundleForm={this.handleUpdateBundleForm}
                                                          onUpdateBundleProducts={this.onUpdateBundleProducts}
                                                          priceTypes={this.state.pricetypes}
+                                                               bundlePricesEditList={this.state.bundlePricesEditList}
+                                                               show_bundle_create_btn={this.state.show_bundle_create_btn}
+                                                               show_bundle_update_btn={this.state.show_bundle_update_btn}
+                                                               onCancelBundleUpdate={this.handleCancelBundleUpdate}
+                                                               bundleEditId={this.state.bundleEditId}
                 /> : null}
-                {this.props.showList ? <ProductsBundleList bundles={this.state.bundles} onUpdateListBundleCreate={this.handleUpdateListBundleCreate} onUpdateListBundle={this.handleUpdateListBundle} onEdit={this.handleOnEdit}/>: null}
+                {this.props.showList ? <ProductsBundleList bundles={this.state.bundles} onUpdateListBundleCreate={this.handleUpdateListBundleCreate} onUpdateBundleListElement={this.handleUpdateListBundle} onEdit={this.handleOnEditBundle}/>: null}
                 </div>
             </div>
         );

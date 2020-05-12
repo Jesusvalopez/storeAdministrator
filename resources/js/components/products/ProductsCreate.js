@@ -44,8 +44,8 @@ export default class ProductsCreate extends Component {
         try {
             axios.put('/products/'+this.props.editId,  this.props.form )
                 .then(res => {
-console.log(res.data);
-                    //this.props.onUpdateListElement(res.data);
+
+                    this.props.onUpdateListElement(res.data);
                     this.resetForm();
                     this.notify('Registro actualizado con éxito')
 
