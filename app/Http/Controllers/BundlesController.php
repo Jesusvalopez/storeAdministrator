@@ -65,6 +65,7 @@ class BundlesController extends Controller
             $price = new Price();
             $price->price_type_id = str_replace('price_', '', $key);
             $price->price = $value;
+            $price->is_current_price = true;
             $bundle->price()->save($price);
 
         }
@@ -77,9 +78,8 @@ class BundlesController extends Controller
 
         }
 
-        $bundle->price;
-        $bundle->products;
 
+        $bundle->load(['products', 'price']);
         return response()->json($bundle);
     }
 

@@ -160,7 +160,7 @@ export default class ProductsBundleCreate extends Component {
             axios.put('/bundles/'+this.props.bundleEditId,  this.props.bundle_form )
                 .then(res => {
 
-                    this.props.handleUpdateListBundleCreate(res.data);
+                    this.props.handleUpdateListBundleEdit(res.data);
                     this.resetForm();
                     this.notify('Registro actualizado con éxito')
 

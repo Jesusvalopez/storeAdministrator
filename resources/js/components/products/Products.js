@@ -63,7 +63,6 @@ export default class Products extends Component {
             bundle_form : {
                 name: '',
                 description:'',
-                stock: '',
             }
         });
     }
@@ -88,6 +87,12 @@ export default class Products extends Component {
     }
 
     handleUpdateListBundleCreate = (element) => {
+console.log(element);
+            this.setState({bundles: [element].concat(this.state.bundles)});
+    }
+
+
+    handleUpdateListBundleEdit = (element) => {
 
     //    this.setState({bundles: [element].concat(this.state.bundles)});
 
@@ -102,7 +107,7 @@ export default class Products extends Component {
 
                 //si es el mismo producto, lo actualizao
                 if(bundle.id === element.id){
-                    console.log(element);
+
                     return element;
                 }
                 return bundle;
@@ -124,8 +129,11 @@ export default class Products extends Component {
 
 
     }
+    handleCreateListElement = (element) => {
+        this.setState({products: [element].concat(this.state.products)});
+    }
     handleUpdateListElement = (element) => {
-       // this.setState({products: [element].concat(this.state.products)});
+
 
         this.setState(prevState => {
 
@@ -239,6 +247,7 @@ export default class Products extends Component {
                 {this.props.showCreate ? <ProductsCreate form={this.state.form}
                                                          onUpdatePriceTypes={this.handleUpdatePriceTypes}
                                                          onUpdateListElement={this.handleUpdateListElement}
+                                                         onCreateListElement={this.handleCreateListElement}
                                                          onUpdateForm={this.handleUpdateForm}
                                                          priceTypes={this.state.pricetypes}
                                                          pricesEditList={this.state.pricesEditList}
@@ -254,6 +263,7 @@ export default class Products extends Component {
                                                                bundle_form={this.state.bundle_form}
                                                          onUpdateBundles={this.handleUpdateBundles}
                                                          handleUpdateListBundleCreate={this.handleUpdateListBundleCreate}
+                                                         handleUpdateListBundleEdit={this.handleUpdateListBundleEdit}
                                                          onUpdateBundleForm={this.handleUpdateBundleForm}
                                                          onUpdateBundleProducts={this.onUpdateBundleProducts}
                                                          priceTypes={this.state.pricetypes}
@@ -263,7 +273,7 @@ export default class Products extends Component {
                                                                onCancelBundleUpdate={this.handleCancelBundleUpdate}
                                                                bundleEditId={this.state.bundleEditId}
                 /> : null}
-                {this.props.showList ? <ProductsBundleList bundles={this.state.bundles} onUpdateListBundleCreate={this.handleUpdateListBundleCreate} onUpdateBundleListElement={this.handleUpdateListBundle} onEdit={this.handleOnEditBundle}/>: null}
+                {this.props.showList ? <ProductsBundleList bundles={this.state.bundles} onUpdateListBundleCreate={this.handleUpdateListBundleCreate} onUpdateListBundle={this.handleUpdateListBundle} onEdit={this.handleOnEditBundle}/>: null}
                 </div>
             </div>
         );

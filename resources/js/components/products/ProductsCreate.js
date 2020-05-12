@@ -60,7 +60,7 @@ export default class ProductsCreate extends Component {
             axios.post('/products',  this.props.form )
                 .then(res => {
 
-                    this.props.onUpdateListElement(res.data);
+                    this.props.onCreateListElement(res.data);
                     this.resetForm();
                     this.notify('Registro creado con éxito')
 

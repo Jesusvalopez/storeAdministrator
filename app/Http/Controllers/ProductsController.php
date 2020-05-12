@@ -81,13 +81,14 @@ class ProductsController extends Controller
             $price = new Price();
             $price->price_type_id = str_replace('price_', '', $key);
             $price->price = $value;
+            $price->is_current_price = true;
 
             $product->price()->save($price);
 
         }
 
 
-
+       // $prduct->load('price');
         return response()->json($product);
     }
 
