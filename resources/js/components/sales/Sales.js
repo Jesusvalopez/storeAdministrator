@@ -19,7 +19,7 @@ export default class Sales extends Component {
         this.state = {
 
             pricetypes : [],
-            selected_price_type_id : 1,
+            selected_price_type_id : 4,
             products : [],
 
             products_on_sale :{
@@ -62,7 +62,7 @@ export default class Sales extends Component {
                 this.setState({
 
                     pricetypes: res.data,
-                    selected_price_type_id: res.data[0].id
+                    //selected_price_type_id: res.data[0].id
 
                 });
             })
@@ -576,7 +576,7 @@ export default class Sales extends Component {
                                 <div className="row">
                                 <div className="col-xs-3">
                                 <label htmlFor="">Tipo de precio</label>
-                                    <select id="priceType" name="priceType"  className="form-control" value={this.selected_price_type_id} onChange={this.handleChangePriceType}>
+                                    <select id="priceType" name="priceType"  className="form-control" value={this.state.selected_price_type_id} onChange={this.handleChangePriceType}>
                                         {this.state.pricetypes.map((pricetype) => (
                                             <option key={pricetype.id} value={pricetype.id} >{pricetype.name}</option>
                                         ))}
