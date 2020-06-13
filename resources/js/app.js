@@ -23,3 +23,4 @@ require('./components/sales/Sales');
 require('./components/sales/SalesList');
 require('./components/discounts/Discounts');
 require('./components/paymentmethods/PaymentMethods');
+require('./components/cashboxes/Cashboxes');

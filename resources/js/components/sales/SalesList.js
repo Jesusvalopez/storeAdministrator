@@ -353,7 +353,7 @@ export default class SalesList extends Component {
             <div>
 
 
-                <div className="col-xs-2">
+                <div className="col-lg-2 col-md-3 col-xs-6">
                     <div className="small-box bg-green">
 
                         <div className="inner">
@@ -370,7 +370,7 @@ export default class SalesList extends Component {
                     </div>
                 </div>
 
-                <div className="col-xs-2">
+                <div className="col-lg-2 col-md-3 col-xs-6">
                     <div className="small-box bg-green">
                         <div className="inner">
                             {this.state.ventas_brutas_totales != null ?
@@ -385,7 +385,7 @@ export default class SalesList extends Component {
                     </div>
                 </div>
 
-                <div className="col-xs-2">
+                <div className="col-lg-2 col-md-3 col-xs-6">
                     <div className="small-box bg-yellow">
                         <div className="inner">
                             {this.state.comisiones_totales != null ?
@@ -400,7 +400,7 @@ export default class SalesList extends Component {
 
                     </div>
                 </div>
-                <div className="col-xs-2">
+                <div className="col-lg-2 col-md-3 col-xs-6">
                     <div className="small-box bg-yellow">
                         <div className="inner">
                             {this.state.descuentos_totales != null ?
@@ -416,7 +416,7 @@ export default class SalesList extends Component {
                     </div>
                 </div>
 
-                <div className="col-xs-2">
+                <div className="col-lg-2 col-md-3 col-xs-6">
                     <div className="small-box bg-green">
                         <div className="inner">
                             {this.state.ventas_netas_totales != null ?

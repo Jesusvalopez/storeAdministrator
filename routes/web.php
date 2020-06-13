@@ -42,5 +42,6 @@ Route::resource('discounts', 'DiscountsController');
 Route::post('/sales/listing-date', 'SalesController@listingDate');
 Route::get('/sales/listing', 'SalesController@listing');
 Route::resource('sales', 'SalesController');
+Route::resource('cashboxes', 'CashBoxesController');
 
 

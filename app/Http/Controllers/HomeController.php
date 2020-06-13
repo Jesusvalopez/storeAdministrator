@@ -26,6 +26,8 @@ class HomeController extends Controller
      */
     public function index()
     {
+
+
 /*
         Role::create(['name' => 'Administrador']);
 
@@ -80,6 +82,16 @@ class HomeController extends Controller
         $role->givePermissionTo('create bundles');
         $role->givePermissionTo('edit bundles');
         $role->givePermissionTo('delete bundles');
+
+        Permission::create(['name' => 'create cashboxes']);
+        Permission::create(['name' => 'edit cashboxes']);
+        Permission::create(['name' => 'delete cashboxes']);
+        Permission::create(['name' => 'view cashboxes']);
+        $role->givePermissionTo('view cashboxes');
+        $role->givePermissionTo('create cashboxes');
+        $role->givePermissionTo('edit cashboxes');
+        $role->givePermissionTo('delete cashboxes');
+
 
         $user = Auth::user();
         $user->assignRole('Administrador');
