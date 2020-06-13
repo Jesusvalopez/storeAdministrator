@@ -21,6 +21,22 @@
         </ul>
     </li>
 </ul>
+
+<ul class="sidebar-menu" data-widget="tree">
+
+    <li class="treeview">
+        <a href="#"><i class="fa fa-area-chart"></i> <span>Reportes</span>
+            <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+        </a>
+        <ul class="treeview-menu">
+            @can('view sales')
+                <li><a href="{{route('sales.reports')}}">Reportes de Ventas</a></li>
+            @endcan
+        </ul>
+    </li>
+</ul>
 <ul class="sidebar-menu" data-widget="tree">
 
     <li class="treeview">

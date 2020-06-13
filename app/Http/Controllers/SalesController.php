@@ -178,4 +178,36 @@ class SalesController extends Controller
     {
         //
     }
+
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function reports()
+    {
+        $this->authorize('viewAny', Sale::class);
+
+        return view('sales.reports');
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reportsByDate(Request $request)
+    {
+        $start_date =  $request->get('start_date');
+        $end_date =  $request->get('end_date');
+
+        $this->authorize('viewAny', Sale::class);
+        $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
+            ->whereRaw("created_at::date BETWEEN '".$start_date."' and '".$end_date."'")->orderBy('created_at', 'asc')->get();
+        $sales_orderBy = $sales->groupBy('date');
+
+        return response()->json(["sales"=>$sales, "salesOrderBy"=>$sales_orderBy]);
+    }
+
 }

@@ -21,5 +21,6 @@ require('./components/products/ProductsBundleCreate');
 require('./components/products/Products');
 require('./components/sales/Sales');
 require('./components/sales/SalesList');
+require('./components/sales/SalesReport');
 require('./components/discounts/Discounts');
 require('./components/paymentmethods/PaymentMethods');
