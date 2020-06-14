@@ -19,7 +19,11 @@ class CashboxPolicy
      */
     public function viewAny(User $user)
     {
-        //
+        if ($user->can('view cashboxes')) {
+            return Response::allow();
+        }else{
+            return Response::deny('No tiene permisos para acceder.');
+        }
     }
 
     /**

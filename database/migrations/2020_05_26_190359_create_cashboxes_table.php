@@ -17,8 +17,10 @@ class CreateCashboxesTable extends Migration
             $table->id();
             $table->tinyInteger('cashbox_type');
             $table->double('difference');
-            $table->string('details', 100);
-            $table->tinyInteger('cashbox_source');
+            $table->string('details', 100)->nullable();
+            $table->tinyInteger('cashbox_source')->nullable();
+            $table->integer('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
             $table->softDeletes('deleted_at');
         });
