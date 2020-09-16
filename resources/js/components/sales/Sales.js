@@ -574,7 +574,7 @@ export default class Sales extends Component {
                             <div className="box-body">
 
                                 <div className="row">
-                                <div className="col-xs-3">
+                                <div className="col-xs-12 col-md-3 col-sm-6 col-lg-3">
                                 <label htmlFor="">Tipo de precio</label>
                                     <select id="priceType" name="priceType"  className="form-control" value={this.state.selected_price_type_id} onChange={this.handleChangePriceType}>
                                         {this.state.pricetypes.map((pricetype) => (
@@ -585,7 +585,7 @@ export default class Sales extends Component {
                                     <br/>
                                 </div>
                                 <div className="row">
-                                    <div className="col-xs-6">
+                                    <div className="col-xs-12 col-md-6">
                                         <label htmlFor="">Producto</label>
                                         <Select id="products" name="products" components={{ Placeholder }} value={this.state.product_selected_value}
                                                  placeholder={'Seleccione'} onChange={this.handleSelectChange} options={this.state.products.map((product)=>{
@@ -598,7 +598,7 @@ export default class Sales extends Component {
                                         })} />
 
                                     </div>
-                                    <div className="col-xs-2">
+                                    <div className="col-xs-6 col-md-2">
                                         <label htmlFor="">Cantidad</label>
                                         <input id="productAddQuantity" type="number" name="quantity" className="form-control" placeholder="" onKeyUp={this.productQuantityKeyUp}
                                         />
@@ -608,7 +608,7 @@ export default class Sales extends Component {
                             <div className="box-body">
                                 <div className="row">
 
-                                    <div className="col-xs-2">
+                                    <div className="col-xs-12 col-md-2">
                                         <button type="" className="btn btn-block btn-primary" onClick={this.handleAddProduct}>Agregar</button>
                                     </div>
 
