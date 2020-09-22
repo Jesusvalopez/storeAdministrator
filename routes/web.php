@@ -44,5 +44,7 @@ Route::post('/sales/reports-by-date', 'SalesController@reportsByDate');
 Route::get('/sales/listing', 'SalesController@listing');
 Route::get('/sales/reports', 'SalesController@reports')->name('sales.reports');;
 Route::resource('sales', 'SalesController');
+Route::resource('expenses', 'ExpensesController');
+Route::resource('expense-products', 'ExpenseProductsController');
 
 
