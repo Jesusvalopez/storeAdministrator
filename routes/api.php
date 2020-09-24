@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,12 +15,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::post('/webhooks/new-order', 'EventsController@newOrder');
+
+/*
 Route::post('/webhooks/new-order', function (Request $request) {
     //fb5ab8b4-d616-427d-8cdb-cf6a429dd5f2
 
     \Log::info($request->all());
 
+    event(new app\Events\NewOrder('NUEVA ORDEN'));
+
 });
+*/
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

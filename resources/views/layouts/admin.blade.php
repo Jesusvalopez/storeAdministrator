@@ -288,6 +288,97 @@
     immediately after the control sidebar -->
     <div class="control-sidebar-bg"></div>
 </div>
+
+<audio id="audio" controls style="display: none;">
+    <source type="audio/wav" src="/alerts/audio_alerta.mp4">
+</audio>
+
+
+<style>
+    .modal-2 {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+
+    /* The Close Button */
+    .close-2 {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close-2:hover,
+    .close-2:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .modal-header-2 {
+        padding: 0px 16px;
+
+        color: black;
+    }
+
+    /* Modal Body */
+    .modal-body-2 {padding: 2px 16px;}
+
+    /* Modal Footer */
+    .modal-footer-2 {
+        padding: 10px 16px;
+
+        color: black;
+    }
+
+    /* Modal Content */
+    .modal-content-2 {
+        position: relative;
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 0;
+        border: 1px solid #888;
+        width: 60%;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+        animation-name: animatetop;
+        animation-duration: 0.4s
+    }
+
+    /* Add Animation */
+    @keyframes animatetop {
+        from {top: -300px; opacity: 0}
+        to {top: 0; opacity: 1}
+    }
+</style>
+
+<div id="myModal" class="modal-2">
+
+    <!-- Modal content -->
+    <div class="modal-content-2">
+        <div class="modal-header-2">
+
+            <h3>Nuevo pedido</h3>
+        </div>
+        <div class="modal-body-2">
+            <p>Pedido #<span id="order-number-text"></span></p>
+
+        </div>
+        <div class="modal-footer-2 text-center">
+            <button onclick="closeAlertAndOpenWoocommerce()" class="btn btn-primary btn-lg">Aceptar</button>
+        </div>
+    </div>
+
+</div>
+
 <!-- ./wrapper -->
 
 <!-- REQUIRED JS SCRIPTS -->
@@ -301,6 +392,58 @@
 <script src="/dist/js/adminlte.min.js"></script>
 @yield('added-js')
 <script src="/js/app.js"></script>
+
+<script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+
+<script>
+
+    URL_W = '';
+
+    // Enable pusher logging - don't include this in production
+    Pusher.logToConsole = true;
+
+    var pusher = new Pusher('cbbc83069f167d91bc15', {
+        cluster: 'us2'
+    });
+
+    var channel = pusher.subscribe('orders-channel');
+    channel.bind('new-order', function(data) {
+        var order_number = data.message.order_number;
+        URL_W = data.message.url;
+
+        var order_number_span = document.getElementById("order-number-text");
+
+        order_number_span.innerHTML = order_number;
+
+
+        var audio = document.getElementById("audio");
+
+        audio.play();
+
+        //alert(JSON.stringify(url));
+
+        document.getElementById("myModal").style.display= "block";
+
+
+
+
+    });
+</script>
+
+<script>
+
+    function closeAlertAndOpenWoocommerce() {
+        document.getElementById("myModal").style.display= "none";
+        audio.pause();
+        audio.currentTime = 0;
+
+        var win = window.open(URL_W, '_blank');
+        // Cambiar el foco al nuevo tab (punto opcional)
+        //win.focus();
+
+    }
+
+</script>
 
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
      Both of these plugins are recommended to enhance the
