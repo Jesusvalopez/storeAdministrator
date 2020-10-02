@@ -34,10 +34,11 @@
             @can('create expenses')
                 <li><a href="{{route('expenses.create')}}">Crear gasto</a></li>
             @endcan
+            <!--
             @can('view expenses')
                 <li><a href="{{route('expenses.index')}}">Ver Detalle de gastos</a></li>
             @endcan
-
+-->
         </ul>
     </li>
 </ul>
