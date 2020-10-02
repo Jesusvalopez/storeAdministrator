@@ -144,11 +144,21 @@ class ExpensesController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Sale  $sale
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Sale $sale)
+    public function destroy(Expense $expense)
     {
-        //
+
+        $this->authorize('delete', $expense);
+
+        $expense->delete();
+
+        //$expenses = Expense::orderBy('id', 'desc')->get();
+        $expenses = Expense::with(['expenseDetails.product'])->orderBy('id', 'desc')->limit(20)->get();
+
+
+        return response()->json($expenses);
+
     }
 
 

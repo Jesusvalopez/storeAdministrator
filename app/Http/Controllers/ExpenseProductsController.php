@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 class ExpenseProductsController extends Controller
 {
 
+    private $limit = 100;
+
     /**
      * Create a new controller instance.
      *
@@ -31,7 +33,7 @@ class ExpenseProductsController extends Controller
     {
         $this->authorize('viewAny', ExpenseProduct::class);
 
-        $expenseProducts = ExpenseProduct::orderBy('id', 'desc')->limit(10)->get();
+        $expenseProducts = ExpenseProduct::orderBy('id', 'desc')->limit($this->limit)->get();
 
         return response()->json($expenseProducts);
     }
@@ -153,9 +155,11 @@ class ExpenseProductsController extends Controller
      * @param  \App\Sale  $sale
      * @return \Illuminate\Http\Response
      */
-    public function show(Sale $sale)
+    public function show(ExpenseProduct $expenseProduct)
     {
-        //
+        $this->authorize('view', $expenseProduct);
+
+        return response()->json($expenseProduct);
     }
 
     /**
@@ -164,7 +168,7 @@ class ExpenseProductsController extends Controller
      * @param  \App\Sale  $sale
      * @return \Illuminate\Http\Response
      */
-    public function edit(Sale $sale)
+    public function edit(ExpenseProduct $expenseProduct)
     {
         //
     }
@@ -174,11 +178,20 @@ class ExpenseProductsController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Sale  $sale
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Sale $sale)
+    public function update(Request $request, ExpenseProduct $expenseProduct)
     {
-        //
+        $this->authorize('update', $expenseProduct);
+
+        $expenseProduct->name = $request->get('name');
+        $expenseProduct->description = $request->get('description');
+        $expenseProduct->price = $request->get('price');
+        $expenseProduct->save();
+
+        $expenseProducts = ExpenseProduct::orderBy('id', 'desc')->limit($this->limit)->get();
+
+        return response()->json($expenseProducts);
     }
 
     /**

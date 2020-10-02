@@ -74,7 +74,11 @@ class ExpensePolicy
      */
     public function delete(User $user, Expense $expense)
     {
-        //
+        if ($user->can('delete expenses')) {
+            return Response::allow();
+        }else{
+            return Response::deny('No tiene permisos para acceder.');
+        }
     }
 
     /**

@@ -9,6 +9,7 @@ import DatePicker from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
 import Moment from "moment";
+import ExpenseProductsEdit from "../expenses/ExpenseProductsEdit";
 const Placeholder = props => {
     return <components.Placeholder {...props} />;
 };
@@ -24,15 +25,28 @@ export default class Expenses extends Component {
                 description: '',
                 price: '',
             },
+            formEdit:{
+                name: '',
+                description: '',
+                price: '',
+                editId: null,
+            },
             products: [],
             expenses: [],
             start_date: Date.now(),
             selected_value: null,
             product_selected_value: null,
             quantity: 0,
+            show:false,
+            text: '¿Está seguro que desea eliminar el registro?',
+            deleteId: null,
+            showExpenseProductsEdit: false,
+            showExpenseProductsCreate: true,
+
 
         }
 
+        this.handleClose = this.handleClose.bind(this);
         toast.configure();
     }
 
@@ -113,9 +127,7 @@ export default class Expenses extends Component {
 
     }
 
-    resetForm = () => {
-        document.getElementById("createProductForm").reset();
-    }
+
 
     handleCreateExpenseSubmit = (e) =>{
         e.preventDefault();
@@ -127,6 +139,7 @@ export default class Expenses extends Component {
                 axios.post('/expenses',   data)
                     .then(res => {
                         this.setState({expenses: [res.data].concat(this.state.expenses)});
+
                         //  this.props.onCreateListElement(res.data);
                        // this.resetForm();
                         this.notify('Gasto creado con éxito')
@@ -151,9 +164,14 @@ export default class Expenses extends Component {
             try {
                 axios.post('/expense-products',  this.state.form )
                     .then(res => {
-                        this.setState({products: [res.data].concat(this.state.products)});
+                        this.setState({products: [res.data].concat(this.state.products),
+                            form:{
+                                name: '',
+                                description: '',
+                                price: '',
+                            }});
                       //  this.props.onCreateListElement(res.data);
-                        this.resetForm();
+                       // this.resetForm();
                         this.notify('Registro creado con éxito')
 
                     }).catch(err => {
@@ -203,6 +221,104 @@ export default class Expenses extends Component {
             product_selected_value: e,
         })
         document.getElementById("quantity").focus();
+    }
+
+    handleShow = (id) => {
+        this.setState({
+            show:true,
+            deleteId: id,
+
+        });
+    }
+
+    handleClose(e){
+        this.setState({
+            show:false
+        });
+    }
+
+    deleteAction = (e) =>{
+        e.preventDefault();
+        try {
+
+            // <input type="hidden" name="_method" value="delete">//{params: {id: id}})
+
+            axios.delete('/expenses/'+this.state.deleteId,  )
+                .then(res => {
+                    this.setState({
+                        expenses: res.data,
+                        show: false,
+
+                    });
+                    this.notify('Registro eliminado con éxito')
+
+                })
+
+
+
+        }catch (e) {
+            this.notifyError('No se pudo eliminar el registro')
+        }
+    }
+
+
+    handleEditHide = () => {
+        this.setState({
+            showExpenseProductsEdit:false,
+            showExpenseProductsCreate: true,
+        });
+    }
+
+    handleChangeEdit = (e) =>{
+
+        this.setState({
+            formEdit:{
+                ...this.state.formEdit,
+                [e.target.name]: e.target.value
+            }
+        });
+    }
+
+    handleSubmitEdit = (e) =>{
+        e.preventDefault();
+        try {
+            axios.put('/expense-products/'+this.state.formEdit.editId,  this.state.formEdit )
+                .then(res => {
+                    this.setState({
+                        products: res.data,
+                        formEdit:{
+                            name: '',
+                            description: '',
+                            price: '',
+                            editId: null,
+                        }
+                    });
+                    this.handleEditHide();
+                    this.notify('Registro modificado con éxito')
+                })
+        }catch (e) {
+            this.notifyError('No se pudo editar el registro')
+        }
+    }
+
+    handleEditShow = (id) => {
+
+        axios.get('/expense-products/'+id)
+            .then(res => {
+                this.setState({
+                    formEdit: {name: res.data.name, price:res.data.price, description: res.data.description,editId:res.data.id},
+                });
+            })
+            .catch((error) => {
+                this.setState({
+                    error: error
+                });
+            });
+
+        this.setState({
+            showExpenseProductsEdit: true,
+            showExpenseProductsCreate: false,
+        });
     }
 
     render(){
@@ -309,9 +425,11 @@ export default class Expenses extends Component {
                                                 <tr key={expense.id}>
                                                     <td className="text-center">{expense.id}</td>
                                                     <td className="text-center">{expense.expense_details[0].product.name}</td>
-                                                    <td className="text-center">{expense.expense_date}</td>
+                                                    <td className="text-center">{expense.date}</td>
                                                     <td className="text-center">{expense.expense_details[0].quantity}</td>
                                                     <td className="text-center">{this.convertNumber(Math.round(expense.expense_details[0].quantity * expense.expense_details[0].product.price))}</td>
+                                                    <td className="text-center"><a href="#" className="btn btn-danger" onClick={() => this.handleShow(expense.id)}><i
+                                                        className="fa fa-times"></i></a></td>
 
                                                 </tr>
                                             )) : null}
@@ -344,6 +462,9 @@ export default class Expenses extends Component {
                 <div className="col-xs-6">
 
                     <div className="row">
+
+
+                        { this.state.showExpenseProductsCreate ?
                         <div className="col-md-12">
                             <form id="createProductForm" action="/" method="" onSubmit={this.handleCreateSubmit}>
 
@@ -386,7 +507,15 @@ export default class Expenses extends Component {
 
                                 </div>
                             </form>
-                        </div>
+                        </div> : null }
+
+                        { this.state.showExpenseProductsEdit ? <ExpenseProductsEdit form = {this.state.formEdit}
+                                                                      onCancel={this.handleEditHide}
+                                                                      onChange={this.handleChangeEdit}
+
+                                                                      onSubmit={this.handleSubmitEdit}/> : null }
+
+
                     </div>
 
                     <div className="row">
@@ -419,7 +548,8 @@ export default class Expenses extends Component {
                                                         <td className="text-center">{product.name}</td>
                                                         <td className="text-center">{product.description}</td>
                                                         <td className="text-center">{product.price}</td>
-                                                        <td className="text-center"></td>
+                                                        <td className="text-center"><a href="#" className="btn btn-primary" onClick={() => this.handleEditShow(product.id)}><i
+                                                            className="fa fa-edit" ></i></a></td>
 
                                                     </tr>
                                                 )) : null}
@@ -444,10 +574,10 @@ export default class Expenses extends Component {
 
 
 
-
-
-
+                <ConfirmModal handleClose={this.handleClose} show={this.state.show} text={this.state.text} action={this.deleteAction}/>
             </div>
+
+
         );
     }
 }

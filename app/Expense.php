@@ -10,15 +10,15 @@ class Expense extends Model
 
     use SoftDeletes;
 
-    //protected $appends = ['date', 'date_time'];
+    protected $appends = ['date'];
 
 
 
-   /* public function getDateAttribute(){
-        $date = date('d/m/y', strtotime($this->created_at));
+    public function getDateAttribute(){
+        $date = date('d/m/Y', strtotime($this->expense_date));
         return $date;
     }
-
+/*
 
     public function getDateTimeAttribute(){
         $date = date('d/m/y H:i:s', strtotime($this->created_at));

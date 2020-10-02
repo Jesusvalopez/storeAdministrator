@@ -35,7 +35,11 @@ class ExpenseProductPolicy
      */
     public function view(User $user, ExpenseProduct $expense)
     {
-        //
+        if ($user->can('view expense products')) {
+            return true;
+        }else{
+            return false;
+        }
     }
 
     /**
@@ -62,7 +66,11 @@ class ExpenseProductPolicy
      */
     public function update(User $user, ExpenseProduct $expense)
     {
-        //
+        if ($user->can('edit expense products')) {
+            return Response::allow();
+        }else{
+            return Response::deny('No tiene permisos para acceder.');
+        }
     }
 
     /**
