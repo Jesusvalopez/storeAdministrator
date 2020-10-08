@@ -112,14 +112,14 @@ export default class Expenses extends Component {
 
     validateExpenseInputs = () => {
 
-        var price_value = parseInt(document.getElementById("quantity").value);
+        var price_value = (document.getElementById("quantity").value);
 
         if(!this.state.selected_value){
             this.notifyWarning('Debe seleccionar un producto o servicio');
             return false;
         }
 
-        if(isNaN(price_value) || price_value < 1){
+        if(isNaN(price_value) || price_value < 0.1){
             this.notifyWarning('Debe agregar cantidad');
             document.getElementById("quantity").focus();
             return false;
