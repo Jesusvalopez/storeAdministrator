@@ -56,6 +56,7 @@ export default class Expenses extends Component {
                 this.setState({
                     products: res.data
                 });
+
                // this.state.products(res.data);
             })
             .catch((error) => {
@@ -67,6 +68,7 @@ export default class Expenses extends Component {
                 this.setState({
                     expenses: res.data
                 });
+
                 // this.state.products(res.data);
             })
             .catch((error) => {
@@ -245,6 +247,7 @@ export default class Expenses extends Component {
 
             axios.delete('/expenses/'+this.state.deleteId,  )
                 .then(res => {
+
                     this.setState({
                         expenses: res.data,
                         show: false,
@@ -291,8 +294,10 @@ export default class Expenses extends Component {
                             description: '',
                             price: '',
                             editId: null,
+
                         }
                     });
+                  //  console.log(res.data);
                     this.handleEditHide();
                     this.notify('Registro modificado con éxito')
                 })
@@ -301,12 +306,29 @@ export default class Expenses extends Component {
         }
     }
 
+    getProperPrice = (expense) => {
+
+        var price = '';
+
+        if(expense.expense_details[0].price){
+         price =  expense.expense_details[0].price.price;
+        }else{
+            price = expense.expense_details[0].product.price;
+        }
+
+        return price;
+
+
+    }
+
     handleEditShow = (id) => {
 
         axios.get('/expense-products/'+id)
             .then(res => {
                 this.setState({
-                    formEdit: {name: res.data.name, price:res.data.price, description: res.data.description,editId:res.data.id},
+                    formEdit: {name: res.data.name,
+                        price:res.data.prices ? res.data.prices.length > 0 ? res.data.prices[0].price : res.data.price : res.data.price,
+                        description: res.data.description,editId:res.data.id},
                 });
             })
             .catch((error) => {
@@ -354,7 +376,7 @@ export default class Expenses extends Component {
                                             </div>
 
                                             <div className="col-xs-3">
-                                                <input id ="quantity" type="number" name="quantity" className="form-control" placeholder="Cantidad"
+                                                <input id ="quantity" type="number" step="0.1" name="quantity" className="form-control" placeholder="Cantidad"
                                                        onChange={this.handleQuantityChange}/>
                                             </div>
 
@@ -427,7 +449,7 @@ export default class Expenses extends Component {
                                                     <td className="text-center">{expense.expense_details[0].product.name}</td>
                                                     <td className="text-center">{expense.date}</td>
                                                     <td className="text-center">{expense.expense_details[0].quantity}</td>
-                                                    <td className="text-center">{this.convertNumber(Math.round(expense.expense_details[0].quantity * expense.expense_details[0].product.price))}</td>
+                                                    <td className="text-center">{this.convertNumber(Math.round(expense.expense_details[0].quantity * this.getProperPrice(expense)))}</td>
                                                     <td className="text-center"><a href="#" className="btn btn-danger" onClick={() => this.handleShow(expense.id)}><i
                                                         className="fa fa-times"></i></a></td>
 
@@ -547,7 +569,7 @@ export default class Expenses extends Component {
                                                     <tr key={product.id}>
                                                         <td className="text-center">{product.name}</td>
                                                         <td className="text-center">{product.description}</td>
-                                                        <td className="text-center">{product.price}</td>
+                                                        <td className="text-center">{product.prices ? product.prices.length > 0 ? product.prices[0].price : product.price : product.price}</td>
                                                         <td className="text-center"><a href="#" className="btn btn-primary" onClick={() => this.handleEditShow(product.id)}><i
                                                             className="fa fa-edit" ></i></a></td>
 

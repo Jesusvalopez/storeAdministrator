@@ -26,5 +26,9 @@ class ExpenseProduct extends Model
      }
  */
 
+    public function prices()
+    {
+        return $this->morphMany(Price::class, 'priceable')->where('is_current_price', true);
+    }
 
 }

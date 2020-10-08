@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Expense;
 use App\ExpenseDetail;
+use App\ExpenseProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -30,7 +31,7 @@ class ExpensesController extends Controller
     {
         $this->authorize('viewAny', Expense::class);
 
-        $expenses = Expense::with(['expenseDetails.product'])->orderBy('id', 'desc')->limit(10)->get();
+        $expenses = Expense::with(['expenseDetails.product', 'expenseDetails.price'])->orderBy('id', 'desc')->limit(10)->get();
 
         return response()->json($expenses);
     }
@@ -97,10 +98,15 @@ class ExpensesController extends Controller
         $expense_detail->quantity = $request->get('quantity');
         $expense_detail->product_id = $request->get('selected_value');
 
+        $expense_product = ExpenseProduct::find($expense_detail->product_id);
+
+        $expense_detail->price_id = $expense_product->prices ? count($expense_product->prices) > 0 ? $expense_product->prices[0]->id : null : null;
+
         $expense->expenseDetails()->save($expense_detail);
 
         $expense->expenseDetails->map(function ($expenseDetail){
             $expenseDetail->product;
+            $expenseDetail->price;
         });
 
         return response()->json($expense);

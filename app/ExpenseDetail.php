@@ -31,4 +31,9 @@ class ExpenseDetail extends Model
         return $this->belongsTo(ExpenseProduct::class);
     }
 
+    public function price()
+    {
+        return $this->belongsTo(Price::class);
+    }
+
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\ExpenseProduct;
 use App\Http\Requests\ExpenseRequest;
+use App\Price;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,36 +39,9 @@ class ExpenseProductsController extends Controller
         return response()->json($expenseProducts);
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function listingDate(Request $request)
-    {
-        $start_date =  $request->get('start_date');
-        $end_date =  $request->get('end_date');
 
-        $this->authorize('viewAny', Sale::class);
-        $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
-            ->whereRaw("created_at::date BETWEEN '".$start_date."' and '".$end_date."'")->orderBy('id', 'desc')->get();
 
-        return response()->json($sales);
-    }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function listing()
-    {
-        $this->authorize('viewAny', Sale::class);
-        $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
-            ->whereRaw("created_at::date = '". date('Y-m-d')."'")->orderBy('id', 'desc')->get();
-
-        return response()->json($sales);
-    }
 
     /**
      * Show the form for creating a new resource.
@@ -101,51 +75,17 @@ class ExpenseProductsController extends Controller
 
         $expenseProduct->save();
 
+        $price = new Price();
+        $price->price_type_id = 1; //Siempre uno porque aca no importa el tipo de precio
+        $price->price = $request->get('price');
+        $price->is_current_price = true;
+
+        $expenseProduct->prices()->save($price);
+
         //$expenseProducts = ExpenseProduct::all();
-
+        $expenseProduct->load('prices');
         return response()->json($expenseProduct);
-/*
-        $products = $request->get('products');
-        $payment_methods_sale = $request->get('payment_methods_sale');
 
-        $sale = new Sale();
-        $sale->user_id = Auth::user()->id;
-        $sale->save();
-
-        foreach ($products as $array){
-            //\Log::info( $array);
-            $obj = json_decode(json_encode($array), FALSE);
-            $saleDetail = new SaleDetail();
-            $saleDetail->quantity = $obj->quantity;
-            $saleDetail->price_id = $obj->product_price_type_id;
-
-            $sale->saleDetails()->save($saleDetail);
-
-            foreach ($obj->discounts as $discount){
-                $discountSale = new DiscountSaleDetail();
-                $discountSale->discount_id = $discount->id;
-                $saleDetail->discountSaleDetails()->save($discountSale);
-
-            }
-
-
-        }
-
-        foreach ($payment_methods_sale as $array){
-
-            $obj = json_decode(json_encode($array), FALSE);
-
-            $payment_method_sale = new PaymentMethodSale();
-            $payment_method_sale->amount = $obj->quantity;
-            $payment_method_sale->payment_method_id = $obj->payment_method->id;
-            $sale->paymentMethodSale()->save($payment_method_sale);
-
-
-        }
-
-
-        return response()->json([$sale]);
-*/
 
     }
 
@@ -158,6 +98,8 @@ class ExpenseProductsController extends Controller
     public function show(ExpenseProduct $expenseProduct)
     {
         $this->authorize('view', $expenseProduct);
+
+        $expenseProduct->load('prices');
 
         return response()->json($expenseProduct);
     }
@@ -189,7 +131,56 @@ class ExpenseProductsController extends Controller
         $expenseProduct->price = $request->get('price');
         $expenseProduct->save();
 
-        $expenseProducts = ExpenseProduct::orderBy('id', 'desc')->limit($this->limit)->get();
+
+        $price_type_id = 1;
+
+        $price_type_exists = true;
+
+        $price_value = $request->get('price');
+
+        foreach ($expenseProduct->prices as $price){
+
+            //Son el mismo tipo de precio
+            if($price->price_type_id == $price_type_id){
+
+                //Marcamos que tipo de precio existe para que no cree otro
+                $price_type_exists = false;
+
+                //Si tienen distinto valor de precio, marco como falso el anterior y creo uno nuevo.
+                //De lo contrario no hay que hacer nada, el precio no debe ser actualizado
+                if(!($price_value == $price->price)){
+                    $price->is_current_price = false;
+                    $price->save();
+
+                    $price = new Price();
+                    $price->price_type_id = $price_type_id;
+                    $price->price = $price_value;
+                    $price->is_current_price = true;
+
+                    $expenseProduct->prices()->save($price);
+
+                }
+            }
+
+        }
+
+        //Si el tipo de precio no se encontró en la lista, es uno nuevo y hay que crearlo
+        if($price_type_exists){
+
+            $price = new Price();
+            $price->price_type_id = $price_type_id;
+            $price->price = $price_value;
+            $price->is_current_price = true;
+
+            $expenseProduct->prices()->save($price);
+
+        }
+
+
+
+
+
+        $expenseProducts = ExpenseProduct::with('prices')->orderBy('id', 'desc')->limit($this->limit)->get();
 
         return response()->json($expenseProducts);
     }
