@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DiscountSale;
 use App\DiscountSaleDetail;
+use App\ExpenseDetail;
 use App\PaymentMethodSale;
 use App\Sale;
 use App\SaleDetail;
@@ -53,7 +54,16 @@ class SalesController extends Controller
         $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
             ->whereRaw("created_at::date BETWEEN '".$start_date."' and '".$end_date."'")->orderBy('id', 'desc')->get();
 
-        return response()->json($sales);
+
+        $expenses = ExpenseDetail::with('price')->whereRaw("created_at::date BETWEEN '".$start_date."' and '".$end_date."'")->get();
+
+        $total_expenses = 0;
+
+        foreach ($expenses as $expense){
+            $total_expenses += $expense->quantity * $expense->price->price;
+        }
+
+        return response()->json(["sales" => $sales, "expenses" => $total_expenses]);
     }
 
     /**
@@ -67,7 +77,15 @@ class SalesController extends Controller
         $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
             ->whereRaw("created_at::date = '". date('Y-m-d')."'")->orderBy('id', 'desc')->get();
 
-        return response()->json($sales);
+        $expenses = ExpenseDetail::with('price')->whereRaw("created_at::date = '". date('Y-m-d')."'")->get();
+
+        $total_expenses = 0;
+
+        foreach ($expenses as $expense){
+            $total_expenses += $expense->quantity * $expense->price->price;
+        }
+
+        return response()->json(["sales" => $sales, "expenses" => $total_expenses]);
     }
 
     /**

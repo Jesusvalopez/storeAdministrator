@@ -31,7 +31,7 @@ class ExpensesController extends Controller
     {
         $this->authorize('viewAny', Expense::class);
 
-        $expenses = Expense::with(['expenseDetails.product', 'expenseDetails.price'])->orderBy('id', 'desc')->limit(10)->get();
+        $expenses = Expense::with(['expenseDetails.product', 'expenseDetails.price'])->orderBy('id', 'desc')->limit(100)->get();
 
         return response()->json($expenses);
     }
@@ -160,7 +160,7 @@ class ExpensesController extends Controller
         $expense->delete();
 
         //$expenses = Expense::orderBy('id', 'desc')->get();
-        $expenses = Expense::with(['expenseDetails.product'])->orderBy('id', 'desc')->limit(20)->get();
+        $expenses = Expense::with(['expenseDetails.product'])->orderBy('id', 'desc')->limit(100)->get();
 
 
         return response()->json($expenses);
