@@ -36,6 +36,7 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('price-types', 'PriceTypesController');
 Route::resource('payment-methods', 'PaymentMethodsController');
 //Route::get('/products-all', 'ProductsController@listing');
+Route::get('/products/best-sellers', 'ProductsController@bestSellers');
 Route::resource('products', 'ProductsController');
 Route::resource('bundles', 'BundlesController');
 Route::resource('discounts', 'DiscountsController');

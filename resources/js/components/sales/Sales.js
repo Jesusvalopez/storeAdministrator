@@ -41,6 +41,7 @@ export default class Sales extends Component {
             to_charge:0,
             to_charge_pretty:'0',
             to_cashback:0,
+            best_sellers: null,
 
         }
 
@@ -113,12 +114,27 @@ export default class Sales extends Component {
                 this.setState({
                     error: error
                 });
-            })
+            });
         axios.get('/payment-methods')
             .then(res => {
                 this.setState({
                     payment_methods: res.data
                 });
+
+            })
+            .catch((error) => {
+                this.setState({
+                    error: error
+                });
+            });
+
+        axios.get('/products/best-sellers')
+            .then(res => {
+
+                this.setState({
+                    best_sellers: res.data
+                });
+
 
             })
             .catch((error) => {
@@ -139,7 +155,27 @@ export default class Sales extends Component {
         return response;
     };
 
+    handleAddBestSeller = (prices) =>{
+
+        var priceType = document.getElementById("priceType");
+        var priceType_value = priceType.value;
+
+        var price = prices.filter(price => {return price.price_type_id === parseInt(priceType_value)});
+
+        this.setState({
+            selected_value: price[0].id
+        }, function () {
+            document.getElementById("productAddQuantity").value = 1;
+            this.handleAddProduct();
+        })
+
+
+
+        console.log(price);
+
+    };
     handleAddProduct = () =>{
+
 
 
         var priceType = document.getElementById("priceType");
@@ -157,6 +193,9 @@ export default class Sales extends Component {
         var product = products.find(product => (product.price.find(price => (price.price_type_id ===parseInt(priceType_value) ))
             .id === parseInt(product_selected_value)));
 
+        console.log(product);
+        console.log(product_selected_value);
+        console.log(priceType_value);
 
         var products_on_sale = this.state.products_on_sale.products;
 
@@ -779,6 +818,35 @@ export default class Sales extends Component {
 
 
 
+
+                <div className="col-md-4">
+                    <div className="box box-success">
+                        <div className="box-header with-border">
+                            <h3 className="box-title">Más Vendidos</h3>
+                        </div>
+                        <div className="box-body">
+                            <div className="row">
+                                <div className="col-xs-12">
+
+                                      {this.state.best_sellers ? this.state.best_sellers.map((best_seller) => (
+                                          <div key={best_seller.name} className="row" style={{paddingBottom:'3px'}}>
+                                              <div className="col-md-12">
+                                          <a className="btn btn-primary btn-block btn-big" onClick={() => this.handleAddBestSeller(best_seller.prices)}>{best_seller.name}</a>
+                                              </div>
+                                          </div>
+                                        ))
+                                        :
+                                         null }
+
+
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
 
 
 

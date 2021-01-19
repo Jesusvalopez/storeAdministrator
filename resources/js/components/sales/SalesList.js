@@ -204,6 +204,7 @@ export default class SalesList extends Component {
         };
     }
 
+    //TODO corregir este calculo esta tomando como descuento todos los productos.
     calculateDetailTotals = (sale_detail) =>{
 
         var subTotal = sale_detail.quantity * sale_detail.price.price;

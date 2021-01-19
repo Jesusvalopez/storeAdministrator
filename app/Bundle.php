@@ -18,4 +18,9 @@ class Bundle extends Model
     public function products(){
         return $this->belongsToMany(Product::class);
     }
+
+    public function allPrices()
+    {
+        return $this->morphMany(Price::class, 'priceable');
+    }
 }
