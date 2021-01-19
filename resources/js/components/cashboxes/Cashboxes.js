@@ -5,7 +5,9 @@ import ConfirmModal from "../ConfirmModal";
 import 'react-toastify/dist/ReactToastify.css';
 import {toast} from "react-toastify";
 import CashboxModal from "./CashboxModal";
-import CashbackModal from "../sales/CashbackModal";
+import CashboxCounter from "./CashBoxCounter";
+import Modal from "react-bootstrap/lib/Modal";
+import Button from "react-bootstrap/lib/Button";
 
 export default class Cashboxes extends Component {
 
@@ -17,10 +19,16 @@ export default class Cashboxes extends Component {
         const currency = [{id:1, value:10, total:0, quantity:''}, {id:2, value:50, total:0, quantity:''}, {id:3, value:100, total:0, quantity:''},
             {id:4, value:500, total:0, quantity:''},{id:5, value:1000, total:0, quantity:''}, {id:6, value:2000, total:0, quantity:''},
             {id:7, value:5000, total:0, quantity:''}, {id:8, value:10000, total:0, quantity:''}, {id:9, value:20000, total:0, quantity:''}];
+
+        const currency_withdraw = [{id:1, value:10, total:0, quantity:''}, {id:2, value:50, total:0, quantity:''}, {id:3, value:100, total:0, quantity:''},
+            {id:4, value:500, total:0, quantity:''},{id:5, value:1000, total:0, quantity:''}, {id:6, value:2000, total:0, quantity:''},
+            {id:7, value:5000, total:0, quantity:''}, {id:8, value:10000, total:0, quantity:''}, {id:9, value:20000, total:0, quantity:''}];
         this.state = {
 
             cashbox_form:currency,
+            cashbox_withdraw_form:currency_withdraw,
             total:0,
+            total_withdraw:0,
             last_cashboxes: [],
             last_cashbox: null,
             currency: currency,
@@ -30,6 +38,8 @@ export default class Cashboxes extends Component {
             show:false,
             total_cash:0,
             total_last_cashbox:0,
+            show_difference_modal:false,
+            difference:0,
 
         }
         toast.configure();
@@ -121,6 +131,47 @@ export default class Cashboxes extends Component {
         return total;
     }
 
+    handleUpdateFormWithdrawal = (e) => {
+
+        const target_id = e.target.name
+        const target_value = e.target.value
+
+        this.setState(prevState => {
+
+            var currency = [...prevState.cashbox_withdraw_form];
+
+            var new_total = 0;
+
+            var new_currency = currency.map(currency => {
+
+                if (currency.id == target_id) {
+
+
+                    currency.quantity = target_value;
+                    currency.total = currency.value * currency.quantity;
+                    new_total += currency.total;
+
+                    return currency;
+                }
+                new_total += currency.total;
+
+                return currency;
+            });
+            return {cashbox_withdraw_form:new_currency, total_withdraw: new_total};
+
+        });
+
+    }
+    handleUpdateJustification = (e) => {
+
+
+        this.setState({
+                [e.target.name]: e.target.value
+
+        });
+
+
+    }
     handleUpdateForm = (e) => {
 
         const target_id = e.target.name
@@ -179,10 +230,28 @@ export default class Cashboxes extends Component {
     handleSubmit = (e) =>{
         e.preventDefault();
 
-        this.setState({
-            show:true,
+        if (this.state.box_type === 2) {
 
-        });
+            console.log(this.state.total);
+            console.log(this.state.total_cash);
+
+            if (this.state.total !== this.state.total_cash) {
+
+
+                this.setState({
+                    show_difference_modal:true,
+                    difference: this.state.total_cash - this.state.total,
+                });
+
+            } else {
+
+                this.setState({
+                    show: true,
+                });
+            }
+        } else {
+            this.handleOk();
+        }
 
         /*
         try {
@@ -202,6 +271,23 @@ export default class Cashboxes extends Component {
         */
 
     }
+
+    handleDifferenceModalAccept = () =>{
+
+        this.setState({
+            show:true,
+            show_difference_modal:false,
+
+        });
+
+    }
+    handleWithdraw = () =>{
+
+        //restar de cashbox_form el cashbox_withdraw_form
+
+
+    }
+
 
     handleOk = () =>{
 
@@ -231,6 +317,12 @@ export default class Cashboxes extends Component {
 
     }
 
+    handleCloseDifferenceModal = () =>{
+        this.setState({
+            show_difference_modal:false,
+
+        });
+    }
     handleClose = () =>{
         this.setState({
             show:false,
@@ -244,50 +336,9 @@ export default class Cashboxes extends Component {
         return (
             <div className="row">
                 <div className="col-md-4">
-                    <form id="createCashboxForm" action="/" method="" onSubmit={this.handleSubmit}>
 
-                        <div className="box box-success">
-                            <div className="box-header with-border">
-                                <h3 className="box-title">Caja</h3>
-                            </div>
-                            <div className="box-body">
-                                <div className="">
+                    <CashboxCounter show_button={true} text="Caja" handleSubmit={this.handleSubmit} cashbox_form={this.state.cashbox_form} handleUpdateForm={this.handleUpdateForm} total={this.state.total} buttonText={this.state.buttonText}></CashboxCounter>
 
-                                    <table className="table table-bordered">
-                                        <thead>
-
-                                        <tr>
-                                            <th className="text-center">Billete/Moneda</th>
-                                            <th className="text-center">Cantidad</th>
-                                            <th className="text-center">Total</th>
-
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {this.state.cashbox_form.map((currency) => (
-                                            <tr key={currency.id}>
-                                                <td className="text-center">{this.convertNumber(Math.round(currency.value))}</td>
-                                                <td className="text-center"> <input type="number" name={currency.id} className="form-control currency-input" placeholder="Cantidad"
-                                                                                  onChange={this.handleUpdateForm} value={currency.quantity}/></td>
-                                                <td className="text-center">{this.convertNumber(Math.round(currency.total))}</td>
-                                            </tr>
-                                        ))}
-                                        <tr><td></td><td className="text-center">TOTAL</td><td className="text-center">{this.convertNumber(Math.round(this.state.total))}</td></tr>
-
-                                        </tbody>
-
-                                    </table>
-
-                                </div>
-                                <div className="col-xs-4">
-                                    <button type="submit" className="btn btn-block btn-primary">{this.state.buttonText}</button>
-                                </div>
-
-                            </div>
-
-
-                        </div>
-                    </form>
                 </div>
 
 
@@ -350,8 +401,65 @@ export default class Cashboxes extends Component {
 
                 </div>
 
-                <CashboxModal show={this.state.show}  action={this.handleClose} acceptAction={this.handleOk}
-                              />
+
+
+
+
+                <Modal show={this.state.show} bsSize='lg'>
+                    <Modal.Header>
+                        <Modal.Title componentClass="h3">Cierre de caja</Modal.Title>
+                    </Modal.Header>
+                    <div className="modal-body">
+
+                        <div className="row">
+                            <div className="col-md-3"><h4>Monto en caja: <b>{this.convertNumber(this.state.total)}</b></h4></div>
+                            <div className="col-md-3"><h4>Monto a retirar: <b>{this.convertNumber(this.state.total_withdraw)}</b></h4></div>
+                            <div className="col-md-6"><h4>Monto restante en caja: <b>{this.convertNumber(this.state.total - this.state.total_withdraw)}</b></h4></div>
+
+
+                        </div>
+                        <CashboxCounter show_button={false} text="Retiro" handleSubmit={()=>{}} cashbox_form={this.state.cashbox_withdraw_form} handleUpdateForm={this.handleUpdateFormWithdrawal} total={this.state.total_withdraw} buttonText="Retirar"></CashboxCounter>
+
+
+
+                    </div>
+                    <Modal.Footer>
+                        <Button bsStyle="default" onClick={this.handleClose} bsSize="large">
+                            Cancelar
+                        </Button>
+                        <Button bsStyle="primary" onClick={this.handleWithdraw} bsSize="large">
+                            Retirar
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+
+                <Modal show={this.state.show_difference_modal}>
+                    <Modal.Header>
+                        <Modal.Title componentClass="h3">Diferencia de caja</Modal.Title>
+                    </Modal.Header>
+                    <div className="modal-body">
+
+
+
+                        <div className="">
+                            <h3 className="text-center">Existe una diferencia de: <b>{this.convertNumber(this.state.difference)}</b></h3>
+                        <label htmlFor="">Justificación:</label>
+                        <textarea className="form-control" name="justification" id="" cols="30" rows="10" onChange={this.handleUpdateJustification}></textarea>
+                            <small>*Presione cancelar si desea contar nuevamente</small>
+                        </div>
+
+
+                    </div>
+                    <Modal.Footer>
+                        <Button bsStyle="default" onClick={this.handleCloseDifferenceModal} bsSize="large">
+                            Cancelar
+                        </Button>
+                        <Button bsStyle="primary" onClick={this.handleDifferenceModalAccept} bsSize="large">
+                            Aceptar
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+
 
             </div>
         );
