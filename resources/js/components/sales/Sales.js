@@ -42,6 +42,7 @@ export default class Sales extends Component {
             to_charge_pretty:'0',
             to_cashback:0,
             best_sellers: null,
+            is_disabled: false,
 
         }
 
@@ -525,6 +526,8 @@ export default class Sales extends Component {
                 payment_methods_sale: this.state.payment_methods_sales,
         }
 
+        this.setState({is_disabled: true});
+
         try {
             axios.post('/sales',  saleForm )
                 .then(res => {
@@ -534,6 +537,7 @@ export default class Sales extends Component {
                             products: [],
                         },
                         payment_methods_sales:[],
+                        is_disabled:false,
                     },() => { this.calculateTotals(); this.calculateTotalPaymentMethodsSale() })
 
 
@@ -599,6 +603,16 @@ export default class Sales extends Component {
         return response;
     };
 
+
+    isDisabled = () =>{
+
+        if(this.state.is_disabled){
+            return 'disabled'
+        }else{
+            return ''
+        }
+
+    }
 
     render(){
 
@@ -806,7 +820,7 @@ export default class Sales extends Component {
                                 <div className="row">
 
                                     <div className="col-xs-4">
-                                        <button type="submit" className="btn btn-block btn-primary btn-lg" onClick={this.handleSubmitSale}>Generar Venta</button>
+                                        <button type="submit" className="btn btn-block btn-primary btn-lg" disabled={this.isDisabled()} onClick={this.handleSubmitSale}>Generar Venta</button>
                                     </div>
 
                                 </div>
