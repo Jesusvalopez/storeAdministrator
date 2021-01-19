@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Bundle;
 use App\Price;
 use App\Product;
+use App\SaleDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -203,5 +204,67 @@ class ProductsController extends Controller
         $products = Product::orderBy('id', 'desc')->get();
 
         return response()->json($products);
+    }
+
+    public function bestSellers(){
+
+        $this->authorize('viewAny', Product::class);
+
+
+
+        $best_sellers = SaleDetail::with(['price', 'price.priceable', 'price.priceType'])
+            ->whereBetween('created_at', [date("Y-m-d", strtotime("-1 months")),date('Y-m-d', strtotime("+1 days"))])
+            ->orderBy('id', 'desc')->get();
+
+
+        $products = [];
+
+        foreach ($best_sellers as $key => $best_seller){
+
+            $name = $best_seller->price->priceable->name;
+            //buscar nombre
+
+            if(array_key_exists($name,$products)){
+                //si encuentro el nombre sumo.
+                $products[$name]->quantity +=  $best_seller->quantity;
+            }else{
+
+                //si no encuentro el nombre
+                $info = new \stdClass();
+                $info->name = $name;
+                $info->quantity = $best_seller->quantity;
+                $info->prices = $best_seller->price->priceable->price;
+
+                $products[$name] = $info;
+
+            }
+
+        }
+
+
+        $quantity = array_column($products, 'quantity');
+
+        array_multisort($quantity, SORT_DESC, $products);
+     //   $best_sellers = Product::with(['price', 'price.saleDetails'])->limit(10)->get();
+
+        $array_products = [];
+
+        $count = 0;
+        foreach ($products as $key => $product){
+
+            if($count == 10){
+                break;
+            }
+            $array_p = (array) $product;
+
+            array_push($array_products, $array_p);
+
+            $count++;
+
+        }
+
+        return response()->json($array_products);
+
+
     }
 }

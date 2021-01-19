@@ -41,6 +41,8 @@ export default class Sales extends Component {
             to_charge:0,
             to_charge_pretty:'0',
             to_cashback:0,
+            best_sellers: null,
+            is_disabled: false,
 
         }
 
@@ -113,12 +115,27 @@ export default class Sales extends Component {
                 this.setState({
                     error: error
                 });
-            })
+            });
         axios.get('/payment-methods')
             .then(res => {
                 this.setState({
                     payment_methods: res.data
                 });
+
+            })
+            .catch((error) => {
+                this.setState({
+                    error: error
+                });
+            });
+
+        axios.get('/products/best-sellers')
+            .then(res => {
+
+                this.setState({
+                    best_sellers: res.data
+                });
+
 
             })
             .catch((error) => {
@@ -139,7 +156,27 @@ export default class Sales extends Component {
         return response;
     };
 
+    handleAddBestSeller = (prices) =>{
+
+        var priceType = document.getElementById("priceType");
+        var priceType_value = priceType.value;
+
+        var price = prices.filter(price => {return price.price_type_id === parseInt(priceType_value)});
+
+        this.setState({
+            selected_value: price[0].id
+        }, function () {
+            document.getElementById("productAddQuantity").value = 1;
+            this.handleAddProduct();
+        })
+
+
+
+        console.log(price);
+
+    };
     handleAddProduct = () =>{
+
 
 
         var priceType = document.getElementById("priceType");
@@ -157,6 +194,9 @@ export default class Sales extends Component {
         var product = products.find(product => (product.price.find(price => (price.price_type_id ===parseInt(priceType_value) ))
             .id === parseInt(product_selected_value)));
 
+        console.log(product);
+        console.log(product_selected_value);
+        console.log(priceType_value);
 
         var products_on_sale = this.state.products_on_sale.products;
 
@@ -486,6 +526,8 @@ export default class Sales extends Component {
                 payment_methods_sale: this.state.payment_methods_sales,
         }
 
+        this.setState({is_disabled: true});
+
         try {
             axios.post('/sales',  saleForm )
                 .then(res => {
@@ -495,6 +537,7 @@ export default class Sales extends Component {
                             products: [],
                         },
                         payment_methods_sales:[],
+                        is_disabled:false,
                     },() => { this.calculateTotals(); this.calculateTotalPaymentMethodsSale() })
 
 
@@ -561,6 +604,16 @@ export default class Sales extends Component {
     };
 
 
+    isDisabled = () =>{
+
+        if(this.state.is_disabled){
+            return 'disabled'
+        }else{
+            return ''
+        }
+
+    }
+
     render(){
 
         return (
@@ -574,7 +627,7 @@ export default class Sales extends Component {
                             <div className="box-body">
 
                                 <div className="row">
-                                <div className="col-xs-3">
+                                <div className="col-xs-12 col-md-3 col-sm-6 col-lg-3">
                                 <label htmlFor="">Tipo de precio</label>
                                     <select id="priceType" name="priceType"  className="form-control" value={this.state.selected_price_type_id} onChange={this.handleChangePriceType}>
                                         {this.state.pricetypes.map((pricetype) => (
@@ -585,7 +638,7 @@ export default class Sales extends Component {
                                     <br/>
                                 </div>
                                 <div className="row">
-                                    <div className="col-xs-6">
+                                    <div className="col-xs-12 col-md-6">
                                         <label htmlFor="">Producto</label>
                                         <Select id="products" name="products" components={{ Placeholder }} value={this.state.product_selected_value}
                                                  placeholder={'Seleccione'} onChange={this.handleSelectChange} options={this.state.products.map((product)=>{
@@ -598,7 +651,7 @@ export default class Sales extends Component {
                                         })} />
 
                                     </div>
-                                    <div className="col-xs-2">
+                                    <div className="col-xs-6 col-md-2">
                                         <label htmlFor="">Cantidad</label>
                                         <input id="productAddQuantity" type="number" name="quantity" className="form-control" placeholder="" onKeyUp={this.productQuantityKeyUp}
                                         />
@@ -608,7 +661,7 @@ export default class Sales extends Component {
                             <div className="box-body">
                                 <div className="row">
 
-                                    <div className="col-xs-2">
+                                    <div className="col-xs-12 col-md-2">
                                         <button type="" className="btn btn-block btn-primary" onClick={this.handleAddProduct}>Agregar</button>
                                     </div>
 
@@ -767,7 +820,7 @@ export default class Sales extends Component {
                                 <div className="row">
 
                                     <div className="col-xs-4">
-                                        <button type="submit" className="btn btn-block btn-primary btn-lg" onClick={this.handleSubmitSale}>Generar Venta</button>
+                                        <button type="submit" className="btn btn-block btn-primary btn-lg" disabled={this.isDisabled()} onClick={this.handleSubmitSale}>Generar Venta</button>
                                     </div>
 
                                 </div>
@@ -779,6 +832,35 @@ export default class Sales extends Component {
 
 
 
+
+                <div className="col-md-4">
+                    <div className="box box-success">
+                        <div className="box-header with-border">
+                            <h3 className="box-title">Más Vendidos</h3>
+                        </div>
+                        <div className="box-body">
+                            <div className="row">
+                                <div className="col-xs-12">
+
+                                      {this.state.best_sellers ? this.state.best_sellers.map((best_seller) => (
+                                          <div key={best_seller.name} className="row" style={{paddingBottom:'3px'}}>
+                                              <div className="col-md-12">
+                                          <a className="btn btn-primary btn-block btn-big" onClick={() => this.handleAddBestSeller(best_seller.prices)}>{best_seller.name}</a>
+                                              </div>
+                                          </div>
+                                        ))
+                                        :
+                                         null }
+
+
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
 
 
 

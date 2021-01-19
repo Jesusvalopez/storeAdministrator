@@ -27,7 +27,6 @@ class HomeController extends Controller
     public function index()
     {
 
-
 /*
         Role::create(['name' => 'Administrador']);
 
@@ -104,6 +103,39 @@ class HomeController extends Controller
         $user = Auth::user();
         $user->assignRole('Vendedor');
 */
+
+/*CREAR ROLES GASTOS*/
+
+
+/*
+        Permission::create(['name' => 'create expenses']);
+        Permission::create(['name' => 'edit expenses']);
+        Permission::create(['name' => 'delete expenses']);
+        Permission::create(['name' => 'view expenses']);
+
+        $role = Role::findById(1);
+
+        $role->givePermissionTo('create expenses');
+        $role->givePermissionTo('edit expenses');
+        $role->givePermissionTo('delete expenses');
+        $role->givePermissionTo('view expenses');
+
+
+
+
+                Permission::create(['name' => 'create expense products']);
+                Permission::create(['name' => 'edit expense products']);
+                Permission::create(['name' => 'delete expense products']);
+                Permission::create(['name' => 'view expense products']);
+
+             //   $role = Role::findById(1);
+
+                $role->givePermissionTo('create expense products');
+                $role->givePermissionTo('edit expense products');
+                $role->givePermissionTo('delete expense products');
+                $role->givePermissionTo('view expense products');
+*/
+
 
         return view('home');
     }

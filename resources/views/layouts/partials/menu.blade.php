@@ -36,6 +36,43 @@
         </ul>
     </li>
 </ul>
+
+<ul class="sidebar-menu" data-widget="tree">
+
+    <li class="treeview">
+        <a href="#"><i class="fa fa-line-chart"></i> <span>Gastos</span>
+            <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+        </a>
+        <ul class="treeview-menu">
+            @can('create expenses')
+                <li><a href="{{route('expenses.create')}}">Crear gasto</a></li>
+            @endcan
+            <!--
+            @can('view expenses')
+                <li><a href="{{route('expenses.index')}}">Ver Detalle de gastos</a></li>
+            @endcan
+-->
+        </ul>
+    </li>
+</ul>
+
+<ul class="sidebar-menu" data-widget="tree">
+
+    <li class="treeview">
+        <a href="#"><i class="fa fa-area-chart"></i> <span>Reportes</span>
+            <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+        </a>
+        <ul class="treeview-menu">
+            @can('view sales')
+                <li><a href="{{route('sales.reports')}}">Reportes de Ventas</a></li>
+            @endcan
+        </ul>
+    </li>
+</ul>
 <ul class="sidebar-menu" data-widget="tree">
 
     <li class="treeview">

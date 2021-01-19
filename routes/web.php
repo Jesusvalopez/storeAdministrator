@@ -36,12 +36,17 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('price-types', 'PriceTypesController');
 Route::resource('payment-methods', 'PaymentMethodsController');
 //Route::get('/products-all', 'ProductsController@listing');
+Route::get('/products/best-sellers', 'ProductsController@bestSellers');
 Route::resource('products', 'ProductsController');
 Route::resource('bundles', 'BundlesController');
 Route::resource('discounts', 'DiscountsController');
 Route::post('/sales/listing-date', 'SalesController@listingDate');
+Route::post('/sales/reports-by-date', 'SalesController@reportsByDate');
 Route::get('/sales/listing', 'SalesController@listing');
+Route::get('/sales/reports', 'SalesController@reports')->name('sales.reports');;
 Route::resource('sales', 'SalesController');
+Route::resource('expenses', 'ExpensesController');
+Route::resource('expense-products', 'ExpenseProductsController');
 Route::get('/cashboxes/listing', 'CashBoxesController@listing');
 Route::resource('cashboxes', 'CashBoxesController');
 

@@ -39,5 +39,16 @@ class Sale extends Model
     }
 
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        self::deleting(function ($sale) {
+            $sale->saleDetails->each->delete();
+            $sale->paymentMethodSale->each->delete();
+        });
+
+    }
+
 
 }

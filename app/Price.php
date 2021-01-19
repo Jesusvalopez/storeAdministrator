@@ -20,4 +20,9 @@ class Price extends Model
     {
         return $this->morphTo();
     }
+
+    public function saleDetails()
+    {
+        return $this->hasMany(SaleDetail::class);
+    }
 }

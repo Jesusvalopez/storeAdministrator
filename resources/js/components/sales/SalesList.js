@@ -29,6 +29,7 @@ export default class SalesList extends Component {
             comisiones_totales: null,
             descuentos_totales: null,
             ventas_netas_totales: null,
+            gastos: null,
             range_start_date: Date.now(),
             range_end_date: Date.now(),
             sales_payments_details: null,
@@ -55,12 +56,12 @@ export default class SalesList extends Component {
 
 
             // <input type="hidden" name="_method" value="delete">//{params: {id: id}})
-            axios.delete('/products/'+this.state.deleteId,  )
+            axios.delete('/sales/'+this.state.deleteId,  )
                 .then(res => {
 
-                    this.props.onUpdateList(res.data);
-                    this.setState({
-                        show: false,
+
+                    this.setState(prevState => {
+                        return this.reCalculateAllTotals(res)
                     });
                     this.notify('Registro eliminado con éxito')
 
@@ -99,10 +100,13 @@ export default class SalesList extends Component {
         var ventas_brutas_totales = 0;
         var comisiones_totales = 0;
         var descuentos_totales = 0;
+        var gastos = this.convertNumber(Math.round(res.data.expenses))
 
         var paymentsModelsTotals = [];
 
-        const new_sales = res.data.map(sale => {
+
+
+        const new_sales = res.data.sales.map(sale => {
 
             numero_ventas++;
 
@@ -185,7 +189,7 @@ export default class SalesList extends Component {
 
 
             return sale;
-        });
+        }) ;
 
 
         return {
@@ -196,9 +200,12 @@ export default class SalesList extends Component {
             descuentos_totales:this.convertNumber(Math.round(descuentos_totales)),
             ventas_netas_totales:this.convertNumber(Math.round(ventas_brutas_totales-descuentos_totales-comisiones_totales)),
             sales_payments_details:paymentsModelsTotals,
+            gastos: gastos,
+            show:false,
         };
     }
 
+    //TODO corregir este calculo esta tomando como descuento todos los productos.
     calculateDetailTotals = (sale_detail) =>{
 
         var subTotal = sale_detail.quantity * sale_detail.price.price;
@@ -283,6 +290,7 @@ export default class SalesList extends Component {
             ventas_netas_totales: null,
             sales: null,
             sales_payments_details: null,
+            gastos: null,
         });
 
         trackPromise(
@@ -308,6 +316,7 @@ export default class SalesList extends Component {
             range_start_date: date,
         })
     }
+
 
 
     render() {
@@ -353,7 +362,7 @@ export default class SalesList extends Component {
             <div>
 
 
-                <div className="col-lg-2 col-md-3 col-xs-6">
+                <div className="col-md-4 col-lg-2">
                     <div className="small-box bg-green">
 
                         <div className="inner">
@@ -370,7 +379,7 @@ export default class SalesList extends Component {
                     </div>
                 </div>
 
-                <div className="col-lg-2 col-md-3 col-xs-6">
+                <div className="col-md-4 col-lg-2">
                     <div className="small-box bg-green">
                         <div className="inner">
                             {this.state.ventas_brutas_totales != null ?
@@ -385,7 +394,7 @@ export default class SalesList extends Component {
                     </div>
                 </div>
 
-                <div className="col-lg-2 col-md-3 col-xs-6">
+                <div className="col-md-4 col-lg-2">
                     <div className="small-box bg-yellow">
                         <div className="inner">
                             {this.state.comisiones_totales != null ?
@@ -400,7 +409,7 @@ export default class SalesList extends Component {
 
                     </div>
                 </div>
-                <div className="col-lg-2 col-md-3 col-xs-6">
+                <div className="col-md-4 col-lg-2">
                     <div className="small-box bg-yellow">
                         <div className="inner">
                             {this.state.descuentos_totales != null ?
@@ -416,7 +425,7 @@ export default class SalesList extends Component {
                     </div>
                 </div>
 
-                <div className="col-lg-2 col-md-3 col-xs-6">
+                <div className="col-md-4 col-lg-2">
                     <div className="small-box bg-green">
                         <div className="inner">
                             {this.state.ventas_netas_totales != null ?
@@ -427,7 +436,24 @@ export default class SalesList extends Component {
                             <p>Ventas Netas Totales</p>
                         </div>
                         <div className="icon">
-                            <i className="ion ion-stats-bars"></i>
+                            <i className="ion ion ion-arrow-graph-up-right"></i>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div className="col-md-4 col-lg-2">
+                    <div className="small-box bg-red">
+                        <div className="inner">
+                            {this.state.gastos != null ?
+                                <h3>{this.state.gastos}</h3>
+                                :  <LoadingIndicator/> }
+
+
+                            <p>Gastos</p>
+                        </div>
+                        <div className="icon">
+                            <i className="ion ion-arrow-graph-down-right"></i>
                         </div>
 
                     </div>
@@ -540,9 +566,10 @@ export default class SalesList extends Component {
                                     <div className="box box-success" key={sale.id}>
                                         <div className="box-header with-border">
                                             <div className="col-md-6"><h3 className="box-title">Venta # {sale.id} | Vendedor: {sale.seller.name}</h3></div>
-                                            <div className="col-md-6"><h3 className="box-title  pull-right"> {sale.date_time}</h3></div>
+                                            <div className="col-md-5 "><h3 className="box-title pull-right "> {sale.date_time}</h3> </div>
+                                            <div className="col-md-1"><a href="#" onClick={()=>this.handleShow(sale.id)} className="btn btn-danger pull-right"><i className="fa fa-times"></i></a>  </div>
 
-                                            {false ? <a href="#" className="btn btn-danger pull-right"><i className="fa fa-times"></i>Eliminar venta</a> : null}
+
                                         </div>
                                     <div className="box-body" >
 
