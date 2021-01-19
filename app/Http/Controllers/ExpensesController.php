@@ -160,7 +160,7 @@ class ExpensesController extends Controller
         $expense->delete();
 
         //$expenses = Expense::orderBy('id', 'desc')->get();
-        $expenses = Expense::with(['expenseDetails.product'])->orderBy('id', 'desc')->limit(100)->get();
+        $expenses = Expense::with(['expenseDetails.product'])->orderBy('id', 'desc')->limit(250)->get();
 
 
         return response()->json($expenses);
