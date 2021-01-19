@@ -40,6 +40,7 @@ Route::get('/products/best-sellers', 'ProductsController@bestSellers');
 Route::resource('products', 'ProductsController');
 Route::resource('bundles', 'BundlesController');
 Route::resource('discounts', 'DiscountsController');
+Route::get('/sales/daily-cash-total', 'SalesController@dailyCashTotal');
 Route::post('/sales/listing-date', 'SalesController@listingDate');
 Route::post('/sales/reports-by-date', 'SalesController@reportsByDate');
 Route::get('/sales/listing', 'SalesController@listing');

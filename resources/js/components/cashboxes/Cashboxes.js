@@ -28,6 +28,8 @@ export default class Cashboxes extends Component {
             box_type : 1,
             notifyMessage: 'Caja abierta con éxito',
             show:false,
+            total_cash:0,
+            total_last_cashbox:0,
 
         }
         toast.configure();
@@ -51,8 +53,25 @@ export default class Cashboxes extends Component {
 
         this.reloadLastCashboxes();
 
+        this.reloadLastCashTotal();
+
     }
 
+    reloadLastCashTotal(){
+        axios.get('/sales/daily-cash-total')
+            .then(res => {
+                console.log(res.data);
+                this.setState( {
+
+                    total_cash_sales: parseInt(res.data.last_cash_sales),
+                    total_last_cashbox: res.data.last_cashbox_total,
+                    total_cash: parseInt(res.data.last_cash_sales) + res.data.last_cashbox_total,
+
+                } );
+
+
+            })
+    }
     reloadLastCashboxes(){
         axios.get('/cashboxes/listing')
             .then(res => {
@@ -184,6 +203,34 @@ export default class Cashboxes extends Component {
 
     }
 
+    handleOk = () =>{
+
+        this.setState({
+            show:false,
+
+        });
+
+
+        try {
+            axios.post('/cashboxes',  this.state.cashbox_form )
+                .then(res => {
+
+
+                    this.resetForm();
+                    this.notify(this.state.notifyMessage);
+                    this.reloadLastCashboxes();
+                    this.reloadLastCashTotal();
+
+
+                });
+
+        }catch (e) {
+            this.notifyError('No se pudo obtener la información')
+        }
+
+
+    }
+
     handleClose = () =>{
         this.setState({
             show:false,
@@ -196,7 +243,7 @@ export default class Cashboxes extends Component {
 
         return (
             <div className="row">
-                <div className="col-md-6">
+                <div className="col-md-4">
                     <form id="createCashboxForm" action="/" method="" onSubmit={this.handleSubmit}>
 
                         <div className="box box-success">
@@ -204,7 +251,7 @@ export default class Cashboxes extends Component {
                                 <h3 className="box-title">Caja</h3>
                             </div>
                             <div className="box-body">
-                                <div className="row">
+                                <div className="">
 
                                     <table className="table table-bordered">
                                         <thead>
@@ -232,7 +279,7 @@ export default class Cashboxes extends Component {
                                     </table>
 
                                 </div>
-                                <div className="col-xs-2">
+                                <div className="col-xs-4">
                                     <button type="submit" className="btn btn-block btn-primary">{this.state.buttonText}</button>
                                 </div>
 
@@ -244,7 +291,7 @@ export default class Cashboxes extends Component {
                 </div>
 
 
-                <div className="col-md-6">
+                <div className="col-md-8">
 
 
                         <div className="box box-success">
@@ -252,7 +299,7 @@ export default class Cashboxes extends Component {
                                 <h3 className="box-title">Últimas cajas</h3>
                             </div>
                             <div className="box-body">
-                                <div className="row">
+                                <div className="">
 
                                     <table className="table table-bordered">
                                         <thead>
@@ -262,6 +309,12 @@ export default class Cashboxes extends Component {
                                             <th className="text-center">Vendedor</th>
                                             <th className="text-center">Tipo</th>
                                             <th className="text-center">Detalle</th>
+                                            <th className="text-center">Efectivo</th>
+                                            <th className="text-center">Transferencia</th>
+                                            <th className="text-center">Tarjeta</th>
+                                            <th className="text-center">Rappi</th>
+                                            <th className="text-center">Pedidos Ya</th>
+                                            <th className="text-center">Diferencia</th>
                                             <th className="text-center">Total</th>
 
                                         </tr>
@@ -272,6 +325,12 @@ export default class Cashboxes extends Component {
                                                 <td className="text-center">{cashboxes.date_time}</td>
                                                 <td className="text-center">{cashboxes.seller.name}</td>
                                                 <td className="text-center">{cashboxes.cashbox_type_name}</td>
+                                                <td className="text-center"> {cashboxes.details}</td>
+                                                <td className="text-center"> {cashboxes.details}</td>
+                                                <td className="text-center"> {cashboxes.details}</td>
+                                                <td className="text-center"> {cashboxes.details}</td>
+                                                <td className="text-center"> {cashboxes.details}</td>
+                                                <td className="text-center"> {cashboxes.details}</td>
                                                 <td className="text-center"> {cashboxes.details}</td>
                                                 <td className="text-center">{this.convertNumber(Math.round(this.calculateTotal(cashboxes)))}</td>
                                             </tr>
@@ -291,7 +350,7 @@ export default class Cashboxes extends Component {
 
                 </div>
 
-                <CashboxModal show={this.state.show}  action={this.handleClose}
+                <CashboxModal show={this.state.show}  action={this.handleClose} acceptAction={this.handleOk}
                               />
 
             </div>

@@ -31,4 +31,22 @@ class Cashbox extends Model
         return $date;
     }
 
+
+    public function cashboxTotal(){
+
+        $details = $this->cashboxDetails;
+
+        $total = 0;
+
+        foreach ($details as $detail){
+
+            $total += $detail->total;
+
+        }
+
+        return $total;
+
+
+    }
+
 }

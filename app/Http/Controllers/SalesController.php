@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Cashbox;
 use App\DiscountSale;
 use App\DiscountSaleDetail;
 use App\Expense;
@@ -11,6 +12,7 @@ use App\Sale;
 use App\SaleDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SalesController extends Controller
 {
@@ -233,6 +235,7 @@ class SalesController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
+
     public function reportsByDate(Request $request)
     {
         $start_date =  $request->get('start_date');
@@ -244,6 +247,25 @@ class SalesController extends Controller
         $sales_orderBy = $sales->groupBy('date');
 
         return response()->json(["sales"=>$sales, "salesOrderBy"=>$sales_orderBy]);
+    }
+
+    public function dailyCashTotal(){
+
+        $cashbox = Cashbox::with(['cashboxDetails', 'seller'])->orderBy('id', 'desc')->first();
+
+        $cashbox_total = $cashbox->cashboxTotal();
+
+        //last cash sales
+        $last_cash_sales_total = PaymentMethodSale::whereHas('paymentMethod', function($query){
+            $query->where('name', 'like', '%Efectivo%');
+        })->where("created_at",">", $cashbox->created_at)->sum('amount');
+
+
+
+
+        return response()->json(["last_cash_sales" => $last_cash_sales_total, "last_cashbox_total" => $cashbox_total]);
+
+
     }
 
 }

@@ -5,11 +5,11 @@ import Button from 'react-bootstrap/lib/Button';
 
 
 
-const CashboxModal = ({show, action}) => (
+const CashboxModal = ({show, action, acceptAction}) => (
 
     <>
 
-        <Modal show={show} bsSize="medium">
+        <Modal show={show} bsSize="sm">
             <Modal.Header>
                 <Modal.Title componentClass="h3">Vuelto</Modal.Title>
             </Modal.Header>
@@ -40,7 +40,7 @@ const CashboxModal = ({show, action}) => (
                 <Button bsStyle="default" onClick={action} bsSize="large">
                     Cancelar
                 </Button>
-                <Button bsStyle="primary" onClick={action} bsSize="large">
+                <Button bsStyle="primary" onClick={acceptAction} bsSize="large">
                     Aceptar
                 </Button>
             </Modal.Footer>
