@@ -56,12 +56,12 @@ export default class SalesList extends Component {
 
 
             // <input type="hidden" name="_method" value="delete">//{params: {id: id}})
-            axios.delete('/products/'+this.state.deleteId,  )
+            axios.delete('/sales/'+this.state.deleteId,  )
                 .then(res => {
 
-                    this.props.onUpdateList(res.data);
-                    this.setState({
-                        show: false,
+
+                    this.setState(prevState => {
+                        return this.reCalculateAllTotals(res)
                     });
                     this.notify('Registro eliminado con éxito')
 
@@ -201,6 +201,7 @@ export default class SalesList extends Component {
             ventas_netas_totales:this.convertNumber(Math.round(ventas_brutas_totales-descuentos_totales-comisiones_totales)),
             sales_payments_details:paymentsModelsTotals,
             gastos: gastos,
+            show:false,
         };
     }
 
@@ -315,6 +316,7 @@ export default class SalesList extends Component {
             range_start_date: date,
         })
     }
+
 
 
     render() {
@@ -564,9 +566,10 @@ export default class SalesList extends Component {
                                     <div className="box box-success" key={sale.id}>
                                         <div className="box-header with-border">
                                             <div className="col-md-6"><h3 className="box-title">Venta # {sale.id} | Vendedor: {sale.seller.name}</h3></div>
-                                            <div className="col-md-6"><h3 className="box-title  pull-right"> {sale.date_time}</h3></div>
+                                            <div className="col-md-5 "><h3 className="box-title pull-right "> {sale.date_time}</h3> </div>
+                                            <div className="col-md-1"><a href="#" onClick={()=>this.handleShow(sale.id)} className="btn btn-danger pull-right"><i className="fa fa-times"></i></a>  </div>
 
-                                            {false ? <a href="#" className="btn btn-danger pull-right"><i className="fa fa-times"></i>Eliminar venta</a> : null}
+
                                         </div>
                                     <div className="box-body" >
 

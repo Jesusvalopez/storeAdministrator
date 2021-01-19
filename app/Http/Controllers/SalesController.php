@@ -197,7 +197,22 @@ class SalesController extends Controller
      */
     public function destroy(Sale $sale)
     {
-        //
+        $sale->delete();
+
+        $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
+            ->whereRaw("created_at::date = '". date('Y-m-d')."'")->orderBy('id', 'desc')->get();
+
+        $expenses = Expense::with(['expenseDetails','expenseDetails.price'])->where("expense_date", date('Y-m-d'))->get();
+
+        $total_expenses = 0;
+
+        foreach ($expenses as $expense){
+            foreach ($expense->expenseDetails as $expense_detail)
+                $total_expenses += $expense_detail->quantity * $expense_detail->price->price;
+        }
+
+        return response()->json(["sales" => $sales, "expenses" => $total_expenses]);
+
     }
 
 
