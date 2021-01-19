@@ -85,7 +85,7 @@ export default class Cashboxes extends Component {
     reloadLastCashboxes(){
         axios.get('/cashboxes/listing')
             .then(res => {
-                console.log(res.data);
+
                 var buttonText = 'Abrir caja';
                 var notifyMessage = 'Caja abierta con éxito';
                 var boxType = 1;
@@ -210,6 +210,7 @@ export default class Cashboxes extends Component {
         this.setState(prevState => {
 
             var currency = [...prevState.cashbox_form];
+            var currency_withdraw = [...prevState.cashbox_withdraw_form];
 
 
             var new_currency = currency.map(currency => {
@@ -221,7 +222,17 @@ export default class Cashboxes extends Component {
 
                 return currency;
             });
-            return {cashbox_form:new_currency, total: 0};
+
+            var new_currency_withdraw = currency_withdraw.map(currency => {
+
+
+                currency.quantity = '';
+                currency.total = 0;
+
+
+                return currency;
+            });
+            return {cashbox_form:new_currency, total: 0, difference: 0, cashbox_withdraw_form:new_currency_withdraw, total_withdraw:0};
 
         });
 
@@ -230,7 +241,7 @@ export default class Cashboxes extends Component {
     handleSubmit = (e) =>{
         e.preventDefault();
 
-        if (this.state.box_type === 2) {
+    //    if (this.state.box_type === 2) {
 
             console.log(this.state.total);
             console.log(this.state.total_cash);
@@ -245,13 +256,17 @@ export default class Cashboxes extends Component {
 
             } else {
 
+                    if (this.state.box_type === 2) {
                 this.setState({
                     show: true,
                 });
+                       } else {
+                         this.handleOk();
+                   }
             }
-        } else {
-            this.handleOk();
-        }
+ //       } else {
+   //         this.handleOk();
+     //   }
 
         /*
         try {
@@ -274,16 +289,60 @@ export default class Cashboxes extends Component {
 
     handleDifferenceModalAccept = () =>{
 
+        if (this.state.box_type === 2) {
         this.setState({
             show:true,
             show_difference_modal:false,
 
         });
+        }else{
+            this.setState({
 
+                show_difference_modal:false,
+
+            },function () {
+                this.handleOk();
+            });
+        }
     }
     handleWithdraw = () =>{
 
-        //restar de cashbox_form el cashbox_withdraw_form
+         //restar de cashbox_form el cashbox_withdraw_form
+
+        this.setState(prevState => {
+
+            var currency = [...prevState.cashbox_form];
+            var currency_withdraw = [...prevState.cashbox_withdraw_form];
+
+            var new_total = 0;
+
+            var new_currency = currency.map(currency => {
+
+                currency_withdraw.map(currency_withdraw_iterator =>{
+
+                    if (currency.id === currency_withdraw_iterator.id) {
+
+                        currency.quantity = currency.quantity - currency_withdraw_iterator.quantity;
+
+                        currency.total = currency.value * currency.quantity;
+
+                        new_total += currency.total;
+
+                        return currency;
+                    }
+
+                });
+
+               // new_total += currency.total;
+
+               // console.log(new_total);
+                return currency;
+            });
+            return {cashbox_form:new_currency, total: new_total};
+
+        }, function () {
+            this.handleOk();
+        });
 
 
     }
@@ -298,7 +357,7 @@ export default class Cashboxes extends Component {
 
 
         try {
-            axios.post('/cashboxes',  this.state.cashbox_form )
+            axios.post('/cashboxes',  {cashbox_form:this.state.cashbox_form, difference: this.state.difference, cash_withdraw_form: this.state.cashbox_withdraw_form} )
                 .then(res => {
 
 
@@ -320,6 +379,7 @@ export default class Cashboxes extends Component {
     handleCloseDifferenceModal = () =>{
         this.setState({
             show_difference_modal:false,
+            difference:0
 
         });
     }
@@ -360,11 +420,9 @@ export default class Cashboxes extends Component {
                                             <th className="text-center">Vendedor</th>
                                             <th className="text-center">Tipo</th>
                                             <th className="text-center">Detalle</th>
-                                            <th className="text-center">Efectivo</th>
-                                            <th className="text-center">Transferencia</th>
+
                                             <th className="text-center">Tarjeta</th>
-                                            <th className="text-center">Rappi</th>
-                                            <th className="text-center">Pedidos Ya</th>
+
                                             <th className="text-center">Diferencia</th>
                                             <th className="text-center">Total</th>
 
@@ -378,11 +436,8 @@ export default class Cashboxes extends Component {
                                                 <td className="text-center">{cashboxes.cashbox_type_name}</td>
                                                 <td className="text-center"> {cashboxes.details}</td>
                                                 <td className="text-center"> {cashboxes.details}</td>
-                                                <td className="text-center"> {cashboxes.details}</td>
-                                                <td className="text-center"> {cashboxes.details}</td>
-                                                <td className="text-center"> {cashboxes.details}</td>
-                                                <td className="text-center"> {cashboxes.details}</td>
-                                                <td className="text-center"> {cashboxes.details}</td>
+
+                                                <td className="text-center"> {cashboxes.difference}</td>
                                                 <td className="text-center">{this.convertNumber(Math.round(this.calculateTotal(cashboxes)))}</td>
                                             </tr>
                                         ))}

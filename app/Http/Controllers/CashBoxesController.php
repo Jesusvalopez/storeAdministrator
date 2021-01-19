@@ -53,10 +53,10 @@ class CashBoxesController extends Controller
 
             if($last_cashbox->cashbox_type == Cashbox::APERTURA){
                 $cashbox->cashbox_type = Cashbox::CIERRE;
-                $cashbox->difference = 0;
+                $cashbox->difference = $request->get('difference');
             }else{
                 $cashbox->cashbox_type = Cashbox::APERTURA;
-                $cashbox->difference = 0;
+                $cashbox->difference = $request->get('difference');
             }
 
         }else{
@@ -70,14 +70,14 @@ class CashBoxesController extends Controller
         $cashbox->save();
 
 
-        foreach ($request->all() as $value){
+        foreach ($request->get('cashbox_form') as $value){
 
             $obj = json_decode(json_encode($value), FALSE);
 
         //\Log::info(json_encode($obj->total));
 
             $cashbox_detail = new CashboxDetail();
-            $cashbox_detail->quantity = $obj->quantity;
+            $cashbox_detail->quantity = $obj->quantity ? $obj->quantity : 0;
             $cashbox_detail->cash_type = $obj->id;
             $cashbox->cashboxDetails()->save($cashbox_detail);
 
@@ -140,7 +140,7 @@ class CashBoxesController extends Controller
     {
         $this->authorize('viewAny', Cashbox::class);
 
-        $cashboxes = Cashbox::with(['cashboxDetails', 'seller'])->orderBy('id', 'desc')->get();
+        $cashboxes = Cashbox::with(['cashboxDetails', 'seller'])->orderBy('id', 'desc')->limit(10)->get();
 
         return response()->json($cashboxes);
     }
