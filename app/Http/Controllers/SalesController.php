@@ -264,7 +264,7 @@ class SalesController extends Controller
 
         $cashbox = Cashbox::with(['cashboxDetails', 'seller'])->orderBy('id', 'desc')->first();
 
-        $cashbox_total = $cashbox->cashboxTotal();
+        $cashbox_total = $cashbox ? $cashbox->cashboxTotal() : 0;
 
         //last cash sales
         $last_cash_sales_total = PaymentMethodSale::whereHas('paymentMethod', function($query){
