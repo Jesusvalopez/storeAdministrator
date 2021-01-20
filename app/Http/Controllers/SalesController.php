@@ -102,6 +102,17 @@ class SalesController extends Controller
     {
         $this->authorize('create', Sale::class);
 
+
+        $last_cashbox = Cashbox::latest()->first();
+
+        if($last_cashbox){
+            if($last_cashbox->cashbox_type == Cashbox::APERTURA){
+                return view('sales.create');
+            }else{
+                return view('sales.open_cashbox');
+            }
+        }
+
         return view('sales.create');
     }
 

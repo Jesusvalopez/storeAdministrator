@@ -9,11 +9,16 @@ class Cashbox extends Model
     const APERTURA = 1;
     const CIERRE = 2;
 
-    protected $appends = ['cashbox_type_name', 'date_time'];
+    protected $appends = ['cashbox_type_name', 'date_time', 'cashbox_withdraw_total'];
 
     public function cashboxDetails()
     {
         return $this->hasMany(CashboxDetail::class);
+    }
+
+    public function cashboxWithdrawDetails()
+    {
+        return $this->hasMany(CashboxWithdrawDetail::class);
     }
 
     public function seller()
@@ -31,6 +36,20 @@ class Cashbox extends Model
         return $date;
     }
 
+    public function getCashboxWithdrawTotalAttribute(){
+
+        $details = $this->cashboxWithdrawDetails;
+
+        $total = 0;
+
+        foreach ($details as $detail){
+
+            $total += $detail->total;
+        }
+
+        return $total;
+
+    }
 
     public function cashboxTotal(){
 

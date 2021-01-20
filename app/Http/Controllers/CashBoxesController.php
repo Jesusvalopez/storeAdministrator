@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Cashbox;
 use App\CashboxDetail;
+use App\CashboxWithdrawDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -67,6 +68,7 @@ class CashBoxesController extends Controller
         }
 
         $cashbox->user_id = Auth::user()->id;
+        $cashbox->details = $request->get('justification');
         $cashbox->save();
 
 
@@ -80,6 +82,19 @@ class CashBoxesController extends Controller
             $cashbox_detail->quantity = $obj->quantity ? $obj->quantity : 0;
             $cashbox_detail->cash_type = $obj->id;
             $cashbox->cashboxDetails()->save($cashbox_detail);
+
+        }
+
+        foreach ($request->get('cash_withdraw_form') as $value){
+
+            $obj = json_decode(json_encode($value), FALSE);
+
+            //\Log::info(json_encode($obj->total));
+
+            $cashbox_withdraw_detail = new CashboxWithdrawDetail();
+            $cashbox_withdraw_detail->quantity = $obj->quantity ? $obj->quantity : 0;
+            $cashbox_withdraw_detail->cash_type = $obj->id;
+            $cashbox->cashboxWithdrawDetails()->save($cashbox_withdraw_detail);
 
         }
 

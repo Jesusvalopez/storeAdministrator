@@ -267,7 +267,7 @@ export default class Sales extends Component {
 
                     if(this.discounts.length > 0){
                         this.discounts.map((discount)=>{
-                            discount_amount+= parseInt(discount.quantity);
+                            discount_amount+= discount.quantity;
                         });
 
                     }

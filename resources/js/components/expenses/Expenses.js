@@ -376,7 +376,7 @@ export default class Expenses extends Component {
                                             </div>
 
                                             <div className="col-xs-3">
-                                                <input id ="quantity" type="number" step="0.1" name="quantity" className="form-control" placeholder="Cantidad"
+                                                <input id ="quantity" type="number" step=".01" name="quantity" className="form-control" placeholder="Cantidad"
                                                        onChange={this.handleQuantityChange}/>
                                             </div>
 

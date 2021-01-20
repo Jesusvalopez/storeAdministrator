@@ -40,6 +40,7 @@ export default class Cashboxes extends Component {
             total_last_cashbox:0,
             show_difference_modal:false,
             difference:0,
+            justification: null,
 
         }
         toast.configure();
@@ -357,7 +358,8 @@ export default class Cashboxes extends Component {
 
 
         try {
-            axios.post('/cashboxes',  {cashbox_form:this.state.cashbox_form, difference: this.state.difference, cash_withdraw_form: this.state.cashbox_withdraw_form} )
+            axios.post('/cashboxes',  {cashbox_form:this.state.cashbox_form, difference: this.state.difference, cash_withdraw_form: this.state.cashbox_withdraw_form,
+                justification:this.state.justification} )
                 .then(res => {
 
 
@@ -421,9 +423,10 @@ export default class Cashboxes extends Component {
                                             <th className="text-center">Tipo</th>
                                             <th className="text-center">Detalle</th>
 
-                                            <th className="text-center">Tarjeta</th>
+
 
                                             <th className="text-center">Diferencia</th>
+                                            <th className="text-center">Retiro</th>
                                             <th className="text-center">Total</th>
 
                                         </tr>
@@ -435,9 +438,10 @@ export default class Cashboxes extends Component {
                                                 <td className="text-center">{cashboxes.seller.name}</td>
                                                 <td className="text-center">{cashboxes.cashbox_type_name}</td>
                                                 <td className="text-center"> {cashboxes.details}</td>
-                                                <td className="text-center"> {cashboxes.details}</td>
 
-                                                <td className="text-center"> {cashboxes.difference}</td>
+
+                                                <td className="text-center"> {this.convertNumber(Math.round(cashboxes.difference))}</td>
+                                                <td className="text-center"> {this.convertNumber(Math.round(cashboxes.cashbox_withdraw_total))}</td>
                                                 <td className="text-center">{this.convertNumber(Math.round(this.calculateTotal(cashboxes)))}</td>
                                             </tr>
                                         ))}
