@@ -267,10 +267,13 @@ class SalesController extends Controller
         $cashbox_total = $cashbox ? $cashbox->cashboxTotal() : 0;
 
         //last cash sales
+        if($cashbox){
         $last_cash_sales_total = PaymentMethodSale::whereHas('paymentMethod', function($query){
             $query->where('name', 'like', '%Efectivo%');
         })->where("created_at",">", $cashbox->created_at)->sum('amount');
-
+        }else{
+            $last_cash_sales_total = 0;
+        }
 
 
 
