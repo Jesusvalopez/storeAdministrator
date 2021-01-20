@@ -113,7 +113,7 @@ export default class Cashboxes extends Component {
                 var buttonText = 'Abrir caja';
                 var notifyMessage = 'Caja abierta con éxito';
                 var boxType = 1;
-                if(res.data[0].cashbox_type === 1){
+                if(res.data[0] ? res.data[0].cashbox_type === 1 : false){
                     buttonText = 'Cerrar caja';
                     notifyMessage = 'Caja cerrada con éxito';
                     boxType = 2;
