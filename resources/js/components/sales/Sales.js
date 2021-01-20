@@ -5,9 +5,22 @@ import CashbackModal from "./CashbackModal";
 import 'react-toastify/dist/ReactToastify.css';
 import {toast} from "react-toastify";
 import Select, { components } from 'react-select';
+import ContentLoader from "react-content-loader";
+
 const Placeholder = props => {
     return <components.Placeholder {...props} />;
 };
+
+const BestSellersLoader = () => (
+    <ContentLoader width={'100%'} height={250}>
+        <rect x="0" y="15" rx="1" ry="1" width="100%" height="35" />
+        <rect x="0" y="55" rx="1" ry="1" width="100%" height="35" />
+        <rect x="0" y="95" rx="1" ry="1" width="100%" height="35" />
+        <rect x="0" y="135" rx="1" ry="1" width="100%" height="35" />
+        <rect x="0" y="175" rx="1" ry="1" width="100%" height="35" />
+        <rect x="0" y="215" rx="1" ry="1" width="100%" height="35" />
+    </ContentLoader>
+);
 
 
 export default class Sales extends Component {
@@ -850,7 +863,7 @@ export default class Sales extends Component {
                                           </div>
                                         ))
                                         :
-                                         null }
+                                          <BestSellersLoader /> }
 
 
                                 </div>

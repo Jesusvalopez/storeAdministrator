@@ -11,6 +11,20 @@ import {trackPromise} from "react-promise-tracker";
 
 import {Doughnut, Line} from 'react-chartjs-2';
 
+import ContentLoader from "react-content-loader";
+
+const DonutLoader = () => (
+    <ContentLoader width={'100%'} height={300}>
+        <circle cx="170" cy="170" r="120" />
+        <rect x="60" y="15" rx="0" ry="0" width="40" height="7" />
+        <rect x="110" y="15" rx="0" ry="0" width="40" height="7" />
+        <rect x="160" y="15" rx="0" ry="0" width="40" height="7" />
+        <rect x="210" y="15" rx="0" ry="0" width="40" height="7" />
+
+
+    </ContentLoader>
+);
+
 export default class SalesReport extends Component {
 
     constructor(props){
@@ -557,18 +571,22 @@ export default class SalesReport extends Component {
 
                         <div className="box-body">
 
+                            {this.state.data_donut.labels.length > 0 ?
 
-                            <Doughnut data={this.state.data_donut} width={71} options={{tooltips:{
+                                <Doughnut data={this.state.data_donut} width={71} options={{tooltips:{
 
-                                    callbacks: {
-                                        label: function(tooltipItem, data) {
-                                            var label = data.labels[tooltipItem.index] || 'Other';
-                                            var value = Math.round(data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]);
-                                            return label + ' : '+ '$' + value.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+                                        callbacks: {
+                                            label: function(tooltipItem, data) {
+                                                var label = data.labels[tooltipItem.index] || 'Other';
+                                                var value = Math.round(data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]);
+                                                return label + ' : '+ '$' + value.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+                                            }
                                         }
-                                    }
-                                }}}
-                                      height={50}/>
+                                    }}}
+                                          height={50}/>
+
+                            : <DonutLoader/>}
+
 
                         </div>
                     </div>

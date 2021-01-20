@@ -10,6 +10,49 @@ import "react-datepicker/dist/react-datepicker.css";
 import Moment from 'moment';
 import {trackPromise, usePromiseTracker} from "react-promise-tracker";
 import Loader from 'react-loader-spinner';
+import ContentLoader from "react-content-loader";
+
+const PaymentMethodLoader = () => (
+    <ContentLoader width={'100%'} height={100}>
+        <rect x="0%" y="4" rx="0" ry="0" width="100%" height="22" />
+
+        <rect x="0%" y="33" rx="0" ry="0" width="34%" height="13" />
+        <rect x="35%" y="33" rx="0" ry="0" width="22%" height="13" />
+        <rect x="58%" y="33" rx="0" ry="0" width="24%" height="13" />
+        <rect x="83%" y="33" rx="0" ry="0" width="20%" height="13" />
+        <rect x="0%" y="55" rx="0" ry="0" width="34%" height="13" />
+        <rect x="35%" y="55" rx="0" ry="0" width="22%" height="13" />
+        <rect x="58%" y="55" rx="0" ry="0" width="24%" height="13" />
+        <rect x="83%" y="55" rx="0" ry="0" width="20%" height="13" />
+        <rect x="0%" y="77" rx="0" ry="0" width="34%" height="13" />
+        <rect x="35%" y="77" rx="0" ry="0" width="22%" height="13" />
+        <rect x="58%" y="77" rx="0" ry="0" width="24%" height="13" />
+        <rect x="83%" y="77" rx="0" ry="0" width="20%" height="13" />
+
+
+    </ContentLoader>
+);
+
+const SalesLoader = () => (
+    <ContentLoader width={'100%'} height={100}>
+        <rect x="0%" y="4" rx="0" ry="0" width="100%" height="22" />
+
+        <rect x="0%" y="33" rx="0" ry="0" width="34%" height="13" />
+        <rect x="35%" y="33" rx="0" ry="0" width="22%" height="13" />
+        <rect x="58%" y="33" rx="0" ry="0" width="24%" height="13" />
+        <rect x="83%" y="33" rx="0" ry="0" width="20%" height="13" />
+        <rect x="0%" y="55" rx="0" ry="0" width="34%" height="13" />
+        <rect x="35%" y="55" rx="0" ry="0" width="22%" height="13" />
+        <rect x="58%" y="55" rx="0" ry="0" width="24%" height="13" />
+        <rect x="83%" y="55" rx="0" ry="0" width="20%" height="13" />
+        <rect x="0%" y="77" rx="0" ry="0" width="34%" height="13" />
+        <rect x="35%" y="77" rx="0" ry="0" width="22%" height="13" />
+        <rect x="58%" y="77" rx="0" ry="0" width="24%" height="13" />
+        <rect x="83%" y="77" rx="0" ry="0" width="20%" height="13" />
+
+
+    </ContentLoader>
+);
 
 export default class SalesList extends Component {
 
@@ -555,7 +598,12 @@ export default class SalesList extends Component {
                                 </table>
                             </div>
                             </div>
-                                : <LoadingIndicator2/>}
+                                :                             <div className="row">
+                                    <div className="col-xs-offset-1 col-xs-10">
+                                        <PaymentMethodLoader/>
+                                    </div>
+                                </div>}
+
                         </div>
                     </div>
 
@@ -669,7 +717,22 @@ export default class SalesList extends Component {
                                         </div>
                                     </div>
                                     </div>
-                                )) : <LoadingIndicator2/>}
+                                )) :
+
+                                    <div className="box box-success">
+                                    <div className="box-header with-border">
+                                    <div className="col-md-6"></div>
+                                    <div className="col-md-5 "></div>
+                                    <div className="col-md-1"></div>
+
+
+                                    </div>
+                                    <div className="box-body" >
+                                        <SalesLoader/>
+                                    </div>
+                                    </div>
+
+                                    }
 
 
 

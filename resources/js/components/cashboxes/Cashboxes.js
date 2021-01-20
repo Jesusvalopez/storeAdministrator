@@ -8,6 +8,29 @@ import CashboxModal from "./CashboxModal";
 import CashboxCounter from "./CashBoxCounter";
 import Modal from "react-bootstrap/lib/Modal";
 import Button from "react-bootstrap/lib/Button";
+import ContentLoader from "react-content-loader";
+
+const CashboxLoader = () => (
+    <ContentLoader width={'100%'} height={100}>
+        <rect x="0%" y="4" rx="0" ry="0" width="100%" height="22" />
+
+        <rect x="0%" y="33" rx="0" ry="0" width="34%" height="13" />
+        <rect x="35%" y="33" rx="0" ry="0" width="22%" height="13" />
+        <rect x="58%" y="33" rx="0" ry="0" width="24%" height="13" />
+        <rect x="83%" y="33" rx="0" ry="0" width="20%" height="13" />
+        <rect x="0%" y="55" rx="0" ry="0" width="34%" height="13" />
+        <rect x="35%" y="55" rx="0" ry="0" width="22%" height="13" />
+        <rect x="58%" y="55" rx="0" ry="0" width="24%" height="13" />
+        <rect x="83%" y="55" rx="0" ry="0" width="20%" height="13" />
+        <rect x="0%" y="77" rx="0" ry="0" width="34%" height="13" />
+        <rect x="35%" y="77" rx="0" ry="0" width="22%" height="13" />
+        <rect x="58%" y="77" rx="0" ry="0" width="24%" height="13" />
+        <rect x="83%" y="77" rx="0" ry="0" width="20%" height="13" />
+
+
+    </ContentLoader>
+);
+
 
 export default class Cashboxes extends Component {
 
@@ -29,7 +52,7 @@ export default class Cashboxes extends Component {
             cashbox_withdraw_form:currency_withdraw,
             total:0,
             total_withdraw:0,
-            last_cashboxes: [],
+            last_cashboxes: null,
             last_cashbox: null,
             currency: currency,
             buttonText: 'Abrir caja',
@@ -413,7 +436,7 @@ export default class Cashboxes extends Component {
                             </div>
                             <div className="box-body">
                                 <div className="">
-
+                                    {this.state.last_cashboxes ?
                                     <table className="table table-bordered">
                                         <thead>
 
@@ -450,6 +473,7 @@ export default class Cashboxes extends Component {
                                         </tbody>
 
                                     </table>
+                                    : <CashboxLoader/> }
 
                                 </div>
 

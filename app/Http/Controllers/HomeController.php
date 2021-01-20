@@ -28,6 +28,7 @@ class HomeController extends Controller
     {
 
 
+
 /*
         Role::create(['name' => 'Administrador']);
 
