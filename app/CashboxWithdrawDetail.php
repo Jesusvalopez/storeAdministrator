@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CashboxWithdrawDetail extends Model
 {
 
-    protected $appends = ['total'];
+    protected $appends = ['total', 'money_value'];
 
     public function returnCashValue($cash_type){
 
@@ -40,6 +40,12 @@ class CashboxWithdrawDetail extends Model
                 return 20000;
             }
         }
+
+    }
+
+    public function getMoneyValueAttribute(){
+
+        return self::returnCashValue($this->cash_type);
 
     }
 

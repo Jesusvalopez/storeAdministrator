@@ -62,6 +62,8 @@ export default class Cashboxes extends Component {
             total_cash:0,
             total_last_cashbox:0,
             show_difference_modal:false,
+            show_details_modal:false,
+            cashbox_modal_details:[],
             difference:0,
             justification: null,
 
@@ -372,6 +374,11 @@ export default class Cashboxes extends Component {
     }
 
 
+    handleShowDetails = (cashboxes_details) =>{
+        console.log(cashboxes_details);
+        this.setState({cashbox_modal_details:cashboxes_details, show_details_modal:true })
+    }
+
     handleOk = () =>{
 
         this.setState({
@@ -405,6 +412,12 @@ export default class Cashboxes extends Component {
         this.setState({
             show_difference_modal:false,
             difference:0
+
+        });
+    }
+    handleCloseDetailsModal = () =>{
+        this.setState({
+            show_details_modal:false,
 
         });
     }
@@ -451,6 +464,7 @@ export default class Cashboxes extends Component {
                                             <th className="text-center">Diferencia</th>
                                             <th className="text-center">Retiro</th>
                                             <th className="text-center">Total</th>
+                                            <th className="text-center">Acciones</th>
 
                                         </tr>
                                         </thead>
@@ -466,6 +480,7 @@ export default class Cashboxes extends Component {
                                                 <td className="text-center"> {this.convertNumber(Math.round(cashboxes.difference))}</td>
                                                 <td className="text-center"> {this.convertNumber(Math.round(cashboxes.cashbox_withdraw_total))}</td>
                                                 <td className="text-center">{this.convertNumber(Math.round(this.calculateTotal(cashboxes)))}</td>
+                                                <td className="text-center"><a href="#" onClick={()=> this.handleShowDetails(cashboxes.cashbox_details)} className="btn btn-primary btn-xs">Ver detalle caja</a> <a href="#" onClick={()=> this.handleShowDetails(cashboxes.cashbox_withdraw_details)} className="btn btn-primary btn-xs">Ver detalle retiro</a></td>
                                             </tr>
                                         ))}
 
@@ -540,6 +555,48 @@ export default class Cashboxes extends Component {
                         <Button bsStyle="primary" onClick={this.handleDifferenceModalAccept} bsSize="large">
                             Aceptar
                         </Button>
+                    </Modal.Footer>
+                </Modal>
+
+
+                <Modal show={this.state.show_details_modal} bsSize='lg'>
+                    <Modal.Header>
+                        <Modal.Title componentClass="h3">Detalle de caja</Modal.Title>
+                    </Modal.Header>
+                    <div className="modal-body">
+
+                        <table className="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>Billete/Moneda</th>
+                                <th>Cantidad</th>
+                                <th>Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                        {this.state.cashbox_modal_details.length > 0 ?
+
+                            this.state.cashbox_modal_details.map((details) =>(
+
+                                <tr key={details.id}>
+                                    <td>{this.convertNumber(Math.round(details.money_value))}</td>
+                                    <td>{details.quantity}</td>
+                                    <td>{this.convertNumber(Math.round(details.total))}</td>
+                                </tr>
+                            ))
+
+                            : null}
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                    <Modal.Footer>
+                        <Button bsStyle="default" onClick={this.handleCloseDetailsModal} bsSize="large">
+                            Cerrar
+                        </Button>
+
                     </Modal.Footer>
                 </Modal>
 
