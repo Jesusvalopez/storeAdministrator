@@ -13,6 +13,7 @@ use App\SaleDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class SalesController extends Controller
 {
@@ -133,6 +134,7 @@ class SalesController extends Controller
         $sale->user_id = Auth::user()->id;
         $sale->save();
 
+
         foreach ($products as $array){
             //\Log::info( $array);
             $obj = json_decode(json_encode($array), FALSE);
@@ -152,6 +154,13 @@ class SalesController extends Controller
 
         }
 
+        $totals = [];
+
+        $totals['MntTotal'] = 0;
+
+        $billeable = false;
+        $no_billeable = false;
+
         foreach ($payment_methods_sale as $array){
 
             $obj = json_decode(json_encode($array), FALSE);
@@ -161,11 +170,80 @@ class SalesController extends Controller
             $payment_method_sale->payment_method_id = $obj->payment_method->id;
             $sale->paymentMethodSale()->save($payment_method_sale);
 
+            if(PaymentMethodSale::isBilleable($obj->payment_method->name)){
+                $billeable = true;
+                $totals['MntTotal'] = $totals['MntTotal'] + $obj->quantity;
+
+            }else{
+                $no_billeable = true;
+            }
 
         }
 
+        if($totals['MntTotal'] > 0){
 
-        return response()->json([$sale]);
+            $totals["MntNeto"] = intval(round($totals['MntTotal'] / Sale::IVA));
+            $totals["IVA"] = $totals['MntTotal'] - $totals["MntNeto"];
+
+            $products_billables = $request->get('products_billable_details');
+
+            $details = [];
+
+            foreach ($products_billables as $product_billable_raw){
+
+                $product_billable = json_decode(json_encode($product_billable_raw), FALSE);
+
+                $product_billable_array = [];
+
+                    $product_billable_array["PrcItem"] = $product_billable->unit_price;
+                    $product_billable_array["MontoItem"] = $product_billable->final_price;
+
+                $product_billable_array["NroLinDet"] = $product_billable->line;
+                $product_billable_array["NmbItem"] = $product_billable->name;
+                $product_billable_array["QtyItem"] = $product_billable->quantity;
+
+
+
+                array_push($details, $product_billable_array);
+            }
+
+            if($no_billeable && $billeable){
+                $default_array = [];
+
+                $default_array["NroLinDet"] = 1;
+                $default_array["NmbItem"] = "Pago efectivo";
+                $default_array["QtyItem"] = 1;
+                $default_array["PrcItem"] = $totals['MntTotal'];
+                $default_array["MontoItem"] = $totals['MntTotal'];
+
+                $details = [];
+
+                array_push($details, $default_array);
+            }
+
+        $response = Http::withHeaders([
+            'apikey' => '928e15a2d14d4a6292345f04960f4bd3',
+            //    "Idempotency-Key" => 604,
+            'Content-Type' => 'application/json'
+        ])->post('https://dev-api.haulmer.com/v2/dte/document', [
+            'response' => ["PDF", "80MM"],
+            'dte' => ["Encabezado" => ["IdDoc"=>["TipoDTE"=>39, "Folio"=> 0, "FchEmis"=>"2021-01-30", "IndServicio" => 3],
+                "Emisor"=>["RUTEmisor" => "76795561-8","RznSocEmisor" => "HAULMERSPA","GiroEmisor" => "VENTA AL POR MENOR EN EMPRESAS DE VENTA A DISTANCIA VÍA INTERNET","CdgSIISucur" => "81303347","DirOrigen" => "ARTURO PRAT 527 CURICO","CmnaOrigen" => "Curicó",],
+                "Receptor" => ["RUTRecep" => "66666666-6"],
+                "Totales" => ["MntNeto" =>  $totals["MntNeto"], "IVA" => $totals["IVA"], "MntTotal" => $totals['MntTotal']]],
+                "Detalle" => $details
+            ],
+        ]);
+
+
+        $response_decoded = json_decode($response);
+
+
+        return response()->json(["billeable" => true, "response" => $response_decoded, "pdf" => isset($response['PDF']) ? $response['PDF'] : null ]);
+
+        }
+
+        return response()->json(["billeable" => false]);
     }
 
     /**

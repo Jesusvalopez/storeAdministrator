@@ -10,6 +10,8 @@ class Sale extends Model
 
     use SoftDeletes;
 
+    const IVA = 1.19;
+
     protected $appends = ['date', 'date_time'];
 
     public function saleDetails()

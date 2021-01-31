@@ -6,6 +6,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import {toast} from "react-toastify";
 import Select, { components } from 'react-select';
 import ContentLoader from "react-content-loader";
+import printJS from 'print-js';
+import BlockUi from 'react-block-ui';
+import 'react-block-ui/style.css';
 
 const Placeholder = props => {
     return <components.Placeholder {...props} />;
@@ -34,6 +37,7 @@ export default class Sales extends Component {
             pricetypes : [],
             selected_price_type_id : 4,
             products : [],
+            products_billable_details : [],
 
             products_on_sale :{
                 products:[],
@@ -56,6 +60,7 @@ export default class Sales extends Component {
             to_cashback:0,
             best_sellers: null,
             is_disabled: false,
+            blocking: false,
 
         }
 
@@ -246,7 +251,7 @@ export default class Sales extends Component {
                     products:new_products_on_sale
                     } };
 
-            },() => { this.calculateTotals() });
+            },() => { this.calculateTotals(); this.calculateBillableDetails() });
 
             return false;
         }
@@ -300,13 +305,9 @@ export default class Sales extends Component {
             return {products_on_sale:{
                     products:products_on_sale_2.concat(product_on_sale_model),
                 } };
-            /*
-            products_on_sale:{
-                products: products_on_sale.concat(product_on_sale_model),
-                 }
-             */
 
-        },() => { this.calculateTotals() })
+
+        },() => { this.calculateTotals(); this.calculateBillableDetails() })
 
 
 
@@ -324,6 +325,28 @@ export default class Sales extends Component {
     }
 
 
+    calculateBillableDetails = () =>{
+
+        const products = this.state.products_on_sale.products;
+
+
+
+        var products_billable_details= products.map((product, i) => {
+
+            var unit_price = Math.round(parseFloat(product.calculate_final_price()) / product.quantity);
+
+            return {line: i+1, name: product.product.name,final_price:Math.round(parseFloat(product.calculate_final_price())), quantity: product.quantity, unit_price: unit_price}
+
+
+
+        });
+
+        this.setState({
+
+            products_billable_details:products_billable_details,
+        });
+
+    }
     calculateTotals= () =>{
 
         const products = this.state.products_on_sale.products;
@@ -479,6 +502,49 @@ export default class Sales extends Component {
 
     }
 
+    handlePrint = (e) =>{
+
+        this.setState({
+            blocking:true,
+        },()=>{
+
+        });
+
+        axios.get('/home')
+            .then(res => {
+
+                console.log(res.data);
+/*
+                this.setState({
+                    blocking:false,
+                });
+*/
+
+                if(res.data.pdf){
+               printJS({onPrintDialogClose: this.setState({
+                       blocking:false,
+                   }), printable: res.data.pdf, type: 'pdf', base64: true, header:null, gridHeaderStyle: 'font-weight: bold; padding: 105px; border: 1px solid #dddddd;',})
+
+                }else{
+                    this.notifyError('Ha ocurrido un error');
+                    this.setState({
+                        blocking:false,
+                    });
+                }
+
+            })
+            .catch((error) => {
+                console.log(error.response.data);
+                this.notifyError('Ha ocurrido un error');
+                this.setState({
+                    blocking:false,
+                });
+            })
+
+
+
+
+    }
     handleAddDiscount = (e) =>{
         var discount_selected = document.getElementById("discounts");
         var products_on_sale_discount = document.getElementById("products_on_sale_discount");
@@ -513,7 +579,7 @@ export default class Sales extends Component {
                     products:new_products_on_sale
                 } };
 
-        },() => { this.calculateTotals() })
+        },() => { this.calculateTotals(); this.calculateBillableDetails() })
         this.notify('Descuento agregado');
 
 
@@ -537,9 +603,10 @@ export default class Sales extends Component {
         var saleForm = {
                 products: products,
                 payment_methods_sale: this.state.payment_methods_sales,
+                products_billable_details: this.state.products_billable_details,
         }
 
-        this.setState({is_disabled: true});
+        this.setState({is_disabled: true, blocking:true});
 
         try {
             axios.post('/sales',  saleForm )
@@ -551,10 +618,32 @@ export default class Sales extends Component {
                         },
                         payment_methods_sales:[],
                         is_disabled:false,
+                        blocking:false,
                     },() => { this.calculateTotals(); this.calculateTotalPaymentMethodsSale() })
 
 
                     this.notify('Venta registrada')
+
+                    if (res.data.billeable) {
+                        if (res.data.pdf) {
+                            printJS({
+                                onPrintDialogClose: this.setState({
+                                    blocking: false,
+                                }),
+                                printable: res.data.pdf,
+                                type: 'pdf',
+                                base64: true,
+                                header: null,
+                                gridHeaderStyle: 'font-weight: bold; padding: 105px; border: 1px solid #dddddd;',
+                            })
+
+                        } else {
+                            this.notifyError('Ha ocurrido un error al generar la boleta');
+                            this.setState({
+                                blocking: false,
+                            });
+                        }
+                    }
 
                 })
         }catch (e) {
@@ -631,6 +720,7 @@ export default class Sales extends Component {
 
         return (
             <div>
+                <BlockUi tag="div" blocking={this.state.blocking}>
                 <div className="col-md-8">
 
                         <div className="box box-success">
@@ -922,8 +1012,12 @@ export default class Sales extends Component {
                 </div>
                 </div>
 
+                <button type="submit" className="btn btn-block btn-primary" onClick={this.handlePrint}>Imprimir boleta</button>
+
                 <CashbackModal show={this.state.show}  action={this.handleClose} to_charge={this.state.to_charge_pretty} to_cashback={this.state.to_cashback}
                                handleChange={this.handleCashbackChange} keyUp={this.handleKeyUp}/>
+
+                </BlockUi>
             </div>
 
 

@@ -19,4 +19,17 @@ class PaymentMethodSale extends Model
         return $this->belongsTo(PaymentMethod::class);
     }
 
+    public static function isBilleable($name){
+
+        $billeables = ['Efectivo', 'Rappi', 'Pedidos Ya', 'Efectivo Pedidos Ya', 'Transferencia', 'FPay'];
+
+        if(in_array($name, $billeables)){
+            return true;
+        }else{
+            return false;
+        }
+
+
+    }
+
 }
