@@ -721,6 +721,7 @@ export default class Sales extends Component {
         return (
             <div>
                 <BlockUi tag="div" blocking={this.state.blocking}>
+                    <div className="row">
                 <div className="col-md-8">
 
                         <div className="box box-success">
@@ -1012,11 +1013,11 @@ export default class Sales extends Component {
                 </div>
                 </div>
 
-                <button type="submit" className="btn btn-block btn-primary" onClick={this.handlePrint}>Imprimir boleta</button>
+
 
                 <CashbackModal show={this.state.show}  action={this.handleClose} to_charge={this.state.to_charge_pretty} to_cashback={this.state.to_cashback}
                                handleChange={this.handleCashbackChange} keyUp={this.handleKeyUp}/>
-
+                    </div>
                 </BlockUi>
             </div>
 

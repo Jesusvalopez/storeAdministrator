@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Cashbox;
 use App\DiscountSale;
 use App\DiscountSaleDetail;
+use App\DTE;
 use App\Expense;
 use App\ExpenseDetail;
 use App\PaymentMethodSale;
@@ -55,7 +56,7 @@ class SalesController extends Controller
         $end_date =  $request->get('end_date');
 
         $this->authorize('viewAny', Sale::class);
-        $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
+        $sales = Sale::with(['dtes' => function($query){$query->where('type_id', DTE::BOLETA_ELECTRONICA);}])->with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
             ->whereRaw("created_at::date BETWEEN '".$start_date."' and '".$end_date."'")->orderBy('id', 'desc')->get();
 
 
@@ -79,7 +80,7 @@ class SalesController extends Controller
     public function listing()
     {
         $this->authorize('viewAny', Sale::class);
-        $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
+        $sales = Sale::with(['dtes' => function($query){$query->where('type_id', DTE::BOLETA_ELECTRONICA);}])->with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
             ->whereRaw("created_at::date = '". date('Y-m-d')."'")->orderBy('id', 'desc')->get();
 
         $expenses = Expense::with(['expenseDetails','expenseDetails.price'])->where("expense_date", date('Y-m-d'))->get();
@@ -223,12 +224,12 @@ class SalesController extends Controller
 
         $response = Http::withHeaders([
             'apikey' => '928e15a2d14d4a6292345f04960f4bd3',
-            //    "Idempotency-Key" => 604,
+            "Idempotency-Key" => $sale->id,
             'Content-Type' => 'application/json'
         ])->post('https://dev-api.haulmer.com/v2/dte/document', [
             'response' => ["PDF", "80MM"],
-            'dte' => ["Encabezado" => ["IdDoc"=>["TipoDTE"=>39, "Folio"=> 0, "FchEmis"=>"2021-01-30", "IndServicio" => 3],
-                "Emisor"=>["RUTEmisor" => "76795561-8","RznSocEmisor" => "HAULMERSPA","GiroEmisor" => "VENTA AL POR MENOR EN EMPRESAS DE VENTA A DISTANCIA VÍA INTERNET","CdgSIISucur" => "81303347","DirOrigen" => "ARTURO PRAT 527 CURICO","CmnaOrigen" => "Curicó",],
+            'dte' => ["Encabezado" => ["IdDoc"=>["TipoDTE"=>39, "Folio"=> 0, "FchEmis"=>date("Y-m-d"), "IndServicio" => 3],
+                "Emisor"=>["RUTEmisor" => "76795561-8","RznSocEmisor" => "HAULMER SPA","GiroEmisor" => "Florería, artículos de artesanía","CdgSIISucur" => "81303347","DirOrigen" => "ARTURO PRAT 527 CURICO","CmnaOrigen" => "Curicó",],
                 "Receptor" => ["RUTRecep" => "66666666-6"],
                 "Totales" => ["MntNeto" =>  $totals["MntNeto"], "IVA" => $totals["IVA"], "MntTotal" => $totals['MntTotal']]],
                 "Detalle" => $details
@@ -236,8 +237,17 @@ class SalesController extends Controller
         ]);
 
 
+            \Log::info($response);
+
+
+
         $response_decoded = json_decode($response);
 
+        $dte = new DTE();
+        $dte->type_id = DTE::BOLETA_ELECTRONICA;
+        $dte->token =  $response['TOKEN'];
+
+        $sale->dtes()->save($dte);
 
         return response()->json(["billeable" => true, "response" => $response_decoded, "pdf" => isset($response['PDF']) ? $response['PDF'] : null ]);
 
@@ -338,6 +348,18 @@ class SalesController extends Controller
         return response()->json(["sales"=>$sales, "salesOrderBy"=>$sales_orderBy]);
     }
 
+    public function getDteByToken($token){
+        $response = Http::withHeaders([
+            'apikey' => '928e15a2d14d4a6292345f04960f4bd3',
+
+            'Content-Type' => 'application/json'
+            ])->get('https://dev-api.haulmer.com/v2/dte/document/'.$token.'/pdf');
+       // ])->get('https://dev-api.haulmer.com/v2/dte/document/76795561-8/39/94418/pdf');
+        //   \Log::info($response);
+        //  \Log::info($response['pdf']);
+
+        return response()->json(["pdf"=>$response['pdf']]);
+    }
     public function dailyCashTotal(){
 
         $cashbox = Cashbox::with(['cashboxDetails', 'seller'])->orderBy('id', 'desc')->first();

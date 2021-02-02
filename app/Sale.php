@@ -40,6 +40,10 @@ class Sale extends Model
         return $date;
     }
 
+    public function dtes()
+    {
+        return $this->hasMany(DTE::class);
+    }
 
     protected static function boot()
     {

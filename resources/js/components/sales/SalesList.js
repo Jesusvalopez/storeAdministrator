@@ -11,6 +11,7 @@ import Moment from 'moment';
 import {trackPromise, usePromiseTracker} from "react-promise-tracker";
 import Loader from 'react-loader-spinner';
 import ContentLoader from "react-content-loader";
+import printJS from "print-js";
 
 const PaymentMethodLoader = () => (
     <ContentLoader width={'100%'} height={100}>
@@ -114,6 +115,21 @@ export default class SalesList extends Component {
         }
     }
 
+    handlePrintDteByToken = (token) => {
+        axios.get('/sales/dte/'+token)
+            .then(res => {
+
+                printJS({
+                    printable: res.data.pdf,
+                    type: 'pdf',
+                    base64: true,
+                    header: null,
+                    gridHeaderStyle: 'font-weight: bold; padding: 105px; border: 1px solid #dddddd;',
+                })
+
+
+            });
+    }
     handleShow = (id) => {
         this.setState({
             show:true,
@@ -615,7 +631,9 @@ export default class SalesList extends Component {
                                         <div className="box-header with-border">
                                             <div className="col-md-6"><h3 className="box-title">Venta # {sale.id} | Vendedor: {sale.seller.name}</h3></div>
                                             <div className="col-md-5 "><h3 className="box-title pull-right "> {sale.date_time}</h3> </div>
-                                            <div className="col-md-1"><a href="#" onClick={()=>this.handleShow(sale.id)} className="btn btn-danger pull-right"><i className="fa fa-times"></i></a>  </div>
+                                            <div className="col-md-1">
+                                                {sale.dtes.length > 0 ? <a  onClick={()=>this.handlePrintDteByToken(sale.dtes[0].token)} className="btn btn-primary pull-left"><i className="fa fa-file-text"></i></a>  : null}
+                                                <a href="#" onClick={()=>this.handleShow(sale.id)} className="btn btn-danger pull-right"><i className="fa fa-times"></i></a>  </div>
 
 
                                         </div>

@@ -44,6 +44,7 @@ Route::get('/sales/daily-cash-total', 'SalesController@dailyCashTotal');
 Route::post('/sales/listing-date', 'SalesController@listingDate');
 Route::post('/sales/reports-by-date', 'SalesController@reportsByDate');
 Route::get('/sales/listing', 'SalesController@listing');
+Route::get('/sales/dte/{token}', 'SalesController@getDteByToken');
 Route::get('/sales/reports', 'SalesController@reports')->name('sales.reports');;
 Route::resource('sales', 'SalesController');
 Route::resource('expenses', 'ExpensesController');
