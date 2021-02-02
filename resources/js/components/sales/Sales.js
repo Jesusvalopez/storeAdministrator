@@ -49,6 +49,7 @@ export default class Sales extends Component {
             payment_methods_sales : [],
 
             total : 0,
+            total_raw : 0,
             sub_total : 0,
             discounts_total : 0,
             totalMethodsSale:0.0,
@@ -364,6 +365,7 @@ export default class Sales extends Component {
 
         this.setState({
             total: this.convertNumber(Math.round(total)),
+            total_raw: Math.round(total),
             sub_total: this.convertNumber(Math.round(sub_total)),
             discounts_total: this.convertNumber(Math.round(sub_total-total)),
         });
@@ -450,6 +452,13 @@ export default class Sales extends Component {
     }
 
 
+    handleAddPaymentMethodTotal = (e) =>{
+
+        document.getElementById("paymentMethodAmount").value = this.state.total_raw;
+
+        this.handleAddPaymentMethod(e);
+
+    }
     handleAddPaymentMethod = (e) =>{
 
         var payment_method_select = document.getElementById("PaymentMethodsElements");
@@ -475,8 +484,19 @@ export default class Sales extends Component {
 
         this.setState(prevState => {
                 const new_payment_methods_sale = [...prevState.payment_methods_sales];
+
+                var founded = new_payment_methods_sale.find(payment_method => ( payment_method.payment_method.id === payment_method_model.payment_method.id))
+
+                if(founded ){
+                    payment_method_model.quantity = payment_method_model.quantity + founded.quantity
+
+
+                }
+
+                const new_payment_methods_sale2 = new_payment_methods_sale.filter(payment_method => { return payment_method.payment_method.id !== payment_method_model.payment_method.id})
+
                 return {
-                    payment_methods_sales:new_payment_methods_sale.concat(payment_method_model)
+                    payment_methods_sales:new_payment_methods_sale2.concat(payment_method_model)
                 }
             }, ()=>{
             this.calculateTotalPaymentMethodsSale();
@@ -846,6 +866,7 @@ export default class Sales extends Component {
                                         <div className="col-xs-4">
 
                                             <button type="" className="btn btn-block btn-primary" onClick={this.handleAddPaymentMethod}>Agregar medio de pago</button>
+                                            <button type="" className="btn btn-block btn-primary" onClick={this.handleAddPaymentMethodTotal}>Agregar totalidad</button>
                                         </div>
                                         :null}
 
