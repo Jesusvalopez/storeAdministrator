@@ -181,6 +181,7 @@ class SalesController extends Controller
 
         }
 
+        try{
         if($totals['MntTotal'] > 0){
 
             $totals["MntNeto"] = intval(round($totals['MntTotal'] / Sale::IVA));
@@ -223,13 +224,13 @@ class SalesController extends Controller
             }
 
         $response = Http::withHeaders([
-            'apikey' => '928e15a2d14d4a6292345f04960f4bd3',
+            'apikey' => env('OPENFACTURA_API_KEY'),
             "Idempotency-Key" => $sale->id,
             'Content-Type' => 'application/json'
-        ])->post('https://dev-api.haulmer.com/v2/dte/document', [
+        ])->post(env('OPENFACTURA_PROD_URL').'/v2/dte/document', [
             'response' => ["PDF", "80MM"],
             'dte' => ["Encabezado" => ["IdDoc"=>["TipoDTE"=>39, "Folio"=> 0, "FchEmis"=>date("Y-m-d"), "IndServicio" => 3],
-                "Emisor"=>["RUTEmisor" => "76795561-8","RznSocEmisor" => "HAULMER SPA","GiroEmisor" => "Florería, artículos de artesanía","CdgSIISucur" => "81303347","DirOrigen" => "ARTURO PRAT 527 CURICO","CmnaOrigen" => "Curicó",],
+                "Emisor"=>["RUTEmisor" => "77044784-4","RznSocEmisor" => "STICKS SPA","GiroEmisor" => "Elaboracion, coccion y venta de alimentos","CdgSIISucur" => "83702210","DirOrigen" => "PRESIDENTE BALMACEDA 1232 3, Santiago","CmnaOrigen" => "Santiago",],
                 "Receptor" => ["RUTRecep" => "66666666-6"],
                 "Totales" => ["MntNeto" =>  $totals["MntNeto"], "IVA" => $totals["IVA"], "MntTotal" => $totals['MntTotal']]],
                 "Detalle" => $details
@@ -250,6 +251,9 @@ class SalesController extends Controller
         $sale->dtes()->save($dte);
 
         return response()->json(["billeable" => true, "response" => $response_decoded, "pdf" => isset($response['PDF']) ? $response['PDF'] : null ]);
+
+        }
+        }catch (\Exception $exception){
 
         }
 
@@ -350,10 +354,10 @@ class SalesController extends Controller
 
     public function getDteByToken($token){
         $response = Http::withHeaders([
-            'apikey' => '928e15a2d14d4a6292345f04960f4bd3',
+            'apikey' => env('OPENFACTURA_API_KEY'),
 
             'Content-Type' => 'application/json'
-            ])->get('https://dev-api.haulmer.com/v2/dte/document/'.$token.'/pdf');
+            ])->get(env('OPENFACTURA_PROD_URL').'/v2/dte/document/'.$token.'/pdf');
        // ])->get('https://dev-api.haulmer.com/v2/dte/document/76795561-8/39/94418/pdf');
         //   \Log::info($response);
         //  \Log::info($response['pdf']);
