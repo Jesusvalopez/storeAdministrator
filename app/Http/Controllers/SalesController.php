@@ -12,6 +12,7 @@ use App\PaymentMethodSale;
 use App\Sale;
 use App\SaleDetail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -191,6 +192,7 @@ class SalesController extends Controller
 
             $details = [];
 
+            $orders_json = new Collection();
             foreach ($products_billables as $product_billable_raw){
 
                 $product_billable = json_decode(json_encode($product_billable_raw), FALSE);
@@ -204,7 +206,11 @@ class SalesController extends Controller
                 $product_billable_array["NmbItem"] = $product_billable->name;
                 $product_billable_array["QtyItem"] = $product_billable->quantity;
 
+                $order = new \stdClass();
 
+                $order->producto = $product_billable->name;
+                $order->cantidad = $product_billable->quantity;
+                $orders_json->push($order);
 
                 array_push($details, $product_billable_array);
             }
@@ -231,6 +237,7 @@ class SalesController extends Controller
             'response' => ["PDF", "80MM"],
             'dte' => ["Encabezado" => ["IdDoc"=>["TipoDTE"=>39, "Folio"=> 0, "FchEmis"=>date("Y-m-d"), "IndServicio" => 3],
                 "Emisor"=>["RUTEmisor" => "77044784-4","RznSocEmisor" => "STICKS SPA","GiroEmisor" => "Elaboracion, coccion y venta de alimentos","CdgSIISucur" => "83702210","DirOrigen" => "PRESIDENTE BALMACEDA 1232 3, Santiago","CmnaOrigen" => "Santiago",],
+               // "Emisor"=>["RUTEmisor" => "76795561-8","RznSocEmisor" => "HAULMER SPA","GiroEmisor" => "VENTA AL POR MENOR EN EMPRESAS DE VENTA A DISTANCIA VÍA INTERNET; COMERCIO ELEC","CdgSIISucur" => "81303347","DirOrigen" => "ARTURO PRAT 527   CURICO","CmnaOrigen" => "Curicó",],
                 "Receptor" => ["RUTRecep" => "66666666-6"],
                 "Totales" => ["MntNeto" =>  $totals["MntNeto"], "IVA" => $totals["IVA"], "MntTotal" => $totals['MntTotal']]],
                 "Detalle" => $details
@@ -250,14 +257,33 @@ class SalesController extends Controller
 
         $sale->dtes()->save($dte);
 
-        return response()->json(["billeable" => true, "response" => $response_decoded, "pdf" => isset($response['PDF']) ? $response['PDF'] : null ]);
+        return response()->json(["billeable" => true, "response" => $response_decoded, "pdf" => isset($response['PDF']) ? $response['PDF'] : null, "order" => $orders_json, "order_date" => $sale->date_time]);
 
         }
         }catch (\Exception $exception){
 
         }
 
-        return response()->json(["billeable" => false]);
+        $products_billables = $request->get('products_billable_details');
+
+
+        $orders_json = new Collection();
+        foreach ($products_billables as $product_billable_raw){
+
+            $order = new \stdClass();
+
+            $product_billable = json_decode(json_encode($product_billable_raw), FALSE);
+
+            $order->producto = $product_billable->name;
+            $order->cantidad = $product_billable->quantity;
+
+
+            $orders_json->push($order);
+
+        }
+
+
+        return response()->json(["billeable" => false,"order" => $orders_json, "order_date" => $sale->date_time]);
     }
 
     /**

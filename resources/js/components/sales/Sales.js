@@ -62,6 +62,8 @@ export default class Sales extends Component {
             best_sellers: null,
             is_disabled: false,
             blocking: false,
+            res_data: false,
+            billing_modal_closed: false,
 
         }
 
@@ -605,6 +607,23 @@ export default class Sales extends Component {
 
     }
 
+    printOrder = () => {
+
+        printJS({
+            onPrintDialogClose: this.setState({
+                res_data: false,
+            }),
+            printable: this.state.res_data.order,
+            type: 'json',
+            properties: ['producto', 'cantidad'],
+            header: '<h3 class="custom-h3">'+this.state.res_data.order_date+'</h3>',
+            gridStyle: 'text-align: center;border: 1px solid lightgray;',
+
+
+        })
+
+    }
+
     handleSubmitSale = () =>{
 
 
@@ -639,6 +658,7 @@ export default class Sales extends Component {
                         payment_methods_sales:[],
                         is_disabled:false,
                         blocking:false,
+                        res_data: res.data,
                     },() => { this.calculateTotals(); this.calculateTotalPaymentMethodsSale() })
 
 
@@ -664,6 +684,8 @@ export default class Sales extends Component {
                             });
                         }
                     }
+
+
 
                 })
         }catch (e) {
@@ -947,6 +969,14 @@ export default class Sales extends Component {
                                     <div className="col-xs-4">
                                         <button type="submit" className="btn btn-block btn-primary btn-lg" disabled={this.isDisabled()} onClick={this.handleSubmitSale}>Generar Venta</button>
                                     </div>
+                                    {this.state.res_data ?
+                                    <div className="col-xs-4">
+                                        <button  className="btn btn-block btn-primary btn-lg" onClick={this.printOrder}>Imprimir Comanda</button>
+                                    </div>
+                                        : null
+                                    }
+
+
 
                                 </div>
                             </div>
