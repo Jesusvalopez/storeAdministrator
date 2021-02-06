@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 class ExpenseProductsController extends Controller
 {
 
-    private $limit = 300;
+    private $limit = 1000;
 
     /**
      * Create a new controller instance.
