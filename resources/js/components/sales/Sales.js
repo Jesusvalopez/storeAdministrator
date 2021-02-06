@@ -198,7 +198,7 @@ export default class Sales extends Component {
     };
     handleAddProduct = () =>{
 
-
+        this.setState({res_data:false});
 
         var priceType = document.getElementById("priceType");
         var priceType_value = priceType.value;
