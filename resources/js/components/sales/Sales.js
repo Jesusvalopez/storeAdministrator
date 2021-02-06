@@ -9,7 +9,7 @@ import ContentLoader from "react-content-loader";
 import printJS from 'print-js';
 import BlockUi from 'react-block-ui';
 import 'react-block-ui/style.css';
-
+import Moment from 'moment';
 const Placeholder = props => {
     return <components.Placeholder {...props} />;
 };
@@ -607,6 +607,38 @@ export default class Sales extends Component {
 
     }
 
+    printPreOrder = () => {
+
+        var orders = [];
+
+        this.state.products_on_sale.products.map((product) =>{
+            console.log(product.product.name);
+            console.log(product.quantity);
+
+            var order_model = {producto: product.product.name, cantidad: product.quantity}
+
+            orders.push(order_model);
+
+        })
+
+        this.setState({
+            res_data: {order:orders, order_date: Moment().format('DD/MM/YY HH:mm:ss')},
+        }, () =>{
+            printJS({
+                onPrintDialogClose: this.setState({
+                    res_data: false,
+                }),
+                printable: this.state.res_data.order,
+                type: 'json',
+                properties: ['producto', 'cantidad'],
+                header: '<h3 class="custom-h3">'+this.state.res_data.order_date+'</h3>',
+                gridStyle: 'text-align: center;border: 1px solid lightgray;',
+
+
+            })
+        })
+
+    }
     printOrder = () => {
 
         printJS({
@@ -973,6 +1005,12 @@ export default class Sales extends Component {
                                     <div className="col-xs-4">
                                         <button  className="btn btn-block btn-primary btn-lg" onClick={this.printOrder}>Imprimir Comanda</button>
                                     </div>
+                                        : null
+                                    }
+                                    {this.state.products_on_sale.products.length > 0 ?
+                                        <div className="col-xs-4">
+                                            <button  className="btn btn-block btn-primary btn-lg" onClick={this.printPreOrder}>Imprimir Comanda</button>
+                                        </div>
                                         : null
                                     }
 
