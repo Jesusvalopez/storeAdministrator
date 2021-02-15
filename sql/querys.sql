@@ -25,3 +25,7 @@ join public.products products on products.id = p.priceable_id and p.priceable_ty
 where sd.created_at between '2020-11-27' and '2020-11-28'
 group by products.name
 order by sum(sd.quantity) desc
+
+--Promedio ventas por horas entre fechas
+SELECT TO_CHAR(created_at, 'HH24') as hours, count(id) FROM public.sales where deleted_at is null
+and created_at::date between '2020-12-01' and '2021-02-12' group by hours
