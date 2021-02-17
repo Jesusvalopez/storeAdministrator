@@ -52,6 +52,7 @@ class Sale extends Model
         self::deleting(function ($sale) {
             $sale->saleDetails->each->delete();
             $sale->paymentMethodSale->each->delete();
+            $sale->dtes->each->delete();
         });
 
     }

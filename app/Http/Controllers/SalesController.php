@@ -245,7 +245,7 @@ class SalesController extends Controller
         ]);
 
 
-            \Log::info($response);
+           // \Log::info($response);
 
 
 
@@ -330,7 +330,7 @@ class SalesController extends Controller
     {
         $sale->delete();
 
-        $sales = Sale::with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
+        $sales = Sale::with(['dtes' => function($query){$query->where('type_id', DTE::BOLETA_ELECTRONICA);}])->with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
             ->whereRaw("created_at::date = '". date('Y-m-d')."'")->orderBy('id', 'desc')->get();
 
         $expenses = Expense::with(['expenseDetails','expenseDetails.price'])->where("expense_date", date('Y-m-d'))->get();
