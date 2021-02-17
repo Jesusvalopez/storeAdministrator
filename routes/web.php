@@ -46,10 +46,15 @@ Route::post('/sales/reports-by-date', 'SalesController@reportsByDate');
 Route::get('/sales/listing', 'SalesController@listing');
 Route::get('/sales/dte/{token}', 'SalesController@getDteByToken');
 Route::get('/sales/reports', 'SalesController@reports')->name('sales.reports');;
+
 Route::resource('sales', 'SalesController');
 Route::resource('expenses', 'ExpensesController');
 Route::resource('expense-products', 'ExpenseProductsController');
 Route::get('/cashboxes/listing', 'CashBoxesController@listing');
 Route::resource('cashboxes', 'CashBoxesController');
 
+#WOOCOMMERCE
+Route::get('/woocommerce/index', 'WoocommerceController@index')->name('woocommerce.index');
+Route::get('/woocommerce/orders', 'WoocommerceController@orders');
+Route::post('/woocommerce/finish-order', 'WoocommerceController@finishOrders');
 

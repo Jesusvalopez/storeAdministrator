@@ -397,7 +397,7 @@
 
 <script>
 
-    URL_W = '';
+    URL_W = '/woocommerce/index';
 
     // Enable pusher logging - don't include this in production
     Pusher.logToConsole = true;
@@ -409,7 +409,7 @@
     var channel = pusher.subscribe('orders-channel');
     channel.bind('new-order', function(data) {
         var order_number = data.message.order_number;
-        URL_W = data.message.url;
+      //  URL_W = data.message.url;
 
         var order_number_span = document.getElementById("order-number-text");
 
