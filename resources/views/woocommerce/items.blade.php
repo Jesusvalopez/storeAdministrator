@@ -8,19 +8,19 @@
     <section class="content-header">
         <h1>
             Woocommerce
-            <small>Órdenes</small>
+            <small>Productos</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="/"><i class="fa fa-dashboard"></i> Inicio</a></li>
             <li class="active">Woocommerce</li>
-            <li class="active">Órdenes</li>
+            <li class="active">Productos</li>
         </ol>
     </section>
 @endsection
 
 @section('content')
 
-    <div id="woocommerceOrders"></div>
+    <div id="woocommerceItems"></div>
 
 @endsection
 

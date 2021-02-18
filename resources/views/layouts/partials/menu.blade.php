@@ -71,7 +71,11 @@
             @can('view sales')
                 <li><a href="{{route('woocommerce.index')}}">Órdenes</a></li>
             @endcan
+                @can('view sales')
+                    <li><a href="{{route('woocommerce.items')}}">Productos</a></li>
+                @endcan
         </ul>
+
     </li>
 </ul>
 

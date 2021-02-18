@@ -28,3 +28,4 @@ require('./components/discounts/Discounts');
 require('./components/paymentmethods/PaymentMethods');
 require('./components/cashboxes/Cashboxes');
 require('./components/woocommerce/Orders');
+require('./components/woocommerce/Items');

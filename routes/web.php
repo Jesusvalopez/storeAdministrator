@@ -55,6 +55,10 @@ Route::resource('cashboxes', 'CashBoxesController');
 
 #WOOCOMMERCE
 Route::get('/woocommerce/index', 'WoocommerceController@index')->name('woocommerce.index');
+Route::get('/woocommerce/items', 'WoocommerceController@items')->name('woocommerce.items');
+Route::get('/woocommerce/get-items', 'WoocommerceController@getItems');
+Route::post('/woocommerce/sync-items', 'WoocommerceController@syncItems');
+Route::post('/woocommerce/update-items', 'WoocommerceController@updateItems');
 Route::get('/woocommerce/orders', 'WoocommerceController@orders');
 Route::post('/woocommerce/finish-order', 'WoocommerceController@finishOrders');
 
