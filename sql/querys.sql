@@ -29,3 +29,11 @@ order by sum(sd.quantity) desc
 --Promedio ventas por horas entre fechas
 SELECT TO_CHAR(created_at, 'HH24') as hours, count(id) FROM public.sales where deleted_at is null
 and created_at::date between '2020-12-01' and '2021-02-12' group by hours
+
+
+-- Ventas del mes
+SELECT pm.name, pms.created_at, pms.amount  FROM public.payment_method_sales pms
+join public.payment_methods pm on pm.id = pms.payment_method_id
+join public.sales s on s.id = pms.sale_id
+where pms.payment_method_id in (1,2,5,6,7,8) and pms.created_at between '2021-02-01 00:00:00' and '2021-02-28 23:59:59'
+and s.deleted_at is null

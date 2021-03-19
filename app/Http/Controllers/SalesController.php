@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Cashbox;
+use App\Coupon;
 use App\DiscountSale;
 use App\DiscountSaleDetail;
 use App\DTE;
@@ -57,7 +58,7 @@ class SalesController extends Controller
         $end_date =  $request->get('end_date');
 
         $this->authorize('viewAny', Sale::class);
-        $sales = Sale::with(['dtes' => function($query){$query->where('type_id', DTE::BOLETA_ELECTRONICA);}])->with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
+        $sales = Sale::with(['dtes' => function($query){$query->where('type_id', DTE::BOLETA_ELECTRONICA);}])->with(['coupons','saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
             ->whereRaw("created_at::date BETWEEN '".$start_date."' and '".$end_date."'")->orderBy('id', 'desc')->get();
 
 
@@ -81,7 +82,7 @@ class SalesController extends Controller
     public function listing()
     {
         $this->authorize('viewAny', Sale::class);
-        $sales = Sale::with(['dtes' => function($query){$query->where('type_id', DTE::BOLETA_ELECTRONICA);}])->with(['saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
+        $sales = Sale::with(['dtes' => function($query){$query->where('type_id', DTE::BOLETA_ELECTRONICA);}])->with(['coupons','saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
             ->whereRaw("created_at::date = '". date('Y-m-d')."'")->orderBy('id', 'desc')->get();
 
         $expenses = Expense::with(['expenseDetails','expenseDetails.price'])->where("expense_date", date('Y-m-d'))->get();
@@ -134,6 +135,7 @@ class SalesController extends Controller
 
         $sale = new Sale();
         $sale->user_id = Auth::user()->id;
+        $sale->client_email = $request->get('client_email');
         $sale->save();
 
 
@@ -159,6 +161,7 @@ class SalesController extends Controller
         $totals = [];
 
         $totals['MntTotal'] = 0;
+        $totals['MntTotalGlobal'] = 0;
 
         $billeable = false;
         $no_billeable = false;
@@ -180,8 +183,25 @@ class SalesController extends Controller
                 $no_billeable = true;
             }
 
+            $totals['MntTotalGlobal'] = $totals['MntTotalGlobal'] + $obj->quantity;
+
         }
 
+        try{
+        //Avisar la venta, los totales y los cupones, enviar tambien al usuario
+        $url = env('STICKS_REWARDS_URL') ."/v1/create-points-by-sale";
+
+        $response = Http::withHeaders([
+            'x-api-key' => env('STICKS_REWARDS_API_KEY'),
+            'x-api-secret' =>  env('STICKS_REWARDS_API_SECRET')
+        ])->post($url, ["user_id" =>$request->get('client_id'), "sale_total_amount" => $totals['MntTotalGlobal'],
+            "description" => "Compra #".$sale->id, "sale_id" => $sale->id, "coupons_ids" => $request->get('coupons')]);
+
+        }catch (\Exception $exception){
+            \Log::info($exception);
+        }
+
+        //Facturación
         try{
         if($totals['MntTotal'] > 0){
 
@@ -229,6 +249,44 @@ class SalesController extends Controller
                 array_push($details, $default_array);
             }
 
+            $coupons = $request->get('coupons');
+
+            $couponsDetails = [];
+            $line = 1;
+            foreach ($coupons as $coupon_raw){
+
+                $coupon = json_decode(json_encode($coupon_raw), FALSE);
+
+                $coupon_db = new Coupon();
+                $coupon_db->amount = $coupon->amount;
+                $coupon_db->type = $coupon->type;
+                $coupon_db->coupon_id = $coupon->value;
+                $coupon_db->coupon_human_id = "";
+
+
+                $sale->coupons()->save($coupon_db);
+
+                if($coupon->type != "Coupon"){
+
+                    continue;
+                }
+
+
+                $coupon_array = [];
+
+                $coupon_array["NroLinDR"] = $line;
+                $coupon_array["TpoMov"] = "D";
+
+                $coupon_array["GlosaDR"] = $coupon->billingName;
+                $coupon_array["TpoValor"] = "$";
+                $coupon_array["ValorDR"] = $coupon->amount;
+
+                array_push($couponsDetails, $coupon_array);
+                $line++;
+
+
+            }
+
         $response = Http::withHeaders([
             'apikey' => env('OPENFACTURA_API_KEY'),
             "Idempotency-Key" => $sale->id,
@@ -237,15 +295,16 @@ class SalesController extends Controller
             'response' => ["PDF", "80MM"],
             'dte' => ["Encabezado" => ["IdDoc"=>["TipoDTE"=>39, "Folio"=> 0, "FchEmis"=>date("Y-m-d"), "IndServicio" => 3],
                 "Emisor"=>["RUTEmisor" => "77044784-4","RznSocEmisor" => "STICKS SPA","GiroEmisor" => "Elaboracion, coccion y venta de alimentos","CdgSIISucur" => "83702210","DirOrigen" => "PRESIDENTE BALMACEDA 1232 3, Santiago","CmnaOrigen" => "Santiago",],
-               // "Emisor"=>["RUTEmisor" => "76795561-8","RznSocEmisor" => "HAULMER SPA","GiroEmisor" => "VENTA AL POR MENOR EN EMPRESAS DE VENTA A DISTANCIA VÍA INTERNET; COMERCIO ELEC","CdgSIISucur" => "81303347","DirOrigen" => "ARTURO PRAT 527   CURICO","CmnaOrigen" => "Curicó",],
+                //"Emisor"=>["RUTEmisor" => "76795561-8","RznSocEmisor" => "HAULMER SPA","GiroEmisor" => "VENTA AL POR MENOR EN EMPRESAS DE VENTA A DISTANCIA VÍA INTERNET; COMERCIO ELEC","CdgSIISucur" => "81303347","DirOrigen" => "ARTURO PRAT 527   CURICO","CmnaOrigen" => "Curicó",],
                 "Receptor" => ["RUTRecep" => "66666666-6"],
                 "Totales" => ["MntNeto" =>  $totals["MntNeto"], "IVA" => $totals["IVA"], "MntTotal" => $totals['MntTotal']]],
-                "Detalle" => $details
+                "Detalle" => $details,
+                "DscRcgGlobal" => $couponsDetails
             ],
         ]);
 
 
-           // \Log::info($response);
+           \Log::info($response);
 
 
 
@@ -261,7 +320,7 @@ class SalesController extends Controller
 
         }
         }catch (\Exception $exception){
-
+            \Log::info($exception);
         }
 
         $products_billables = $request->get('products_billable_details');

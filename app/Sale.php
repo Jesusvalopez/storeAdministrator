@@ -45,6 +45,11 @@ class Sale extends Model
         return $this->hasMany(DTE::class);
     }
 
+    public function coupons()
+    {
+        return $this->hasMany(Coupon::class);
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -53,6 +58,7 @@ class Sale extends Model
             $sale->saleDetails->each->delete();
             $sale->paymentMethodSale->each->delete();
             $sale->dtes->each->delete();
+            $sale->coupons->each->delete();
         });
 
     }

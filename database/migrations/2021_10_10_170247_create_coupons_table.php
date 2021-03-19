@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateWoocommerceProductsTable extends Migration
+class CreateCouponsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,14 @@ class CreateWoocommerceProductsTable extends Migration
      */
     public function up()
     {
-        Schema::create('woocommerce_products', function (Blueprint $table) {
+        Schema::create('coupons', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('stock_status');
+            $table->bigInteger('sale_id');
+            $table->foreign('sale_id')->references('id')->on('sales');
+            $table->double('amount');
             $table->string('type');
-            $table->bigInteger('woocommerce_id');
-            $table->bigInteger('woocommerce_parent_id')->nullable();
+            $table->string('coupon_id');
+            $table->string('coupon_human_id');
             $table->softDeletes('deleted_at');
             $table->timestamps();
         });
@@ -32,6 +33,6 @@ class CreateWoocommerceProductsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('woocommerce_products');
+        Schema::dropIfExists('coupons');
     }
 }

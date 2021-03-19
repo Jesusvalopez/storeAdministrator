@@ -60,5 +60,10 @@ Route::get('/woocommerce/get-items', 'WoocommerceController@getItems');
 Route::post('/woocommerce/sync-items', 'WoocommerceController@syncItems');
 Route::post('/woocommerce/update-items', 'WoocommerceController@updateItems');
 Route::get('/woocommerce/orders', 'WoocommerceController@orders');
+
 Route::post('/woocommerce/finish-order', 'WoocommerceController@finishOrders');
+
+#Rewards
+Route::get('/v1/get-users/{email}', 'RewardsController@getUsers');
+Route::get('/v1/get-users-coupons/{client_id}', 'RewardsController@getUserCoupons');
 

@@ -175,10 +175,11 @@ export default class SalesList extends Component {
             sale.discounts = this.convertNumber(Math.round(totals.discount));
             sale.comissions = this.convertNumber(Math.round(totals.comission));
             sale.total = this.convertNumber(Math.round(totals.total));
+            sale.coupons_total = this.convertNumber(Math.round(totals.coupons_total));
 
             ventas_brutas_totales+= totals.sub_total;
             comisiones_totales+= totals.comission;
-            descuentos_totales+= totals.discount;
+            descuentos_totales+= totals.discount + totals.coupons_total;
 
 
             const new_sale_details = sale.sale_details.map(sale_detail =>{
@@ -291,6 +292,7 @@ export default class SalesList extends Component {
         var subTotal = 0.0;
         var discount = 0;
         var discount_quantity = 0;
+        var coupons_total = 0;
 
 
         sale.sale_details.map((sale_detail)=>{
@@ -319,12 +321,18 @@ export default class SalesList extends Component {
 
         })
 
+        sale.coupons.map((coupon)=>{
+            coupons_total+=parseInt(coupon.amount);
+        });
+
+        console.log(coupons_total);
+
         comission = subTotalComission * ((comission_quantity) / 100);
 
-        var total = subTotal - discount - comission;
+        var total = subTotal - discount - comission - coupons_total;
         // console.log(sale);
 
-        return {sub_total :subTotal, discount: discount, comission: comission , total: total};
+        return {sub_total :subTotal, discount: discount, comission: comission , total: total, coupons_total};
     }
 
 
@@ -629,7 +637,7 @@ export default class SalesList extends Component {
                                 {this.state.sales ? this.state.sales.map((sale) => (
                                     <div className="box box-success" key={sale.id}>
                                         <div className="box-header with-border">
-                                            <div className="col-md-6"><h3 className="box-title">Venta # {sale.id} | Vendedor: {sale.seller.name}</h3></div>
+                                            <div className="col-md-6"><h3 className="box-title">Venta # {sale.id} | Vendedor: {sale.seller.name} | Cliente: {sale.client_email ?  sale.client_email : "Cliente Genérico"}</h3></div>
                                             <div className="col-md-5 "><h3 className="box-title pull-right "> {sale.date_time}</h3> </div>
                                             <div className="col-md-1">
                                                 {sale.dtes.length > 0 ? <a  onClick={()=>this.handlePrintDteByToken(sale.dtes[0].token)} className="btn btn-primary pull-left"><i className="fa fa-file-text"></i></a>  : null}
@@ -704,6 +712,13 @@ export default class SalesList extends Component {
                                                 <tr>
                                                     <td></td>
                                                     <td></td>
+                                                    <td ><b>CUPONES</b></td>
+                                                    <td ><b>{(sale.coupons_total)}</b></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
                                                     <td ><b>TOTAL</b></td>
                                                     <td><b>{(sale.total)}</b></td>
                                                     <td></td>
@@ -711,6 +726,29 @@ export default class SalesList extends Component {
                                                 </tbody>
                                             </table>
                                         </div>
+                                            {sale.coupons.length > 0 ?
+                                            <div className="col-md-5">
+                                                <table className="table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Cupones</th>
+                                                        <th>Monto</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {sale.coupons.map((coupon)=>(
+                                                        <tr key={coupon.id}>
+                                                            <td><b>{coupon.type == "Coupon" ? "Cupón" : coupon.type}</b></td>
+                                                            <td><b>{this.convertNumber(Math.round(coupon.amount))}</b></td>
+
+                                                        </tr>
+                                                    ))}
+
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            : null}
                                             <div className="col-md-5">
                                                 <table className="table">
                                                     <thead>

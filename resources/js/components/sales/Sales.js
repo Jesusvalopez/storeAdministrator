@@ -5,6 +5,7 @@ import CashbackModal from "./CashbackModal";
 import 'react-toastify/dist/ReactToastify.css';
 import {toast} from "react-toastify";
 import Select, { components } from 'react-select';
+import AsyncSelect from 'react-select/async';
 import ContentLoader from "react-content-loader";
 import printJS from 'print-js';
 import BlockUi from 'react-block-ui';
@@ -35,6 +36,7 @@ export default class Sales extends Component {
         this.state = {
 
             pricetypes : [],
+            clients : [],
             selected_price_type_id : 4,
             products : [],
             products_billable_details : [],
@@ -55,6 +57,11 @@ export default class Sales extends Component {
             totalMethodsSale:0.0,
             selected_value:null,
             product_selected_value:null,
+            client_selected_value:null,
+            client_coupon_selected:[],
+
+            client_selected: null,
+            client_coupons: [],
             show:false,
             to_charge:0,
             to_charge_pretty:'0',
@@ -64,6 +71,8 @@ export default class Sales extends Component {
             blocking: false,
             res_data: false,
             billing_modal_closed: false,
+            coupons_total: 0
+
 
         }
 
@@ -164,6 +173,8 @@ export default class Sales extends Component {
                     error: error
                 });
             })
+
+
 
 
     }
@@ -295,7 +306,9 @@ export default class Sales extends Component {
 
                     var discount_percent = (100 - discount_amount) / 100;
 
-                return this.quantity * this.get_price().price * discount_percent;
+
+
+                return ((this.quantity * this.get_price().price * discount_percent));
                 },
 
 
@@ -355,6 +368,7 @@ export default class Sales extends Component {
         const products = this.state.products_on_sale.products;
         var total = 0;
         var sub_total = 0;
+        var coupons = this.state.coupons_total;
 
         products.map(product => {
 
@@ -366,9 +380,9 @@ export default class Sales extends Component {
 
 
         this.setState({
-            total: this.convertNumber(Math.round(total)),
-            total_raw: Math.round(total),
-            sub_total: this.convertNumber(Math.round(sub_total)),
+            total: this.convertNumber(Math.round(total-coupons)),
+            total_raw: Math.round(total-coupons),
+            sub_total: sub_total,
             discounts_total: this.convertNumber(Math.round(sub_total-total)),
         });
 
@@ -428,7 +442,7 @@ export default class Sales extends Component {
 
             return {products_on_sale:{
                     products:new_products_on_sale
-                } };
+                }, client_coupon_selected: [], coupons_total: 0 };
 
         },() => { this.calculateTotals() })
 
@@ -675,6 +689,10 @@ export default class Sales extends Component {
                 products: products,
                 payment_methods_sale: this.state.payment_methods_sales,
                 products_billable_details: this.state.products_billable_details,
+                coupons: this.state.client_coupon_selected,
+                client_email: this.state.client_selected?.label,
+                client_id: this.state.client_selected?.value,
+
         }
 
         this.setState({is_disabled: true, blocking:true});
@@ -691,6 +709,10 @@ export default class Sales extends Component {
                         is_disabled:false,
                         blocking:false,
                         res_data: res.data,
+                        coupons_total: 0,
+                        client_coupon_selected:[],
+                        client_selected: []
+
                     },() => { this.calculateTotals(); this.calculateTotalPaymentMethodsSale() })
 
 
@@ -727,6 +749,9 @@ export default class Sales extends Component {
     }
 
 
+
+
+
     handleSelectChange = (e) => {
 
         this.setState({
@@ -751,6 +776,7 @@ export default class Sales extends Component {
         }
 
     }
+
     productQuantityKeyUp = (e) =>{
 
         if(e.key === 'Enter'){
@@ -790,6 +816,160 @@ export default class Sales extends Component {
 
     }
 
+
+
+
+    loadOptions = async (inputValue, callback) => {
+
+        if(inputValue.length < 3)
+            return false;
+
+        const response = await fetch('/v1/get-users/'+inputValue);
+
+        const json = await response.json();
+
+        const final_res = json.map(i=>({label: i.email, value: i._id}))
+
+        callback(final_res);
+
+    };
+
+    handleClientSelectChange = (e) => {
+
+       if(!e){
+           this.setState({
+               client_selected_value:null,
+               client_selected: [],
+               coupons_total: 0,
+               client_coupon_selected:[],
+           }, ()=>{
+               this.calculateTotals();
+           }  );
+           return false;
+       }
+        this.setState({
+            client_selected_value:e.value,
+            client_selected: e,
+        }, ()=>{
+
+            this.getClientCoupons(e.value);
+
+        })
+    }
+
+
+    couponsCanBeApplied = (coupons) =>{
+
+        let can_be_applied = true;
+        let total = this.state.sub_total;
+        let amount_left = 0;
+        let coupons_total = 0;
+
+        const actual_coupons = this.state.client_coupon_selected;
+
+        let same_type = false;
+
+
+        actual_coupons.map((actual_coupon)=>{
+
+            coupons.map((coupon)=>{
+                console.log(coupon.value)
+                console.log(actual_coupon.value)
+                if(coupon.type == actual_coupon.type && coupon.value !== actual_coupon.value){
+                    same_type = true;
+                    can_be_applied = false;
+                    return false;
+                }
+            })
+
+        });
+
+        if(same_type){
+            coupons_filtered = actual_coupons;
+            return {can_be_applied, amount_left, coupons_total, coupons_filtered, same_type : same_type };
+
+        }
+
+        let coupons_filtered = coupons.filter(function (coupon) {
+            if(total < coupon.minAmount){
+                can_be_applied = false;
+                amount_left = (coupon.minAmount - total);
+                return false;
+
+            }
+
+            coupons_total = coupons_total + coupon.amount;
+            console.log("se retorna");
+            return coupon;
+        })
+
+        console.log("cupones filtrados:" );
+        console.log(coupons_filtered);
+
+        return {can_be_applied, amount_left, coupons_total, coupons_filtered, same_type : same_type };
+    }
+
+    handleSelectChangeClientCoupon = (e) => {
+
+
+        if(!e){
+            this.setState({
+
+                client_coupon_selected: e || [],
+                coupons_total: 0
+            }, ()=>{
+                this.calculateTotals();
+            });
+            return;
+        }
+
+        let {can_be_applied, amount_left, coupons_total, coupons_filtered, same_type} = this.couponsCanBeApplied(e);
+
+        if(same_type ){
+            return  this.notifyWarning("Ya hay un cupón del mismo tipo agregado");
+        }
+
+        if(can_be_applied || coupons_filtered.length > 0){
+            this.setState({
+
+                client_coupon_selected: coupons_filtered || [],
+                coupons_total: coupons_total
+            },()=>{
+                this.calculateTotals();
+            })
+
+            if(amount_left > 0){
+                this.notifyWarning("Faltan " + this.convertNumber(Math.round(amount_left)) + " para poder aplicar este cupón" )
+            }
+
+        }else {
+
+           return  this.notifyWarning("Faltan " + this.convertNumber(Math.round(amount_left)) + " para poder aplicar este cupón" )
+        }
+
+
+    }
+
+    getClientCoupons = (client_id) =>{
+
+        axios.get('/v1/get-users-coupons/'+client_id)
+            .then(res => {
+
+                this.setState({
+
+                    client_coupons: res.data.coupons,
+                    //selected_price_type_id: res.data[0].id
+
+                });
+            })
+            .catch((error) => {
+                this.setState({
+                    error: error
+                });
+            })
+
+    }
+
     render(){
 
         return (
@@ -813,6 +993,54 @@ export default class Sales extends Component {
                                         ))}
                                     </select>
                                 </div>
+                                    <div className="col-xs-12 col-md-3 col-sm-6 col-lg-3">
+                                        <label htmlFor="">Cliente</label>
+                                        <AsyncSelect
+                                            value={this.state.client_selected}
+                                            cacheOptions
+                                            loadOptions={this.loadOptions}
+                                            defaultOptions
+                                            onChange={this.handleClientSelectChange}
+                                            placeholder={"Búsqueda de usuarios"}
+                                            isClearable={this.state.client_selected}
+
+                                        />
+                                    </div>
+                                    <div className="col-xs-12 col-md-3 col-sm-6 col-lg-5">
+                                        <label htmlFor="">Cupones</label>
+                                        <Select isMulti id="coupons" name="coupons" components={{Placeholder}}
+                                                value={this.state.client_coupon_selected}
+                                                placeholder={'Seleccione un cupón'}
+                                                onChange={this.handleSelectChangeClientCoupon}
+                                                options={this.state.client_coupons.map((coupon) => {
+                                                    let name = "";
+                                                    let amount = 0;
+                                                    let billingName = "";
+                                                    let coupon_value_formatted = this.convertNumber(Math.round(coupon.value));
+                                                    switch (coupon.type) {
+                                                        case "Coupon": {
+                                                            name =  coupon_value_formatted;
+                                                            amount= coupon.value;
+                                                            billingName = "Cupón " + coupon_value_formatted;
+                                                            break;
+                                                        }
+                                                        case "Envío gratis": {
+                                                            name = coupon.type ;
+                                                        }
+                                                    }
+
+
+                                                    return {
+                                                        "value": coupon._id,
+                                                        "label": name + " - " + Moment(coupon.expireDate).format('DD/MM/YY'),
+                                                        "minAmount": coupon.minAmount,
+                                                        "type": coupon.type,
+                                                        "amount": amount,
+                                                        "billingName": billingName,
+                                                    };
+
+                                                })}/>
+                                    </div>
                                     <br/>
                                 </div>
                                 <div className="row">
@@ -972,14 +1200,21 @@ export default class Sales extends Component {
                                         <td></td>
                                         <td></td>
                                         <td><b>SUBTOTAL</b></td>
-                                        <td><b>{this.state.sub_total}</b></td>
+                                        <td><b>{this.convertNumber(Math.round(this.state.sub_total))}</b></td>
                                         <td></td>
                                     </tr>
                                     <tr>
                                         <td></td>
                                         <td></td>
-                                        <td><b>TOTAL DESCUENTOS</b></td>
+                                        <td><b>DESCUENTOS</b></td>
                                         <td><b>{this.state.discounts_total}</b></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td><b>CUPONES</b></td>
+                                        <td><b>{this.convertNumber(Math.round(this.state.coupons_total))}</b></td>
                                         <td></td>
                                     </tr>
                                     <tr>
