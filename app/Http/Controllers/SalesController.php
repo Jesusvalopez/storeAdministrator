@@ -323,6 +323,24 @@ class SalesController extends Controller
             \Log::info($exception);
         }
 
+        $coupons = $request->get('coupons');
+        foreach ($coupons as $coupon_raw){
+
+            $coupon = json_decode(json_encode($coupon_raw), FALSE);
+
+            $coupon_db = new Coupon();
+            $coupon_db->amount = $coupon->amount;
+            $coupon_db->type = $coupon->type;
+            $coupon_db->coupon_id = $coupon->value;
+            $coupon_db->coupon_human_id = "";
+
+
+            $sale->coupons()->save($coupon_db);
+
+
+        }
+
+
         $products_billables = $request->get('products_billable_details');
 
 
