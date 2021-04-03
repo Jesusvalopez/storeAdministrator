@@ -486,7 +486,7 @@ export default class Sales extends Component {
 
 
 
-        if(payment_method_amount_element.value === '' || payment_method_amount_element.value < 1){
+        if(payment_method_amount_element.value === '' || payment_method_amount_element.value < 0){
            this.notifyWarning('Debe agregar el monto');
             return false;
         }
@@ -1026,6 +1026,13 @@ export default class Sales extends Component {
                                                         }
                                                         case "Envío gratis": {
                                                             name = coupon.type ;
+                                                            break;
+                                                        }
+                                                        case "Product":{
+                                                            name = coupon.name;
+                                                            amount= coupon.value;
+                                                            billingName = "Cupón " + coupon.name;
+                                                            break;
                                                         }
                                                     }
 

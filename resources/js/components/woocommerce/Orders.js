@@ -111,6 +111,9 @@ export default class Orders extends Component {
             case 'on-hold':
                 return 'En Espera';
                 break;
+            case 'pending':
+                return 'Pendiente de pago';
+                break;
         }
 
     }
@@ -134,6 +137,18 @@ export default class Orders extends Component {
 
             </>
         )
+
+    }
+    calculateProgrammedOrNow(date){
+
+        const today = Moment();
+        const date_to_compare = Moment(date)
+
+        if(date_to_compare > today){
+            return 'Programado para';
+        }else{
+            return 'Entrega inmediata'
+        }
 
     }
     getMetaDataByKey(meta_data, key){
@@ -215,8 +230,8 @@ export default class Orders extends Component {
                                                 <td><a href="#" onClick={() =>this.showOrderDetails(order)}>#{order.id} {order.billing.first_name} {order.billing.last_name}</a></td>
                                                 <td>{Moment(order.date_created).format('DD/MM/YYYY HH:mm:ss')}</td>
                                                 <td>{this.translateStatus(order.status)}</td>
-                                                <td>{this.getMetaDataByKey(order.meta_data, 'transactionResponse')} - {this.getMetaDataByKey(order.meta_data, 'paymentCodeResult')}</td>
-                                                <td>Horario entrega: {order.meta_data.find(meta => meta.key === 'delivery_time').value}</td>
+                                                <td>{order.payment_method !== 'transbank' ? 'Aprobado' : this.getMetaDataByKey(order.meta_data, 'transactionResponse')} - {this.getMetaDataByKey(order.meta_data, 'paymentCodeResult')}</td>
+                                                <td>{this.calculateProgrammedOrNow(this.getMetaDataByKey(order.meta_data, 'delivery_date'))}: {Moment(this.getMetaDataByKey(order.meta_data, 'delivery_date')).format('DD/MM/YYYY')} {order.meta_data.find(meta => meta.key === 'delivery_time').value}</td>
                                                 <td>{this.convertNumber(Math.round(order.total))}</td>
                                                 <td>{this.showButtonsByStatus(order.status, order.id)}</td>
                                             </tr>

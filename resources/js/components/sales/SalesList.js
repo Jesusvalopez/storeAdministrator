@@ -738,7 +738,7 @@ export default class SalesList extends Component {
                                                     <tbody>
                                                     {sale.coupons.map((coupon)=>(
                                                         <tr key={coupon.id}>
-                                                            <td><b>{coupon.type == "Coupon" ? "Cupón" : coupon.type}</b></td>
+                                                            <td><b>{coupon.type == "Coupon" ? "Cupón" : coupon.type == "Product" ? coupon.coupon_human_id: null}</b></td>
                                                             <td><b>{this.convertNumber(Math.round(coupon.amount))}</b></td>
 
                                                         </tr>

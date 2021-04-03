@@ -94,6 +94,15 @@ const OrderDetailsModal = ({show, close, order, getMetaData}) => (
                             <td>{convertNumber(Math.round(item.total))}</td>
                         </tr>
                     )) : null}
+                    {order ? order.coupon_lines.map(coupon => (
+                        <tr key={coupon.id}>
+                            <td>Cupón: <b>{(coupon.code).toUpperCase()}</b>
+                            </td>
+                            <td>-{convertNumber(Math.round(coupon.discount))}</td>
+                            <td>1</td>
+                            <td>-{convertNumber(Math.round(coupon.discount))}</td>
+                        </tr>
+                    )) : null}
 
                     </tbody>
                     <tfoot>
@@ -137,7 +146,13 @@ const OrderDetailsModal = ({show, close, order, getMetaData}) => (
 
                     </div>
                 </div>
+                <div className="row">
+                    <div className="col-md-12"><h4><b>Notas</b></h4></div>
+                    <div className="col-md-4">
+                    {order ? <p><b>{order.customer_note}</b></p> : null}
 
+            </div>
+            </div>
             </div>
             <Modal.Footer>
                 <Button bsStyle="primary" onClick={() => printOrder(order.line_items)} bsSize="large">

@@ -261,12 +261,12 @@ class SalesController extends Controller
                 $coupon_db->amount = $coupon->amount;
                 $coupon_db->type = $coupon->type;
                 $coupon_db->coupon_id = $coupon->value;
-                $coupon_db->coupon_human_id = "";
+                $coupon_db->coupon_human_id = $coupon->billingName;
 
 
                 $sale->coupons()->save($coupon_db);
 
-                if($coupon->type != "Coupon"){
+                if($coupon->type != "Coupon" && $coupon->type != "Product"){
 
                     continue;
                 }
@@ -332,7 +332,7 @@ class SalesController extends Controller
             $coupon_db->amount = $coupon->amount;
             $coupon_db->type = $coupon->type;
             $coupon_db->coupon_id = $coupon->value;
-            $coupon_db->coupon_human_id = "";
+            $coupon_db->coupon_human_id = $coupon->billingName;
 
 
             $sale->coupons()->save($coupon_db);

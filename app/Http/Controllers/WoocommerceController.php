@@ -232,8 +232,11 @@ class WoocommerceController extends Controller
     public function orders()
     {
 
+        $options = [
+            'per_page' => 20 // Or your desire number
+        ];
 
-        $orders = Order::all();
+        $orders = Order::all($options);
 
         return response()->json(['orders' => $orders]);
 
