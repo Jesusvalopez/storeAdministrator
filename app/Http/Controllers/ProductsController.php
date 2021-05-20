@@ -221,6 +221,10 @@ class ProductsController extends Controller
 
         foreach ($best_sellers as $key => $best_seller){
 
+            if(!$best_seller->price->priceable){
+                continue;
+            }
+
             $name = $best_seller->price->priceable->name;
             //buscar nombre
 
