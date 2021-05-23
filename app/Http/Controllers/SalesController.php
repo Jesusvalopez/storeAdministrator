@@ -58,7 +58,8 @@ class SalesController extends Controller
         $end_date =  $request->get('end_date');
 
         $this->authorize('viewAny', Sale::class);
-        $sales = Sale::with(['dtes' => function($query){$query->where('type_id', DTE::BOLETA_ELECTRONICA);}])->with(['coupons','saleDetails.price.priceType','saleDetails.price.priceable','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
+        $sales = Sale::with(['dtes' => function($query){$query->where('type_id', DTE::BOLETA_ELECTRONICA);}])->with(['saleDetails.price.priceable' => function ($q) {
+            $q->withTrashed();}])->with(['coupons','saleDetails.price.priceType','saleDetails.discountSaleDetails.discount', 'paymentMethodSale.paymentMethod', 'seller'])
             ->whereRaw("created_at::date BETWEEN '".$start_date."' and '".$end_date."'")->orderBy('id', 'desc')->get();
 
 
