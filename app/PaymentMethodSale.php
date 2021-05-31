@@ -21,14 +21,16 @@ class PaymentMethodSale extends Model
 
     public static function isBilleable($name){
 
-        $billeables = ['Efectivo', 'Rappi', 'Pedidos Ya', 'Efectivo Pedidos Ya', 'Transferencia', 'FPay', 'Webpay Crédito', 'Webpay Débito'];
+        return true;
+        /*
+        $billeables = ['Efectivo', 'Rappi', 'Pedidos Ya', 'Efectivo Pedidos Ya', 'Transferencia', 'FPay', 'Webpay Crédito', 'Webpay Débito', 'Crédito', 'Débito'];
 
         if(in_array($name, $billeables)){
             return true;
         }else{
             return false;
         }
-
+*/
 
     }
 
